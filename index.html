@@ -812,6 +812,25 @@ body.dark .inquiry-table td { border-color: #333; }
 .news-card-body h3:hover { color: var(--primary); }
 
 /* ===== SMOOTH SECTION DIVIDERS ===== */
+/* ===== FAQ ===== */
+.faq-item { margin-bottom: 10px; }
+.faq-q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: #fff; border: 2px solid #e8e8e8; border-radius: 12px;
+  font-family: 'Heebo'; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+  transition: var(--transition); text-align: right; color: var(--text);
+}
+.faq-q:hover, .faq-q.open { border-color: var(--primary); background: var(--sky); color: var(--primary); }
+.faq-q .bi { transition: transform 0.3s; font-size: 0.8rem; }
+.faq-q.open .bi { transform: rotate(180deg); }
+.faq-a {
+  display: none; padding: 14px 20px; margin-top: -2px; background: #fff;
+  border: 2px solid #e8e8e8; border-top: none; border-radius: 0 0 12px 12px;
+  font-size: 0.9rem; color: var(--text-light); line-height: 1.8;
+}
+body.dark .faq-q { background: #16213e; border-color: #333; color: #e0e0e0; }
+body.dark .faq-a { background: #16213e; border-color: #333; }
+
 .section-divider {
   height: 4px;
   background: linear-gradient(90deg, transparent, var(--primary-light), var(--accent), var(--primary-light), transparent);
@@ -1047,6 +1066,9 @@ body.dark .phone-item { background: #16213e; }
       <div class="gallery-item"><img src="images/zimmer_maale_amos.jpg" alt="צימר מעלה עמוס"><div class="gallery-caption">צימר במעלה עמוס</div></div>
       <div class="gallery-item"><img src="images/ptihat_kayitz.png" alt="פתיחת קיץ"><div class="gallery-caption">הפנינג פתיחת קיץ</div></div>
       <div class="gallery-item"><img src="images/toshvei_maale_amos.jpg" alt="תושבי מעלה עמוס"><div class="gallery-caption">ארגון החסד - תושבי מעלה עמוס</div></div>
+      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/kolel/2.jpg" alt="כולל שבות עמי" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">לימוד תורה בכולל</div></div>
+      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/charity/2.jpg" alt="חסד" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">חלוקת מזון לנזקקים</div></div>
+      <div class="gallery-item"><img src="images/zimmer_maale_amos_2.jpg" alt="צימר"><div class="gallery-caption">צימר - מרפסת עם נוף</div></div>
     </div>
   </div>
 </section>
@@ -1453,6 +1475,54 @@ body.dark .phone-item { background: #16213e; }
       <a href="#shabbat" class="service-card"><div class="icon icon-orange"><i class="bi bi-brightness-high"></i></div><h4>זמני שבת</h4><p>הדלקת נרות והבדלה</p></a>
       <a href="#emergency" class="service-card"><div class="icon icon-red"><i class="bi bi-shield-check"></i></div><h4>מידע חירום</h4><p>מקלטים וכוננות</p></a>
       <a href="#simchot" class="service-card"><div class="icon icon-pink"><i class="bi bi-stars"></i></div><h4>לוח שמחות</h4><p>מזל טוב!</p></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2><i class="bi bi-question-circle"></i> שאלות נפוצות</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="fade-up" style="max-width:750px;margin:0 auto">
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>איך מגיעים למעלה עמוס?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">הישוב ממוקם 20 ק"מ דרומית-מזרחית לירושלים, בגובה 725 מ'. ניתן להגיע בקווי אוטובוס 166/167 מירושלים, או ברכב דרך כביש 60 ומחלף גוש עציון.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>מי יכול להתגורר במעלה עמוס?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">מעלה עמוס הוא ישוב חרדי. משפחות המעוניינות להצטרף פונות לרכז הקליטה בכתובת klita@maaleamos.org.il או למזכירות בטלפון 02-9931767.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>יש מרפאה בישוב?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">יש מרפאה קטנה בישוב. מרפאות מלאות של קופות החולים נמצאות בישובי גוש עציון הסמוכים (אפרת, אלעזר).</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>מה מוסדות החינוך?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">חדר לבנים, בית יעקב לבנות, תלמוד תורה בשפת האידיש (ביאלא), גני ילדים ומעונות (עמותת אלעידא, קוד 26094), כולל "שבות עמי", ומתנ"ס עם חוגים.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>איך מדווחים על מפגע ביטחוני?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">יש לחייג למוקד 106 (זמין 24/7) או לפנות לרכז הביטחון. ניתן גם להשתמש בכפתור הדיווח הצף באתר (אדום, למטה משמאל).</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">
+          <span>יש צימר / אירוח לשבת?</span><i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="faq-a">כן! צימר מפנק של 3 חדרים עם מיזוג, אינטרנט מסונן, מרפסת וגריל. ליצירת קשר: אילה 053-3177636.</div>
+      </div>
     </div>
   </div>
 </section>
