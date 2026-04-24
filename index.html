@@ -1557,6 +1557,7 @@ body.dark .phone-item { background: #16213e; }
         <div class="resident-card" onclick="showResidentSection('new-inquiry')"><i class="bi bi-plus-circle"></i><h4>פנייה חדשה</h4></div>
         <div class="resident-card" onclick="showResidentSection('payments')"><i class="bi bi-credit-card"></i><h4>גבייה ותשלומים</h4></div>
         <div class="resident-card" onclick="showResidentSection('post-simcha')"><i class="bi bi-stars"></i><h4>פרסום שמחה</h4></div>
+        <div class="resident-card" onclick="showResidentSection('post-ad')"><i class="bi bi-megaphone"></i><h4>פרסום מודעה</h4></div>
         <div class="resident-card" onclick="showResidentSection('phonebook')"><i class="bi bi-telephone"></i><h4>ספר טלפונים</h4></div>
         <div class="resident-card" onclick="showResidentSection('documents')"><i class="bi bi-file-earmark-text"></i><h4>מסמכים</h4></div>
         <div class="resident-card" onclick="showResidentSection('notifications')"><i class="bi bi-bell"></i><h4>הודעות</h4></div>
@@ -1602,6 +1603,17 @@ body.dark .phone-item { background: #16213e; }
         <div class="admin-form-group"><label>שם משפחה</label><input id="userSimchaFamily" placeholder="משפחת ..."></div>
         <div class="admin-form-group"><label>פרטים</label><input id="userSimchaDetails" placeholder="מזל טוב להולדת הבן!"></div>
         <button class="btn-admin btn-admin-primary" style="width:100%" onclick="userPostSimcha()"><i class="bi bi-send"></i> פרסם שמחה</button>
+      </div>
+      <!-- Post Ad -->
+      <div id="residentPostAd" style="display:none;margin-top:24px;max-width:600px;margin-left:auto;margin-right:auto">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-megaphone"></i> פרסום מודעה בלוח</h4>
+        <div class="admin-form-group"><label>כותרת</label><input id="userAdTitle" placeholder="מה אתם מפרסמים?"></div>
+        <div class="admin-form-group"><label>תיאור</label><textarea id="userAdDesc" rows="3" placeholder="פרטים..."></textarea></div>
+        <div class="admin-form-group"><label>מחיר</label><input id="userAdPrice" placeholder="500 ₪ / חינם / לפי עבודה"></div>
+        <div class="admin-form-group"><label>קטגוריה</label>
+          <select id="userAdCat"><option value="services">שירותים</option><option value="sale">למכירה</option><option value="rent">להשכרה</option><option value="jobs">דרושים</option><option value="secondhand">יד שנייה</option></select>
+        </div>
+        <button class="btn-admin btn-admin-primary" style="width:100%" onclick="userPostAd()"><i class="bi bi-send"></i> פרסם מודעה</button>
       </div>
       <!-- Phone Directory -->
       <div id="residentPhonebook" style="display:none;margin-top:24px">
@@ -2453,15 +2465,15 @@ function shareWA(text) {
 
 // ===== RESIDENT SECTIONS =====
 function showResidentSection(section) {
-  var sections = ['Inquiries','NewInquiry','PostSimcha','Phonebook','Payments','Documents','Notifications','Profile'];
+  var sections = ['Inquiries','NewInquiry','PostSimcha','PostAd','Phonebook','Payments','Documents','Notifications','Profile'];
   sections.forEach(function(s) {
     var el = document.getElementById('resident' + s);
     if (el) el.style.display = 'none';
   });
   var map = {
     'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'post-simcha': 'PostSimcha',
-    'phonebook': 'Phonebook', 'payments': 'Payments', 'documents': 'Documents',
-    'notifications': 'Notifications', 'profile': 'Profile'
+    'post-ad': 'PostAd', 'phonebook': 'Phonebook', 'payments': 'Payments',
+    'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile'
   };
   var target = document.getElementById('resident' + map[section]);
   if (target) target.style.display = 'block';
@@ -2602,6 +2614,29 @@ function userPostSimcha() {
   document.getElementById('userSimchaDetails').value = '';
   showResidentSection('inquiries');
   showToast('מזל טוב! השמחה פורסמה!');
+}
+
+// ===== USER POST AD =====
+function userPostAd() {
+  var title = document.getElementById('userAdTitle').value;
+  if (!title) { showToast('הזינו כותרת'); return; }
+  var user = sessionStorage.getItem('ma_user');
+  var sellerName = '';
+  if (user) { try { sellerName = JSON.parse(user).name; } catch(e) {} }
+  marketData.unshift({
+    title: title,
+    desc: document.getElementById('userAdDesc').value,
+    price: document.getElementById('userAdPrice').value || '',
+    cat: document.getElementById('userAdCat').value,
+    seller: sellerName || 'תושב'
+  });
+  setData('market', marketData);
+  renderMarket();
+  document.getElementById('userAdTitle').value = '';
+  document.getElementById('userAdDesc').value = '';
+  document.getElementById('userAdPrice').value = '';
+  showResidentSection('inquiries');
+  showToast('המודעה פורסמה בלוח!');
 }
 
 // ===== FAMILIES MANAGEMENT =====
