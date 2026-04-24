@@ -2141,39 +2141,36 @@ function handleCmsImageUpload(input, previewId) {
   }
 }
 
-// ===== SHABBAT TIMES =====
-function calcShabbatTimes() {
-  // Approximate calculation for Ma'ale Amos (lat 31.59, lon 35.10)
-  var now = new Date();
-  var friday = new Date(now);
-  var day = friday.getDay();
-  var diff = (5 - day + 7) % 7;
-  if (diff === 0 && now.getHours() >= 20) diff = 7;
-  friday.setDate(friday.getDate() + diff);
-  // Approximate sunset using day of year
-  var start = new Date(friday.getFullYear(), 0, 0);
-  var doy = Math.floor((friday - start) / 86400000);
-  // Sunset varies ~17:00 (winter) to ~19:45 (summer) in this location
-  var sunsetHour = 17 + 2.75 * Math.sin((doy - 80) * Math.PI / 182.5);
-  var sunsetMin = Math.round((sunsetHour % 1) * 60);
-  sunsetHour = Math.floor(sunsetHour);
-  // Candle lighting = sunset - 18 min
-  var candleMin = sunsetMin - 18;
-  var candleHour = sunsetHour;
-  if (candleMin < 0) { candleMin += 60; candleHour--; }
-  // Shabbat end = sunset + ~40 min (next day)
-  var endMin = sunsetMin + 40;
-  var endHour = sunsetHour;
-  if (endMin >= 60) { endMin -= 60; endHour++; }
-  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
-  document.getElementById('candleLighting').textContent = pad(candleHour) + ':' + pad(candleMin);
-  document.getElementById('shabbatEnd').textContent = pad(endHour) + ':' + pad(endMin);
-  // Parasha names (simplified cycle)
-  var parashot = ['\u05d1\u05e8\u05d0\u05e9\u05d9\u05ea','\u05e0\u05d7','\u05dc\u05da \u05dc\u05da','\u05d5\u05d9\u05e8\u05d0','\u05d7\u05d9\u05d9 \u05e9\u05e8\u05d4','\u05ea\u05d5\u05dc\u05d3\u05d5\u05ea','\u05d5\u05d9\u05e6\u05d0','\u05d5\u05d9\u05e9\u05dc\u05d7','\u05d5\u05d9\u05e9\u05d1','\u05de\u05e7\u05e5','\u05d5\u05d9\u05d2\u05e9','\u05e9\u05de\u05d5\u05ea','\u05d5\u05d0\u05e8\u05d0','\u05d1\u05d0','\u05d1\u05e9\u05dc\u05d7','\u05d9\u05ea\u05e8\u05d5','\u05de\u05e9\u05e4\u05d8\u05d9\u05dd','\u05ea\u05e8\u05d5\u05de\u05d4','\u05ea\u05e6\u05d5\u05d4','\u05db\u05d9 \u05ea\u05e9\u05d0','\u05d5\u05d9\u05e7\u05d4\u05dc','\u05e4\u05e7\u05d5\u05d3\u05d9','\u05d5\u05d9\u05e7\u05e8\u05d0','\u05e6\u05d5','\u05de\u05e6\u05d5\u05e8\u05e2','\u05ea\u05d6\u05e8\u05d9\u05e2','\u05e9\u05de\u05d9\u05e0\u05d9','\u05d0\u05de\u05d5\u05e8','\u05e7\u05d3\u05d5\u05e9\u05d9\u05dd','\u05d0\u05d7\u05e8\u05d9 \u05de\u05d5\u05ea','\u05d1\u05d4\u05e8','\u05d1\u05d7\u05e7\u05ea\u05d9','\u05d1\u05de\u05d3\u05d1\u05e8','\u05e0\u05e9\u05d0','\u05d1\u05d4\u05e2\u05dc\u05ea\u05da','\u05e9\u05dc\u05d7','\u05e7\u05e8\u05d7','\u05d7\u05e7\u05ea','\u05d1\u05dc\u05e7','\u05e4\u05e0\u05d7\u05e1','\u05de\u05d8\u05d5\u05ea \u05de\u05e1\u05e2\u05d9','\u05d3\u05d1\u05e8\u05d9\u05dd','\u05d5\u05d0\u05ea\u05d7\u05e0\u05df','\u05e2\u05e7\u05d1','\u05e8\u05d0\u05d4','\u05e9\u05d5\u05e4\u05d8\u05d9\u05dd','\u05db\u05d9 \u05ea\u05e6\u05d0','\u05e0\u05d9\u05e6\u05d1\u05d9\u05dd','\u05d5\u05d9\u05dc\u05da','\u05d4\u05d0\u05d6\u05d9\u05e0\u05d5','\u05d1\u05e8\u05db\u05d4','\u05e0\u05e6\u05d1\u05d9\u05dd'];
-  var weekNum = Math.floor(doy / 7) % parashot.length;
-  document.getElementById('shabbatParasha').textContent = '\u05e4\u05e8\u05e9\u05ea ' + parashot[weekNum];
+// ===== SHABBAT TIMES (Hebcal API) =====
+function loadShabbatTimes() {
+  // Hebcal API - geonameid 295530 = area near Ma'ale Amos, m=50 for havdalah
+  fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=295530&m=50')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var items = data.items || [];
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.category === 'candles') {
+          var t = item.date.split('T')[1];
+          document.getElementById('candleLighting').textContent = t ? t.substring(0,5) : '';
+        }
+        if (item.category === 'havdalah') {
+          var t2 = item.date.split('T')[1];
+          document.getElementById('shabbatEnd').textContent = t2 ? t2.substring(0,5) : '';
+        }
+        if (item.category === 'parashat') {
+          // Convert English parasha to Hebrew display
+          document.getElementById('shabbatParasha').textContent = item.hebrew || item.title;
+        }
+      }
+    })
+    .catch(function() {
+      document.getElementById('candleLighting').textContent = '--:--';
+      document.getElementById('shabbatEnd').textContent = '--:--';
+      document.getElementById('shabbatParasha').textContent = '\u05e9\u05d1\u05ea \u05e9\u05dc\u05d5\u05dd';
+    });
 }
-calcShabbatTimes();
+loadShabbatTimes();
 
 // ===== PHONE DIRECTORY =====
 var allFamilies = [];
