@@ -11,7 +11,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Resident login via community code -->
 <style>
 :root {
   --primary: #1a5c3a;
@@ -1314,17 +1314,12 @@ body.dark .phone-item { background: #16213e; }
     <!-- Login Gate -->
     <div class="residents-gate fade-up" id="residentGate">
       <i class="bi bi-shield-lock-fill"></i>
-      <h3>כניסה לאזור האישי</h3>
-      <p>היכנסו עם חשבון Google או מספר זהות</p>
-      <button class="google-btn" onclick="googleLogin()">
-        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        כניסה עם Google
-      </button>
-      <div class="divider">או</div>
-      <input type="text" placeholder="מספר זהות" id="residentId" maxlength="9">
-      <input type="password" placeholder="סיסמה" id="residentPass">
+      <h3>כניסה לאזור התושבים</h3>
+      <p>הזינו את שמכם וקוד הכניסה הקהילתי</p>
+      <input type="text" placeholder="שם מלא" id="residentName2" style="margin-bottom:10px">
+      <input type="password" placeholder="קוד כניסה" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()">
       <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left"></i></button>
-      <p style="font-size:0.75rem;color:var(--text-light);margin-top:12px"><i class="bi bi-shield-check"></i> החיבור מאובטח בהצפנה מקצה לקצה</p>
+      <p style="font-size:0.75rem;color:var(--text-light);margin-top:12px"><i class="bi bi-info-circle"></i> קוד הכניסה חולק לכל תושבי הישוב</p>
     </div>
     <!-- Dashboard (hidden until login) -->
     <div class="resident-dashboard" id="residentDashboard">
@@ -1485,6 +1480,7 @@ body.dark .phone-item { background: #16213e; }
           <button class="admin-tab" onclick="switchAdminTab('simchot',this)"><i class="bi bi-stars"></i> שמחות</button>
           <button class="admin-tab" onclick="switchAdminTab('market',this)"><i class="bi bi-shop"></i> מודעות</button>
           <button class="admin-tab" onclick="switchAdminTab('gemachim',this)"><i class="bi bi-heart"></i> גמ"חים</button>
+          <button class="admin-tab" onclick="switchAdminTab('families',this)"><i class="bi bi-telephone"></i> משפחות</button>
           <button class="admin-tab" onclick="switchAdminTab('ticker',this)"><i class="bi bi-megaphone"></i> טיקר</button>
           <button class="admin-tab" onclick="switchAdminTab('settings',this)"><i class="bi bi-gear"></i> הגדרות</button>
         </div>
@@ -1564,6 +1560,22 @@ body.dark .phone-item { background: #16213e; }
           <ul class="admin-item-list" id="adminGemachList"></ul>
         </div>
 
+        <!-- FAMILIES ADMIN -->
+        <div class="admin-section" id="admin-families">
+          <h4 style="margin-bottom:16px">ניהול ספר טלפונים (<span id="adminFamilyCount">0</span> משפחות)</h4>
+          <div class="row g-3">
+            <div class="col-6 admin-form-group"><label>שם משפחה + בעל</label><input id="famName" placeholder="כהן אברהם"></div>
+            <div class="col-6 admin-form-group"><label>טלפון בעל</label><input id="famPhone" placeholder="050-1234567"></div>
+            <div class="col-6 admin-form-group"><label>שם אשה</label><input id="famWife" placeholder="שרה"></div>
+            <div class="col-6 admin-form-group"><label>טלפון אשה</label><input id="famWifePhone" placeholder="054-7654321"></div>
+            <div class="col-12 admin-form-group"><label>כתובת</label><input id="famAddr" placeholder="רש&quot;י 42"></div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addFamily()"><i class="bi bi-plus-circle"></i> הוסף משפחה</button>
+          <hr style="margin:20px 0">
+          <div class="admin-form-group"><label>חיפוש</label><input id="adminFamSearch" placeholder="חפש..." oninput="renderAdminFamilies(this.value)"></div>
+          <ul class="admin-item-list" id="adminFamiliesList" style="max-height:400px;overflow-y:auto"></ul>
+        </div>
+
         <!-- TICKER ADMIN -->
         <div class="admin-section" id="admin-ticker">
           <h4 style="margin-bottom:16px">ניהול בר חדשות (טיקר)</h4>
@@ -1580,7 +1592,8 @@ body.dark .phone-item { background: #16213e; }
           <div class="admin-form-group"><label>סלוגן</label><input id="settingSlogan" value="תורה \u00b7 קהילה \u00b7 ישוב הדעת"></div>
           <div class="admin-form-group"><label>טלפון</label><input id="settingPhone" value="02-996-XXXX"></div>
           <div class="admin-form-group"><label>אימייל</label><input id="settingEmail" value="info@maaleamos.org.il"></div>
-          <div class="admin-form-group"><label>שינוי קוד גישה</label><input type="password" id="settingNewCode" placeholder="קוד חדש"></div>
+          <div class="admin-form-group"><label>שינוי קוד גישה מנהל</label><input type="password" id="settingNewCode" placeholder="קוד מנהל חדש"></div>
+          <div class="admin-form-group"><label>קוד כניסה תושבים (נוכחי: <span id="currentResCode"></span>)</label><input id="settingResCode" placeholder="קוד תושבים חדש"></div>
           <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
           <hr style="margin:20px 0">
           <button class="btn-admin btn-admin-danger" onclick="if(confirm('למחוק את כל הנתונים?')){localStorage.clear();location.reload()}"><i class="bi bi-trash"></i> אפס הכל</button>
@@ -1727,40 +1740,16 @@ function showToast(msg) {
   setTimeout(function() { t.classList.remove('show'); }, 3000);
 }
 
-// ===== GOOGLE LOGIN =====
-function googleLogin() {
-  if (typeof google === 'undefined' || !google.accounts) {
-    showToast('\u05e9\u05d9\u05e8\u05d5\u05ea Google \u05dc\u05d0 \u05d6\u05de\u05d9\u05df. \u05e0\u05e1\u05d5 \u05db\u05e0\u05d9\u05e1\u05d4 \u05e8\u05d2\u05d9\u05dc\u05d4.');
-    return;
-  }
-  google.accounts.id.initialize({
-    client_id: '1072944905499-vm2v2i5dvn0a0d2o4ca36i1vge8cvbn0.apps.googleusercontent.com',
-    callback: handleGoogleResponse,
-    ux_mode: 'popup'
-  });
-  google.accounts.id.prompt();
-}
-
-function handleGoogleResponse(response) {
-  try {
-    var payload = JSON.parse(atob(response.credential.split('.')[1]));
-    sessionStorage.setItem('ma_user', JSON.stringify({
-      name: payload.name, email: payload.email, picture: payload.picture, exp: payload.exp
-    }));
-    showResidentDashboard(payload.name, payload.email, payload.picture);
-    showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + payload.name + '!');
-  } catch(e) { showToast('\u05e9\u05d2\u05d9\u05d0\u05d4 \u05d1\u05d4\u05ea\u05d7\u05d1\u05e8\u05d5\u05ea'); }
-}
-
+// ===== RESIDENT LOGIN =====
+var RESIDENT_CODE = getData('resident_code', '5781');
 function residentLogin() {
-  var id = document.getElementById('residentId').value;
-  var pass = document.getElementById('residentPass').value;
-  if (!id || !pass) { showToast('\u05e0\u05d0 \u05dc\u05de\u05dc\u05d0 \u05d0\u05ea \u05db\u05dc \u05d4\u05e9\u05d3\u05d5\u05ea'); return; }
-  if (id.length < 8) { showToast('\u05de\u05e1\u05e4\u05e8 \u05d6\u05d4\u05d5\u05ea \u05dc\u05d0 \u05ea\u05e7\u05d9\u05df'); return; }
-  var hash = simpleHash(id + ':' + pass);
-  sessionStorage.setItem('ma_user', JSON.stringify({ name: '\u05ea\u05d5\u05e9\u05d1 ' + id.slice(-4), email: id, picture: '', hash: hash }));
-  showResidentDashboard('\u05ea\u05d5\u05e9\u05d1 ' + id.slice(-4), id, '');
-  showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0!');
+  var name = document.getElementById('residentName2').value;
+  var code = document.getElementById('residentCode').value;
+  if (!name || !code) { showToast('\u05e0\u05d0 \u05dc\u05de\u05dc\u05d0 \u05e9\u05dd \u05d5\u05e7\u05d5\u05d3'); return; }
+  if (code !== RESIDENT_CODE) { showToast('\u05e7\u05d5\u05d3 \u05e9\u05d2\u05d5\u05d9!'); return; }
+  sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: '', picture: '' }));
+  showResidentDashboard(name, '', '');
+  showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + name + '!');
 }
 
 function simpleHash(str) {
@@ -1826,6 +1815,9 @@ function switchAdminTab(tab, btn) {
 }
 
 function refreshAdminLists() {
+  // Families
+  if (allFamilies.length === 0) loadPhoneDir();
+  renderAdminFamilies('');
   // News
   document.getElementById('adminNewsList').innerHTML = newsData.map(function(n, i) {
     return '<li><div class="item-text"><div class="item-title">' + n.title + '</div><div class="item-sub">' + n.date + ' | ' + n.cat + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteItem(\'news\',' + i + ')"><i class="bi bi-trash"></i></button></li>';
@@ -1920,10 +1912,15 @@ function saveSettings() {
   var newCode = document.getElementById('settingNewCode').value;
   if (newCode && newCode.length >= 4) {
     localStorage.setItem(ADMIN_CODE_KEY, newCode);
-    showToast('\u05e7\u05d5\u05d3 \u05d2\u05d9\u05e9\u05d4 \u05e2\u05d5\u05d3\u05db\u05df!');
-  } else {
-    showToast('\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea \u05e0\u05e9\u05de\u05e8\u05d5!');
   }
+  var resCode = document.getElementById('settingResCode').value;
+  if (resCode && resCode.length >= 4) {
+    setData('resident_code', resCode);
+    RESIDENT_CODE = resCode;
+  }
+  var el = document.getElementById('currentResCode');
+  if (el) el.textContent = RESIDENT_CODE;
+  showToast('\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea \u05e0\u05e9\u05de\u05e8\u05d5!');
 }
 
 function renderAll() { renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); }
@@ -2130,6 +2127,68 @@ function saveProfile() {
   showToast('\u05e4\u05e8\u05d8\u05d9\u05dd \u05e0\u05e9\u05de\u05e8\u05d5!');
 }
 
+// ===== FAMILIES MANAGEMENT =====
+function addFamily() {
+  var n = document.getElementById('famName').value;
+  if (!n) { showToast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05e9\u05dd \u05de\u05e9\u05e4\u05d7\u05d4'); return; }
+  allFamilies.push({
+    n: n,
+    p: document.getElementById('famPhone').value,
+    w: document.getElementById('famWife').value,
+    wp: document.getElementById('famWifePhone').value,
+    a: document.getElementById('famAddr').value
+  });
+  allFamilies.sort(function(a,b) { return a.n.localeCompare(b.n, 'he'); });
+  saveFamiliesLocal();
+  document.getElementById('famName').value = '';
+  document.getElementById('famPhone').value = '';
+  document.getElementById('famWife').value = '';
+  document.getElementById('famWifePhone').value = '';
+  document.getElementById('famAddr').value = '';
+  renderAdminFamilies('');
+  showToast('\u05de\u05e9\u05e4\u05d7\u05d4 \u05e0\u05d5\u05e1\u05e4\u05d4!');
+}
+
+function saveFamiliesLocal() {
+  setData('families_local', allFamilies);
+}
+
+function deleteFamily(idx) {
+  allFamilies.splice(idx, 1);
+  saveFamiliesLocal();
+  renderAdminFamilies(document.getElementById('adminFamSearch') ? document.getElementById('adminFamSearch').value : '');
+  showToast('\u05e0\u05de\u05d7\u05e7!');
+}
+
+function renderAdminFamilies(filter) {
+  filter = (filter || '').toLowerCase();
+  var el = document.getElementById('adminFamiliesList');
+  var countEl = document.getElementById('adminFamilyCount');
+  if (countEl) countEl.textContent = allFamilies.length;
+  var filtered = allFamilies;
+  if (filter) filtered = allFamilies.filter(function(f) { return f.n.toLowerCase().includes(filter) || (f.a||'').toLowerCase().includes(filter); });
+  el.innerHTML = filtered.slice(0, 100).map(function(f) {
+    var idx = allFamilies.indexOf(f);
+    return '<li><div class="item-text"><div class="item-title">' + f.n + '</div><div class="item-sub">' + (f.p||'') + ' | ' + (f.w||'') + ' | ' + (f.a||'') + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteFamily(' + idx + ')"><i class="bi bi-trash"></i></button></li>';
+  }).join('');
+  if (filtered.length > 100) el.innerHTML += '<li style="text-align:center;color:var(--text-light)">+ \u05e2\u05d5\u05d3 ' + (filtered.length-100) + '...</li>';
+}
+
+function loadPhoneDir() {
+  // First check local overrides
+  var local = getData('families_local', null);
+  if (local && local.length > 0) {
+    allFamilies = local;
+    renderPhoneDir('');
+    return;
+  }
+  // Otherwise load from phones.json
+  fetch('phones.json').then(function(r) { return r.json(); }).then(function(data) {
+    allFamilies = data;
+    renderPhoneDir('');
+  }).catch(function() { renderPhoneDir(''); });
+}
+
 // ===== CMS IMAGE UPLOAD =====
 function handleCmsImageUpload(input, previewId) {
   if (input.files && input.files[0]) {
@@ -2209,12 +2268,6 @@ function renderDailyTorah() {
 
 // ===== PHONE DIRECTORY =====
 var allFamilies = [];
-function loadPhoneDir() {
-  fetch('phones.json').then(function(r) { return r.json(); }).then(function(data) {
-    allFamilies = data;
-    renderPhoneDir('');
-  }).catch(function() { renderPhoneDir(''); });
-}
 
 function renderPhoneDir(filter) {
   filter = (filter || '').trim().toLowerCase();
@@ -2232,12 +2285,9 @@ function renderPhoneDir(filter) {
   }
   var countEl = document.getElementById('phoneCount');
   if (countEl) countEl.textContent = filtered.length + ' \u05de\u05ea\u05d5\u05da ' + allFamilies.length + ' \u05de\u05e9\u05e4\u05d7\u05d5\u05ea';
-  grid.innerHTML = filtered.slice(0, 50).map(function(f) {
+  grid.innerHTML = filtered.map(function(f) {
     return '<div class="phone-item"><div class="ph-icon icon-green"><i class="bi bi-house-door"></i></div><div class="ph-info"><h5>' + f.n + '</h5><p>' + (f.a || '') + (f.w ? ' | ' + f.w : '') + '</p></div><div style="text-align:left"><a href="tel:' + (f.p||'').replace(/-/g,'') + '" class="ph-num">' + (f.p||'') + '</a>' + (f.wp ? '<br><a href="tel:' + f.wp.replace(/-/g,'') + '" class="ph-num" style="font-size:0.8rem;color:var(--accent)">' + f.wp + '</a>' : '') + '</div></div>';
   }).join('');
-  if (filtered.length > 50) {
-    grid.innerHTML += '<div style="text-align:center;padding:12px;color:var(--text-light);font-size:0.85rem">+ \u05e2\u05d5\u05d3 ' + (filtered.length - 50) + ' \u05de\u05e9\u05e4\u05d7\u05d5\u05ea. \u05d7\u05e4\u05e9\u05d5 \u05dc\u05e1\u05d9\u05e0\u05d5\u05df.</div>';
-  }
 }
 
 // ===== PWA =====
