@@ -1357,6 +1357,17 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
+<!-- ===== PARASHA CARD ===== -->
+<section class="section" id="parasha" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff">
+  <div class="container">
+    <div class="fade-up" style="max-width:700px;margin:0 auto;text-align:center">
+      <i class="bi bi-book" style="font-size:2.5rem;opacity:0.7"></i>
+      <h2 style="font-weight:900;margin:12px 0 6px" id="parashaTitle">פרשת השבוע</h2>
+      <div id="parashaContent" style="font-size:1.05rem;line-height:2;opacity:0.9"></div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== SHABBAT TIMES ===== -->
 <section class="section" id="shabbat">
   <div class="container">
@@ -2953,6 +2964,32 @@ function renderStreets() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function() {});
 }
+
+// ===== PARASHA CONTENT =====
+function loadParashaContent() {
+  // Get parasha name from Hebcal
+  fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=295530&m=50')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var items = data.items || [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].category === 'parashat') {
+          var title = items[i].hebrew || items[i].title;
+          document.getElementById('parashaTitle').textContent = title;
+          // Short dvar torah based on parasha
+          var link = items[i].link || '';
+          document.getElementById('parashaContent').innerHTML =
+            '<p style="margin-top:16px">"וידבר ה\' אל משה לאמר" — כל שבוע אנו מתחדשים עם דברי התורה הקדושה. בואו ללמוד יחד את פרשת <strong>' + title + '</strong> בשיעורי הרב בבית הכנסת המרכזי.</p>' +
+            '<div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' +
+            '<a href="#shuls" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 24px;border-radius:50px;text-decoration:none;font-weight:600"><i class="bi bi-clock"></i> זמני תפילות</a>' +
+            '<a href="#shabbat" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 24px;border-radius:50px;text-decoration:none;font-weight:600"><i class="bi bi-brightness-high"></i> זמני שבת</a>' +
+            '</div>';
+        }
+      }
+    })
+    .catch(function() {});
+}
+loadParashaContent();
 
 // ===== HERO PARTICLES =====
 (function() {
