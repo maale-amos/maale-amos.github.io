@@ -840,7 +840,7 @@ body.dark .phone-item { background: #16213e; }
     <div class="d-flex align-items-center justify-content-between">
       <a href="#" class="navbar-brand-area text-decoration-none">
         <div class="logo-circle">
-          <img src="https://maaleamos.co.il/pictures/logofondo.png" alt="לוגו מעלה עמוס" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'">
+          <img src="images/logo.png" alt="לוגו מעלה עמוס" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'">
         </div>
         <div class="brand-text">
           <div class="title">מעלה עמוס</div>
@@ -1009,10 +1009,12 @@ body.dark .phone-item { background: #16213e; }
     <div class="gallery-grid fade-up">
       <div class="gallery-item"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/640px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg" alt="מעלה עמוס מהאוויר"><div class="gallery-caption">מעלה עמוס - מבט מהאוויר</div></div>
       <div class="gallery-item"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ma%27ale_Amos.jpg/640px-Ma%27ale_Amos.jpg" alt="מעלה עמוס"><div class="gallery-caption">מעלה עמוס</div></div>
-      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/kolel/1.jpg" alt="כולל אברכים"><div class="gallery-caption">כולל אברכים</div></div>
-      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/talmud/1.jpg" alt="תלמוד תורה"><div class="gallery-caption">תלמוד תורה</div></div>
-      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/charity/1.jpg" alt="ארגון חסד"><div class="gallery-caption">פעילות חסד בקהילה</div></div>
-      <div class="gallery-item"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Gush_Etzion_vinyard.jpg/640px-Gush_Etzion_vinyard.jpg" alt="כרמי גוש עציון"><div class="gallery-caption">כרמי גוש עציון</div></div>
+      <div class="gallery-item"><img src="images/kolel_1.jpg" alt="כולל אברכים"><div class="gallery-caption">כולל שבות עמי</div></div>
+      <div class="gallery-item"><img src="images/talmud_1.jpg" alt="תלמוד תורה"><div class="gallery-caption">תלמוד תורה</div></div>
+      <div class="gallery-item"><img src="images/charity_1.jpg" alt="ארגון חסד"><div class="gallery-caption">ארגון החסד - קמחא דפסחא</div></div>
+      <div class="gallery-item"><img src="images/zimmer_maale_amos.jpg" alt="צימר מעלה עמוס"><div class="gallery-caption">צימר במעלה עמוס</div></div>
+      <div class="gallery-item"><img src="images/ptihat_kayitz.png" alt="פתיחת קיץ"><div class="gallery-caption">הפנינג פתיחת קיץ</div></div>
+      <div class="gallery-item"><img src="images/toshvei_maale_amos.jpg" alt="תושבי מעלה עמוס"><div class="gallery-caption">ארגון החסד - תושבי מעלה עמוס</div></div>
     </div>
   </div>
 </section>
@@ -1314,12 +1316,25 @@ body.dark .phone-item { background: #16213e; }
     <!-- Login Gate -->
     <div class="residents-gate fade-up" id="residentGate">
       <i class="bi bi-shield-lock-fill"></i>
-      <h3>כניסה לאזור התושבים</h3>
-      <p>הזינו את שמכם וקוד הכניסה הקהילתי</p>
-      <input type="text" placeholder="שם מלא" id="residentName2" style="margin-bottom:10px">
-      <input type="password" placeholder="קוד כניסה" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()">
-      <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left"></i></button>
-      <p style="font-size:0.75rem;color:var(--text-light);margin-top:12px"><i class="bi bi-info-circle"></i> קוד הכניסה חולק לכל תושבי הישוב</p>
+      <h3>כניסה / הרשמה</h3>
+      <!-- Login Tab -->
+      <div id="loginTab">
+        <p>כבר רשומים? הזינו שם וקוד כניסה</p>
+        <input type="text" placeholder="שם מלא" id="residentName2" style="margin-bottom:10px">
+        <input type="password" placeholder="קוד כניסה" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()">
+        <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left"></i></button>
+        <p style="margin-top:14px"><a href="#" onclick="showRegTab();return false" style="color:var(--primary);font-weight:600">עדיין לא רשומים? הירשמו כאן</a></p>
+      </div>
+      <!-- Register Tab -->
+      <div id="registerTab" style="display:none">
+        <p>הרשמה לאזור התושבים</p>
+        <input type="text" placeholder="שם מלא" id="regName" style="margin-bottom:10px">
+        <input type="tel" placeholder="טלפון" id="regPhone" style="margin-bottom:10px">
+        <input type="text" placeholder="כתובת בישוב" id="regAddress" style="margin-bottom:10px">
+        <input type="password" placeholder="בחרו סיסמה (4+ תווים)" id="regPass" style="margin-bottom:10px">
+        <button class="btn-login" onclick="registerResident()">הרשמה <i class="bi bi-person-plus"></i></button>
+        <p style="margin-top:14px"><a href="#" onclick="showLoginTab();return false" style="color:var(--primary);font-weight:600">כבר יש חשבון? כניסה</a></p>
+      </div>
     </div>
     <!-- Dashboard (hidden until login) -->
     <div class="resident-dashboard" id="residentDashboard">
@@ -1335,6 +1350,7 @@ body.dark .phone-item { background: #16213e; }
         <div class="resident-card" onclick="showResidentSection('inquiries')"><i class="bi bi-envelope-paper"></i><h4>הפניות שלי</h4></div>
         <div class="resident-card" onclick="showResidentSection('new-inquiry')"><i class="bi bi-plus-circle"></i><h4>פנייה חדשה</h4></div>
         <div class="resident-card" onclick="showResidentSection('payments')"><i class="bi bi-credit-card"></i><h4>גבייה ותשלומים</h4></div>
+        <div class="resident-card" onclick="showResidentSection('post-simcha')"><i class="bi bi-stars"></i><h4>פרסום שמחה</h4></div>
         <div class="resident-card" onclick="showResidentSection('phonebook')"><i class="bi bi-telephone"></i><h4>ספר טלפונים</h4></div>
         <div class="resident-card" onclick="showResidentSection('documents')"><i class="bi bi-file-earmark-text"></i><h4>מסמכים</h4></div>
         <div class="resident-card" onclick="showResidentSection('notifications')"><i class="bi bi-bell"></i><h4>הודעות</h4></div>
@@ -1370,6 +1386,16 @@ body.dark .phone-item { background: #16213e; }
         </div>
         <button class="btn-admin btn-admin-primary" style="width:100%" onclick="submitInquiry()"><i class="bi bi-send"></i> שלח פנייה</button>
         <button class="btn-admin" style="width:100%;margin-top:8px;background:#e0e0e0" onclick="showResidentSection('inquiries')">חזרה לפניות</button>
+      </div>
+      <!-- Post Simcha -->
+      <div id="residentPostSimcha" style="display:none;margin-top:24px;max-width:600px;margin-left:auto;margin-right:auto">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-stars"></i> פרסום שמחה</h4>
+        <div class="admin-form-group"><label>סוג שמחה</label>
+          <select id="userSimchaType"><option value="wedding">חתונה</option><option value="baby">לידה</option><option value="barmitzva">בר/בת מצווה</option><option value="engagement">אירוסין</option></select>
+        </div>
+        <div class="admin-form-group"><label>שם משפחה</label><input id="userSimchaFamily" placeholder="משפחת ..."></div>
+        <div class="admin-form-group"><label>פרטים</label><input id="userSimchaDetails" placeholder="מזל טוב להולדת הבן!"></div>
+        <button class="btn-admin btn-admin-primary" style="width:100%" onclick="userPostSimcha()"><i class="bi bi-send"></i> פרסם שמחה</button>
       </div>
       <!-- Phone Directory -->
       <div id="residentPhonebook" style="display:none;margin-top:24px">
@@ -1741,16 +1767,52 @@ function showToast(msg) {
   setTimeout(function() { t.classList.remove('show'); }, 3000);
 }
 
-// ===== RESIDENT LOGIN =====
+// ===== RESIDENT LOGIN & REGISTRATION =====
 var RESIDENT_CODE = getData('resident_code', '5781');
+
+function showRegTab() { document.getElementById('loginTab').style.display='none'; document.getElementById('registerTab').style.display=''; }
+function showLoginTab() { document.getElementById('registerTab').style.display='none'; document.getElementById('loginTab').style.display=''; }
+
+function registerResident() {
+  var name = document.getElementById('regName').value;
+  var phone = document.getElementById('regPhone').value;
+  var addr = document.getElementById('regAddress').value;
+  var pass = document.getElementById('regPass').value;
+  if (!name || !phone || !pass) { showToast('\u05e0\u05d0 \u05dc\u05de\u05dc\u05d0 \u05d0\u05ea \u05db\u05dc \u05d4\u05e9\u05d3\u05d5\u05ea'); return; }
+  if (pass.length < 4) { showToast('\u05e1\u05d9\u05e1\u05de\u05d4 \u05d7\u05d9\u05d9\u05d1\u05ea \u05dc\u05e4\u05d7\u05d5\u05ea 4 \u05ea\u05d5\u05d5\u05d9\u05dd'); return; }
+  // Save registration
+  var users = getData('registered_users', []);
+  var exists = users.find(function(u) { return u.phone === phone; });
+  if (exists) { showToast('\u05de\u05e1\u05e4\u05e8 \u05d6\u05d4 \u05db\u05d1\u05e8 \u05e8\u05e9\u05d5\u05dd. \u05d4\u05d9\u05db\u05e0\u05e1\u05d5!'); showLoginTab(); return; }
+  users.push({ name: name, phone: phone, addr: addr, pass: simpleHash(pass), registered: new Date().toISOString() });
+  setData('registered_users', users);
+  sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: phone, picture: '' }));
+  showResidentDashboard(name, phone, '');
+  showToast('\u05e0\u05e8\u05e9\u05de\u05ea \u05d1\u05d4\u05e6\u05dc\u05d7\u05d4! \u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + name + '!');
+}
+
 function residentLogin() {
   var name = document.getElementById('residentName2').value;
   var code = document.getElementById('residentCode').value;
   if (!name || !code) { showToast('\u05e0\u05d0 \u05dc\u05de\u05dc\u05d0 \u05e9\u05dd \u05d5\u05e7\u05d5\u05d3'); return; }
-  if (code !== RESIDENT_CODE) { showToast('\u05e7\u05d5\u05d3 \u05e9\u05d2\u05d5\u05d9!'); return; }
-  sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: '', picture: '' }));
-  showResidentDashboard(name, '', '');
-  showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + name + '!');
+  // Check community code
+  if (code === RESIDENT_CODE) {
+    sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: '', picture: '' }));
+    showResidentDashboard(name, '', '');
+    showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + name + '!');
+    return;
+  }
+  // Check registered users by password
+  var users = getData('registered_users', []);
+  var hash = simpleHash(code);
+  var user = users.find(function(u) { return u.name === name && u.pass === hash; });
+  if (user) {
+    sessionStorage.setItem('ma_user', JSON.stringify({ name: user.name, email: user.phone, picture: '' }));
+    showResidentDashboard(user.name, user.phone, '');
+    showToast('\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0, ' + user.name + '!');
+    return;
+  }
+  showToast('\u05e9\u05dd \u05d0\u05d5 \u05e7\u05d5\u05d3 \u05e9\u05d2\u05d5\u05d9!');
 }
 
 function simpleHash(str) {
@@ -2031,14 +2093,15 @@ function shareWA(text) {
 
 // ===== RESIDENT SECTIONS =====
 function showResidentSection(section) {
-  var sections = ['Inquiries','NewInquiry','Phonebook','Payments','Documents','Notifications','Profile'];
+  var sections = ['Inquiries','NewInquiry','PostSimcha','Phonebook','Payments','Documents','Notifications','Profile'];
   sections.forEach(function(s) {
     var el = document.getElementById('resident' + s);
     if (el) el.style.display = 'none';
   });
   var map = {
-    'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'phonebook': 'Phonebook',
-    'payments': 'Payments', 'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile'
+    'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'post-simcha': 'PostSimcha',
+    'phonebook': 'Phonebook', 'payments': 'Payments', 'documents': 'Documents',
+    'notifications': 'Notifications', 'profile': 'Profile'
   };
   var target = document.getElementById('resident' + map[section]);
   if (target) target.style.display = 'block';
@@ -2126,6 +2189,26 @@ function saveProfile() {
     addr: document.getElementById('profileAddr').value
   });
   showToast('\u05e4\u05e8\u05d8\u05d9\u05dd \u05e0\u05e9\u05de\u05e8\u05d5!');
+}
+
+// ===== USER POST SIMCHA =====
+function userPostSimcha() {
+  var family = document.getElementById('userSimchaFamily').value;
+  var details = document.getElementById('userSimchaDetails').value;
+  if (!family) { showToast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05e9\u05dd \u05de\u05e9\u05e4\u05d7\u05d4'); return; }
+  var now = new Date();
+  simchotData.unshift({
+    type: document.getElementById('userSimchaType').value,
+    family: family,
+    details: details || '\u05de\u05d6\u05dc \u05d8\u05d5\u05d1!',
+    date: now.getDate() + '/' + (now.getMonth()+1)
+  });
+  setData('simchot', simchotData);
+  renderSimchot();
+  document.getElementById('userSimchaFamily').value = '';
+  document.getElementById('userSimchaDetails').value = '';
+  showResidentSection('inquiries');
+  showToast('\u05de\u05d6\u05dc \u05d8\u05d5\u05d1! \u05d4\u05e9\u05de\u05d7\u05d4 \u05e4\u05d5\u05e8\u05e1\u05de\u05d4!');
 }
 
 // ===== FAMILIES MANAGEMENT =====
@@ -2286,9 +2369,34 @@ function renderPhoneDir(filter) {
   }
   var countEl = document.getElementById('phoneCount');
   if (countEl) countEl.textContent = filtered.length + ' \u05de\u05ea\u05d5\u05da ' + allFamilies.length + ' \u05de\u05e9\u05e4\u05d7\u05d5\u05ea';
-  grid.innerHTML = filtered.map(function(f) {
-    return '<div class="phone-item"><div class="ph-icon icon-green"><i class="bi bi-house-door"></i></div><div class="ph-info"><h5>' + f.n + '</h5><p>' + (f.a || '') + (f.w ? ' | ' + f.w : '') + '</p></div><div style="text-align:left"><a href="tel:' + (f.p||'').replace(/-/g,'') + '" class="ph-num">' + (f.p||'') + '</a>' + (f.wp ? '<br><a href="tel:' + f.wp.replace(/-/g,'') + '" class="ph-num" style="font-size:0.8rem;color:var(--accent)">' + f.wp + '</a>' : '') + '</div></div>';
-  }).join('');
+  // Group by first letter
+  var groups = {};
+  filtered.forEach(function(f) {
+    var letter = f.n ? f.n.charAt(0) : '?';
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push(f);
+  });
+  var letters = Object.keys(groups).sort(function(a,b) { return a.localeCompare(b,'he'); });
+  var html = '';
+  if (filter) {
+    // When searching, show flat list
+    html = filtered.map(function(f) {
+      return '<div class="phone-item"><div class="ph-icon icon-green"><i class="bi bi-house-door"></i></div><div class="ph-info"><h5>' + f.n + '</h5><p>' + (f.a || '') + (f.w ? ' | ' + f.w : '') + '</p></div><div style="text-align:left"><a href="tel:' + (f.p||'').replace(/-/g,'') + '" class="ph-num">' + (f.p||'') + '</a>' + (f.wp ? '<br><a href="tel:' + f.wp.replace(/-/g,'') + '" class="ph-num" style="font-size:0.8rem;color:var(--accent)">' + f.wp + '</a>' : '') + '</div></div>';
+    }).join('');
+  } else {
+    // Show grouped by letter with expand
+    letters.forEach(function(letter) {
+      var items = groups[letter];
+      var id = 'phoneGroup_' + letter.charCodeAt(0);
+      html += '<div style="margin-bottom:8px"><button onclick="var el=document.getElementById(\'' + id + '\');el.style.display=el.style.display===\'none\'?\'\':\'none\';this.querySelector(\'.bi\').classList.toggle(\'bi-chevron-down\');this.querySelector(\'.bi\').classList.toggle(\'bi-chevron-left\')" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:Heebo;font-weight:700;font-size:1.1rem;cursor:pointer"><span style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center">' + letter + '</span> ' + items.length + ' \u05de\u05e9\u05e4\u05d7\u05d5\u05ea <i class="bi bi-chevron-down" style="margin-right:auto"></i></button>';
+      html += '<div id="' + id + '" style="display:none;margin-top:6px">';
+      items.forEach(function(f) {
+        html += '<div class="phone-item" style="margin-bottom:6px"><div class="ph-icon icon-green"><i class="bi bi-house-door"></i></div><div class="ph-info"><h5>' + f.n + '</h5><p>' + (f.a || '') + (f.w ? ' | ' + f.w : '') + '</p></div><div style="text-align:left"><a href="tel:' + (f.p||'').replace(/-/g,'') + '" class="ph-num">' + (f.p||'') + '</a>' + (f.wp ? '<br><a href="tel:' + f.wp.replace(/-/g,'') + '" class="ph-num" style="font-size:0.8rem;color:var(--accent)">' + f.wp + '</a>' : '') + '</div></div>';
+      });
+      html += '</div></div>';
+    });
+  }
+  grid.innerHTML = html;
 }
 
 // ===== PWA =====
