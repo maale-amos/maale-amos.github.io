@@ -2131,7 +2131,10 @@ openAdmin = function() {
   if (tokenField && getGhToken()) tokenField.value = getGhToken();
 };
 
-function renderAll() { renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); }
+function renderAll() {
+  renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker();
+  if (typeof observeFadeUp === 'function') setTimeout(observeFadeUp, 100);
+}
 
 // ===== SEARCH =====
 function searchSite(q) {
@@ -2179,7 +2182,20 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
 var observer = new IntersectionObserver(function(entries) {
   entries.forEach(function(entry) { if (entry.isIntersecting) entry.target.classList.add('visible'); });
 }, { threshold: 0.1 });
-document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
+function observeFadeUp() {
+  document.querySelectorAll('.fade-up').forEach(function(el) {
+    if (!el.dataset.observed) {
+      // If element is already in viewport, show immediately
+      var rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 100) {
+        el.classList.add('visible');
+      }
+      observer.observe(el);
+      el.dataset.observed = '1';
+    }
+  });
+}
+observeFadeUp();
 
 // Animated counters
 var counterObserver = new IntersectionObserver(function(entries) {
