@@ -823,9 +823,10 @@ body.dark .phone-item { background: #16213e; }
 <!-- ===== NEWS TICKER ===== -->
 <div class="news-ticker">
   <div class="ticker-wrap" id="tickerWrap">
+    <span><i class="bi bi-calendar-heart"></i> <span id="hebrewDateDisplay" style="font-weight:700"></span></span>
     <span><i class="bi bi-bell-fill"></i> הרשמה לגני ילדים תשפ"ז נפתחה!</span>
     <span><i class="bi bi-info-circle-fill"></i> קו אוטובוס 167 חדש — מעלה עמוס לירושלים</span>
-    <span><i class="bi bi-calendar-check"></i> ל"ג בעומר — מדורה קהילתית ב-10 במאי</span>
+    <span><i class="bi bi-calendar-check"></i> ל"ג בעומר — מדורה קהילתית בע"ה</span>
     <span><i class="bi bi-building"></i> אושרה תכנית הרחבה — 120 יח"ד חדשות</span>
   </div>
 </div>
@@ -907,7 +908,7 @@ body.dark .phone-item { background: #16213e; }
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1>ברוכים הבאים למעלה עמוס</h1>
+    <h1>בס"ד — מעלה עמוס</h1>
     <p class="tagline">תורה · קהילה · ישוב הדעת</p>
     <div class="hero-search">
       <i class="bi bi-search"></i>
@@ -946,6 +947,13 @@ body.dark .phone-item { background: #16213e; }
 <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <i class="bi bi-arrow-up"></i>
 </button>
+
+<!-- ===== DAILY TORAH ===== -->
+<section style="padding:24px 0;background:linear-gradient(135deg,#f5f0e6,#fff8e1);border-bottom:1px solid #e0d5b8">
+  <div class="container">
+    <div id="dailyTorah" style="text-align:center;max-width:600px;margin:0 auto"></div>
+  </div>
+</section>
 
 <!-- ===== NEWS ===== -->
 <section class="section" id="news">
@@ -1198,24 +1206,7 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
-<!-- ===== PHONE DIRECTORY ===== -->
-<section class="section" id="phonebook">
-  <div class="container">
-    <div class="section-header fade-up">
-      <h2><i class="bi bi-telephone"></i> ספר טלפונים</h2>
-      <div class="section-line"></div>
-      <p>ספר טלפונים של תושבי מעלה עמוס \u2014 <span id="phoneCount"></span></p>
-    </div>
-    <div class="fade-up" style="max-width:800px;margin:0 auto">
-      <div style="position:relative;margin-bottom:20px">
-        <i class="bi bi-search" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-light)"></i>
-        <input type="text" style="width:100%;padding:14px 20px 14px 44px;border:2px solid #e0e0e0;border-radius:50px;font-family:Heebo;font-size:1rem;outline:none" placeholder="חיפוש לפי שם, רחוב או טלפון..." oninput="renderPhoneDir(this.value)">
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:12px" id="phoneGrid">
-      </div>
-    </div>
-  </div>
-</section>
+<!-- Phone directory moved to residents area -->
 
 <!-- ===== USEFUL LINKS ===== -->
 <section class="section" id="links">
@@ -1349,6 +1340,7 @@ body.dark .phone-item { background: #16213e; }
         <div class="resident-card" onclick="showResidentSection('inquiries')"><i class="bi bi-envelope-paper"></i><h4>הפניות שלי</h4></div>
         <div class="resident-card" onclick="showResidentSection('new-inquiry')"><i class="bi bi-plus-circle"></i><h4>פנייה חדשה</h4></div>
         <div class="resident-card" onclick="showResidentSection('payments')"><i class="bi bi-credit-card"></i><h4>גבייה ותשלומים</h4></div>
+        <div class="resident-card" onclick="showResidentSection('phonebook')"><i class="bi bi-telephone"></i><h4>ספר טלפונים</h4></div>
         <div class="resident-card" onclick="showResidentSection('documents')"><i class="bi bi-file-earmark-text"></i><h4>מסמכים</h4></div>
         <div class="resident-card" onclick="showResidentSection('notifications')"><i class="bi bi-bell"></i><h4>הודעות</h4></div>
         <div class="resident-card" onclick="showResidentSection('profile')"><i class="bi bi-person-gear"></i><h4>עדכון פרטים</h4></div>
@@ -1383,6 +1375,15 @@ body.dark .phone-item { background: #16213e; }
         </div>
         <button class="btn-admin btn-admin-primary" style="width:100%" onclick="submitInquiry()"><i class="bi bi-send"></i> שלח פנייה</button>
         <button class="btn-admin" style="width:100%;margin-top:8px;background:#e0e0e0" onclick="showResidentSection('inquiries')">חזרה לפניות</button>
+      </div>
+      <!-- Phone Directory -->
+      <div id="residentPhonebook" style="display:none;margin-top:24px">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-telephone"></i> ספר טלפונים — <span id="phoneCount"></span></h4>
+        <div style="position:relative;margin-bottom:16px">
+          <i class="bi bi-search" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-light)"></i>
+          <input type="text" style="width:100%;padding:12px 18px 12px 44px;border:2px solid #e0e0e0;border-radius:50px;font-family:Heebo;font-size:0.95rem;outline:none" placeholder="חיפוש לפי שם, רחוב או טלפון..." oninput="renderPhoneDir(this.value)">
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px" id="phoneGrid"></div>
       </div>
       <!-- Payments -->
       <div id="residentPayments" style="display:none;margin-top:24px;text-align:center;padding:40px">
@@ -1599,12 +1600,12 @@ function setData(key, val) { localStorage.setItem('ma_' + key, JSON.stringify(va
 
 // ===== DEFAULT DATA =====
 const DEFAULT_NEWS = [
-  { title: '\u05d4\u05e8\u05d7\u05d1\u05ea \u05e9\u05db\u05d5\u05e0\u05d4 \u05e6\u05e4\u05d5\u05e0\u05d9\u05ea \u2014 \u05d0\u05d5\u05e9\u05e8\u05d4 \u05ea\u05db\u05e0\u05d9\u05ea \u05d1\u05e0\u05d9\u05d9\u05d4', desc: '\u05d5\u05e2\u05d3\u05ea \u05d4\u05ea\u05db\u05e0\u05d5\u05df \u05d0\u05d9\u05e9\u05e8\u05d4 \u05d0\u05ea \u05ea\u05db\u05e0\u05d9\u05ea \u05d4\u05d4\u05e8\u05d7\u05d1\u05d4 \u05d4\u05db\u05d5\u05dc\u05dc\u05ea 120 \u05d9\u05d7\u05d3\u05d5\u05ea \u05d3\u05d9\u05d5\u05e8 \u05d7\u05d3\u05e9\u05d5\u05ea.', date: '24 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05d3\u05d9\u05d5\u05e8', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80' },
-  { title: '\u05d9\u05d5\u05dd \u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df \u2014 \u05d8\u05e7\u05e1 \u05d0\u05d6\u05db\u05e8\u05d4 \u05d1\u05d9\u05d9\u05e9\u05d5\u05d1', desc: '\u05d8\u05e7\u05e1 \u05d9\u05d5\u05dd \u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df \u05d9\u05d9\u05e2\u05e8\u05da \u05d1\u05d9\u05d5\u05dd \u05e9\u05e0\u05d9 \u05d1\u05d2\u05df \u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df \u05d1\u05e9\u05e2\u05d4 19:30.', date: '22 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05e7\u05d4\u05d9\u05dc\u05d4', img: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=600&q=80' },
-  { title: '\u05e4\u05ea\u05d9\u05d7\u05ea \u05d4\u05e8\u05e9\u05de\u05d4 \u05dc\u05d2\u05e0\u05d9 \u05d4\u05d9\u05dc\u05d3\u05d9\u05dd \u2014 \u05ea\u05e9\u05e4"\u05d6', desc: '\u05d4\u05d4\u05e8\u05e9\u05de\u05d4 \u05dc\u05d2\u05e0\u05d9\u05dd \u05e0\u05e4\u05ea\u05d7\u05d4. \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05d9\u05e8\u05e9\u05dd \u05e2\u05d3 \u05d4-15 \u05d1\u05de\u05d0\u05d9.', date: '20 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05d7\u05d9\u05e0\u05d5\u05da', img: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80' },
-  { title: '\u05e9\u05d9\u05e4\u05d5\u05e5 \u05de\u05e7\u05d9\u05e3 \u05d1\u05de\u05e7\u05dc\u05d8 \u05d4\u05de\u05e8\u05db\u05d6\u05d9', desc: '\u05e2\u05d1\u05d5\u05d3\u05d5\u05ea \u05e9\u05d9\u05e4\u05d5\u05e5 \u05d5\u05e9\u05d3\u05e8\u05d5\u05d2 \u05d4\u05de\u05e7\u05dc\u05d8 \u05d4\u05de\u05e8\u05db\u05d6\u05d9.', date: '18 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05d1\u05d9\u05d8\u05d7\u05d5\u05df', img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80' },
-  { title: '\u05e4\u05e1\u05d8\u05d9\u05d1\u05dc \u05d0\u05d1\u05d9\u05d1 \u2014 \u05de\u05d5\u05d6\u05d9\u05e7\u05d4 \u05d5\u05d0\u05d5\u05db\u05dc', desc: '\u05e4\u05e1\u05d8\u05d9\u05d1\u05dc \u05e9\u05e0\u05ea\u05d9 \u05e2\u05dd \u05d4\u05d5\u05e4\u05e2\u05d5\u05ea, \u05d0\u05d5\u05db\u05dc \u05d5\u05e4\u05e2\u05d9\u05dc\u05d5\u05d9\u05d5\u05ea \u05dc\u05d9\u05dc\u05d3\u05d9\u05dd.', date: '15 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05e7\u05d4\u05d9\u05dc\u05d4', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80' },
-  { title: '\u05e7\u05d5 \u05d0\u05d5\u05d8\u05d5\u05d1\u05d5\u05e1 \u05d7\u05d3\u05e9 167', desc: '\u05e7\u05d5 \u05d9\u05e9\u05d9\u05e8 \u05d7\u05d3\u05e9 \u05dc\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd \u05e2\u05dd \u05ea\u05d3\u05d9\u05e8\u05d5\u05ea \u05de\u05d5\u05d2\u05d1\u05e8\u05ea.', date: '12 \u05d1\u05d0\u05e4\u05e8\u05d9\u05dc 2026', cat: '\u05e2\u05d3\u05db\u05d5\u05e0\u05d9\u05dd', img: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80' }
+  { title: '\u05d4\u05e8\u05d7\u05d1\u05ea \u05e9\u05db\u05d5\u05e0\u05d4 \u05e6\u05e4\u05d5\u05e0\u05d9\u05ea \u2014 \u05d0\u05d5\u05e9\u05e8\u05d4 \u05ea\u05db\u05e0\u05d9\u05ea \u05d1\u05e0\u05d9\u05d9\u05d4', desc: '\u05d1\u05e1"\u05d3. \u05d5\u05e2\u05d3\u05ea \u05d4\u05ea\u05db\u05e0\u05d5\u05df \u05d0\u05d9\u05e9\u05e8\u05d4 \u05d0\u05ea \u05ea\u05db\u05e0\u05d9\u05ea \u05d4\u05d4\u05e8\u05d7\u05d1\u05d4 \u05d4\u05db\u05d5\u05dc\u05dc\u05ea 120 \u05d9\u05d7\u05d3\u05d5\u05ea \u05d3\u05d9\u05d5\u05e8 \u05d7\u05d3\u05e9\u05d5\u05ea.', date: '\u05db"\u05d5 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05d3\u05d9\u05d5\u05e8', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80' },
+  { title: '\u05e2\u05e6\u05e8\u05ea \u05ea\u05d5\u05e8\u05d4 \u2014 \u05e1\u05d9\u05d5\u05dd \u05de\u05e1\u05db\u05ea\u05d0 \u05d3\u05d1\u05e8\u05db\u05d5\u05ea \u05d1\u05db\u05d5\u05dc\u05dc', desc: '\u05d1\u05e2"\u05d4 \u05e1\u05d9\u05d5\u05dd \u05d7\u05d2\u05d9\u05d2\u05d9 \u05e9\u05dc \u05de\u05e1\u05db\u05ea\u05d0 \u05d3\u05d1\u05e8\u05db\u05d5\u05ea \u05d1\u05db\u05d5\u05dc\u05dc. \u05db\u05dc \u05d4\u05ea\u05d5\u05e9\u05d1\u05d9\u05dd \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd!', date: '\u05db"\u05d2 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05ea\u05d5\u05e8\u05d4', img: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=600&q=80' },
+  { title: '\u05e4\u05ea\u05d9\u05d7\u05ea \u05d4\u05e8\u05e9\u05de\u05d4 \u05dc\u05d2\u05e0\u05d9 \u05d4\u05d9\u05dc\u05d3\u05d9\u05dd \u2014 \u05ea\u05e9\u05e4"\u05d6', desc: '\u05d4\u05d4\u05e8\u05e9\u05de\u05d4 \u05dc\u05d2\u05e0\u05d9\u05dd \u05e0\u05e4\u05ea\u05d7\u05d4. \u05e0\u05d9\u05ea\u05df \u05dc\u05d4\u05d9\u05e8\u05e9\u05dd \u05e2\u05d3 \u05d8"\u05d5 \u05d1\u05d0\u05d9\u05d9\u05e8.', date: '\u05db"\u05d0 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05d7\u05d9\u05e0\u05d5\u05da', img: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80' },
+  { title: '\u05e9\u05d9\u05e4\u05d5\u05e5 \u05de\u05e7\u05d9\u05e3 \u05d1\u05de\u05e7\u05dc\u05d8 \u05d4\u05de\u05e8\u05db\u05d6\u05d9', desc: '\u05e2\u05d1\u05d5\u05d3\u05d5\u05ea \u05e9\u05d9\u05e4\u05d5\u05e5 \u05d5\u05e9\u05d3\u05e8\u05d5\u05d2 \u05d4\u05de\u05e7\u05dc\u05d8 \u05d4\u05de\u05e8\u05db\u05d6\u05d9. \u05d4\u05e2\u05d1\u05d5\u05d3\u05d5\u05ea \u05e6\u05e4\u05d5\u05d9\u05d5\u05ea \u05dc\u05d4\u05d9\u05de\u05e9\u05da \u05db\u05d7\u05d5\u05d3\u05e9\u05d9\u05d9\u05dd.', date: '\u05d9"\u05d8 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05d1\u05d9\u05d8\u05d7\u05d5\u05df', img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80' },
+  { title: '\u05e2\u05e8\u05d1 \u05d4\u05ea\u05e8\u05de\u05d4 \u05dc\u05db\u05d1\u05d5\u05d3 \u05d4\u05e8\u05d1 \u05e9\u05dc\u05d9\u05d8"\u05d0', desc: '\u05e2\u05e8\u05d1 \u05d4\u05ea\u05e8\u05de\u05d4 \u05dc\u05e8\u05d2\u05dc \u05d4\u05d9\u05dc\u05d5\u05dc\u05d0 \u05e9\u05dc \u05d4\u05e8\u05d1 \u05e9\u05dc\u05d9\u05d8"\u05d0 \u05d1\u05de\u05e8\u05db\u05d6 \u05d4\u05e7\u05d4\u05d9\u05dc\u05ea\u05d9. \u05d4\u05ea\u05d5\u05e9\u05d1\u05d9\u05dd \u05de\u05d5\u05d6\u05de\u05e0\u05d9\u05dd!', date: '\u05d8"\u05d5 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05e7\u05d4\u05d9\u05dc\u05d4', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80' },
+  { title: '\u05e7\u05d5 \u05d0\u05d5\u05d8\u05d5\u05d1\u05d5\u05e1 \u05d7\u05d3\u05e9 167 \u2014 \u05d1\u05e2\u05d6\u05d4"\u05e9', desc: '\u05d1\u05e2\u05d6\u05e8\u05ea \u05d4\u05e9\u05dd \u05d9\u05ea\u05d1\u05e8\u05da \u05d9\u05d5\u05e4\u05e2\u05dc \u05e7\u05d5 \u05d9\u05e9\u05d9\u05e8 \u05d7\u05d3\u05e9 \u05dc\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd \u05e2\u05dd \u05ea\u05d3\u05d9\u05e8\u05d5\u05ea \u05de\u05d5\u05d2\u05d1\u05e8\u05ea.', date: '\u05d9"\u05d2 \u05d1\u05e0\u05d9\u05e1\u05df \u05ea\u05e9\u05e4"\u05d5', cat: '\u05e2\u05d3\u05db\u05d5\u05e0\u05d9\u05dd', img: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80' }
 ];
 
 const DEFAULT_EVENTS = [
@@ -2032,18 +2033,19 @@ function shareWA(text) {
 
 // ===== RESIDENT SECTIONS =====
 function showResidentSection(section) {
-  var sections = ['Inquiries','NewInquiry','Payments','Documents','Notifications','Profile'];
+  var sections = ['Inquiries','NewInquiry','Phonebook','Payments','Documents','Notifications','Profile'];
   sections.forEach(function(s) {
     var el = document.getElementById('resident' + s);
     if (el) el.style.display = 'none';
   });
   var map = {
-    'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'payments': 'Payments',
-    'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile'
+    'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'phonebook': 'Phonebook',
+    'payments': 'Payments', 'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile'
   };
   var target = document.getElementById('resident' + map[section]);
   if (target) target.style.display = 'block';
   if (section === 'inquiries') renderInquiries();
+  if (section === 'phonebook') { if (allFamilies.length === 0) loadPhoneDir(); else renderPhoneDir(''); }
   if (section === 'notifications') renderNotifications();
   if (section === 'profile') loadProfile();
 }
@@ -2142,8 +2144,24 @@ function handleCmsImageUpload(input, previewId) {
 }
 
 // ===== SHABBAT TIMES (Hebcal API) =====
+// ===== HEBREW DATE =====
+function getHebrewDate() {
+  // Use Hebcal converter API
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+  return fetch('https://www.hebcal.com/converter?cfg=json&gy=' + y + '&gm=' + m + '&gd=' + d + '&g2h=1')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var hd = data.hebrew || '';
+      // Display Hebrew date in header
+      var el = document.getElementById('hebrewDateDisplay');
+      if (el) el.textContent = hd;
+      return hd;
+    }).catch(function() { return ''; });
+}
+getHebrewDate();
+
 function loadShabbatTimes() {
-  // Hebcal API - geonameid 295530 = area near Ma'ale Amos, m=50 for havdalah
   fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=295530&m=50')
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -2159,7 +2177,6 @@ function loadShabbatTimes() {
           document.getElementById('shabbatEnd').textContent = t2 ? t2.substring(0,5) : '';
         }
         if (item.category === 'parashat') {
-          // Convert English parasha to Hebrew display
           document.getElementById('shabbatParasha').textContent = item.hebrew || item.title;
         }
       }
@@ -2171,6 +2188,24 @@ function loadShabbatTimes() {
     });
 }
 loadShabbatTimes();
+
+// ===== DAILY TORAH =====
+var torahQuotes = [
+  {text: '\u05d5\u05d0\u05d4\u05d1\u05ea \u05dc\u05e8\u05e2\u05da \u05db\u05de\u05d5\u05da', src: '\u05d5\u05d9\u05e7\u05e8\u05d0 \u05d9"\u05d8, \u05d9"\u05d7'},
+  {text: '\u05d1\u05de\u05e7\u05d5\u05dd \u05e9\u05d1\u05e2\u05dc\u05d9 \u05ea\u05e9\u05d5\u05d1\u05d4 \u05e2\u05d5\u05de\u05d3\u05d9\u05dd \u05d0\u05d9\u05df \u05e6\u05d3\u05d9\u05e7\u05d9\u05dd \u05d2\u05de\u05d5\u05e8\u05d9\u05dd \u05d9\u05db\u05d5\u05dc\u05d9\u05dd \u05dc\u05e2\u05de\u05d5\u05d3', src: '\u05d1\u05e8\u05db\u05d5\u05ea \u05dc"\u05d4:'},
+  {text: '\u05d4\u05d5\u05d9 \u05de\u05ea\u05dc\u05de\u05d9\u05d3\u05d9\u05d5 \u05e9\u05dc \u05d0\u05d3\u05dd', src: '\u05d0\u05d1\u05d5\u05ea \u05d3\u05e3 \u05d3:'},
+  {text: '\u05d0\u05dc \u05ea\u05e1\u05ea\u05db\u05dc \u05e2\u05dc \u05d4\u05de\u05e7\u05d5\u05dd \u05e9\u05dc \u05d7\u05d1\u05e8\u05da', src: '\u05d0\u05d1\u05d5\u05ea \u05d3\u05e3 \u05d1:'},
+  {text: '\u05d0\u05d9\u05d6\u05d4\u05d5 \u05d7\u05db\u05dd \u2014 \u05d4\u05dc\u05d5\u05de\u05d3 \u05de\u05db\u05dc \u05d0\u05d3\u05dd', src: '\u05d0\u05d1\u05d5\u05ea \u05d3\u05e3 \u05d3:'},
+  {text: '\u05db\u05dc \u05d9\u05e9\u05e8\u05d0\u05dc \u05e2\u05e8\u05d1\u05d9\u05dd \u05d6\u05d4 \u05dc\u05d6\u05d4', src: '\u05e1\u05e0\u05d4\u05d3\u05e8\u05d9\u05df \u05e7\u05db:'},
+  {text: '\u05d3\u05e2 \u05dc\u05e4\u05e0\u05d9 \u05de\u05d9 \u05d0\u05ea\u05d4 \u05e2\u05d5\u05de\u05d3', src: '\u05d0\u05d1\u05d5\u05ea \u05d3\u05e3 \u05d2:'}
+];
+function renderDailyTorah() {
+  var el = document.getElementById('dailyTorah');
+  if (!el) return;
+  var doy = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  var q = torahQuotes[doy % torahQuotes.length];
+  el.innerHTML = '<i class="bi bi-quote" style="font-size:1.5rem;color:var(--accent);opacity:0.5"></i><p style="font-size:1.1rem;font-weight:600;margin:8px 0 4px;line-height:1.8">"' + q.text + '"</p><p style="font-size:0.85rem;color:var(--text-light);margin:0">(' + q.src + ')</p>';
+}
 
 // ===== PHONE DIRECTORY =====
 var allFamilies = [];
@@ -2212,7 +2247,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== INIT =====
 renderAll();
-loadPhoneDir();
+renderDailyTorah();
 </script>
 </body>
 </html>
