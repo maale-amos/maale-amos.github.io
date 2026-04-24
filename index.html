@@ -1634,9 +1634,16 @@ body.dark .phone-item { background: #16213e; }
           <div class="admin-form-group"><label>אימייל</label><input id="settingEmail" value="info@maaleamos.org.il"></div>
           <div class="admin-form-group"><label>שינוי קוד גישה מנהל</label><input type="password" id="settingNewCode" placeholder="קוד מנהל חדש"></div>
           <div class="admin-form-group"><label>קוד כניסה תושבים (נוכחי: <span id="currentResCode"></span>)</label><input id="settingResCode" placeholder="קוד תושבים חדש"></div>
+          <hr style="margin:16px 0">
+          <h5><i class="bi bi-github"></i> חיבור GitHub (לפרסום גלובלי)</h5>
+          <div class="admin-form-group"><label>GitHub Token</label><input type="password" id="settingGhToken" placeholder="ghp_... (הזינו פעם אחת)" value=""></div>
+          <p style="font-size:0.78rem;color:var(--text-light)">צרו טוקן ב-github.com/settings/tokens עם הרשאת repo. הטוקן נשמר רק אצלכם.</p>
           <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
           <hr style="margin:20px 0">
-          <button class="btn-admin btn-admin-danger" onclick="if(confirm('למחוק את כל הנתונים?')){localStorage.clear();location.reload()}"><i class="bi bi-trash"></i> אפס הכל</button>
+          <button class="btn-admin btn-admin-primary" style="width:100%;background:#28a745;font-size:1.1rem;padding:14px" onclick="publishToGitHub()"><i class="bi bi-cloud-arrow-up"></i> פרסם שינויים לכל המבקרים</button>
+          <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;text-align:center">לחיצה תעדכן את data.json ב-GitHub. כל המבקרים יראו את השינויים.</p>
+          <hr style="margin:20px 0">
+          <button class="btn-admin btn-admin-danger" onclick="if(confirm('למחוק את כל הנתונים המקומיים?')){localStorage.clear();location.reload()}"><i class="bi bi-trash"></i> אפס נתונים מקומיים</button>
         </div>
       </div>
     </div>
@@ -1703,17 +1710,82 @@ const DEFAULT_TICKER = [
   'אושרה תכנית הרחבה — 120 יח"ד חדשות'
 ];
 
-// ===== LOAD DATA =====
-let newsData = getData('news', DEFAULT_NEWS);
-let eventsData = getData('events', DEFAULT_EVENTS);
-let marketData = getData('market', DEFAULT_MARKET);
-let simchotData = getData('simchot', DEFAULT_SIMCHOT);
-let gemachimData = getData('gemachim', DEFAULT_GEMACHIM);
-let tickerData = getData('ticker', DEFAULT_TICKER);
-const ADMIN_CODE_KEY = 'ma_admin_code';
-const DEFAULT_ADMIN_CODE = '1234';
+// ===== LOAD DATA (from data.json first, then localStorage override) =====
+var newsData = DEFAULT_NEWS;
+var eventsData = DEFAULT_EVENTS;
+var marketData = DEFAULT_MARKET;
+var simchotData = DEFAULT_SIMCHOT;
+var gemachimData = DEFAULT_GEMACHIM;
+var tickerData = DEFAULT_TICKER;
+var ADMIN_CODE_KEY = 'ma_admin_code';
+var DEFAULT_ADMIN_CODE = '1234';
+var GH_TOKEN_KEY = 'ma_gh_token';
 
 function getAdminCode() { return localStorage.getItem(ADMIN_CODE_KEY) || DEFAULT_ADMIN_CODE; }
+function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
+
+// Load data.json from GitHub (global data visible to all)
+function loadGlobalData() {
+  fetch('data.json?t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.news && data.news.length) newsData = data.news;
+      if (data.events && data.events.length) eventsData = data.events;
+      if (data.market && data.market.length) marketData = data.market;
+      if (data.simchot && data.simchot.length) simchotData = data.simchot;
+      if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
+      if (data.ticker && data.ticker.length) tickerData = data.ticker;
+      renderAll();
+    })
+    .catch(function() { renderAll(); });
+}
+
+// Publish all data to GitHub (admin only)
+function publishToGitHub() {
+  var token = getGhToken();
+  if (!token) { showToast('הזינו GitHub Token בהגדרות תחילה'); return; }
+  var data = {
+    news: newsData,
+    events: eventsData,
+    market: marketData,
+    simchot: simchotData,
+    gemachim: gemachimData,
+    ticker: tickerData
+  };
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  // First get current file SHA
+  showToast('מפרסם שינויים...');
+  fetch('https://api.github.com/repos/yossi6742853/maale-amos/contents/data.json', {
+    headers: { 'Authorization': 'token ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(fileInfo) {
+    var sha = fileInfo.sha || '';
+    return fetch('https://api.github.com/repos/yossi6742853/maale-amos/contents/data.json', {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update data.json from CMS',
+        content: content,
+        sha: sha
+      })
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(result) {
+    if (result.content) {
+      showToast('פורסם בהצלחה! כל המבקרים יראו את השינויים.');
+    } else {
+      showToast('שגיאה: ' + (result.message || 'לא ידוע'));
+    }
+  })
+  .catch(function(err) {
+    showToast('שגיאה בפרסום: ' + err.message);
+  });
+}
 
 // ===== RENDER =====
 function renderNews() {
@@ -2042,10 +2114,22 @@ function saveSettings() {
     setData('resident_code', resCode);
     RESIDENT_CODE = resCode;
   }
+  var ghToken = document.getElementById('settingGhToken').value;
+  if (ghToken) {
+    localStorage.setItem(GH_TOKEN_KEY, ghToken);
+  }
   var el = document.getElementById('currentResCode');
   if (el) el.textContent = RESIDENT_CODE;
   showToast('הגדרות נשמרו!');
 }
+
+// Load saved token into field on admin open
+var origOpenAdmin = openAdmin;
+openAdmin = function() {
+  origOpenAdmin();
+  var tokenField = document.getElementById('settingGhToken');
+  if (tokenField && getGhToken()) tokenField.value = getGhToken();
+};
 
 function renderAll() { renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); }
 
@@ -2499,7 +2583,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ===== INIT =====
-renderAll();
+loadGlobalData(); // loads from data.json, then renders
 renderDailyTorah();
 </script>
 </body>
