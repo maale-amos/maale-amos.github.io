@@ -8,11 +8,21 @@
 <meta name="theme-color" content="#1a5c3a">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="https://maaleamos.co.il/pictures/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<!-- Google Identity Services -->
+<!-- Google Identity Services - deferred, loaded only when residents area visible -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="מעלה עמוס">
+<meta property="og:title" content="מעלה עמוס - אתר הישוב הקהילתי">
+<meta property="og:description" content="אתר רשמי של הישוב מעלה עמוס - חדשות, אירועים, שירותים וקהילה">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
 <style>
 :root {
   --primary: #1a5c3a;
@@ -790,6 +800,275 @@ body.dark .inquiry-table td { border-color: #333; }
 .img-upload-area input[type=file] { display: none; }
 .img-preview { max-width: 200px; max-height: 120px; border-radius: 8px; margin-top: 8px; }
 
+/* ===== ACTION SHEET (CONTACT/REPORT MENU) ===== */
+.action-sheet-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 2500;
+  align-items: flex-end;
+  justify-content: center;
+}
+.action-sheet-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from {opacity:0} to {opacity:1} }
+.action-sheet {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.25);
+  animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideUp { from {transform:translateY(100%)} to {transform:translateY(0)} }
+body.dark .action-sheet { background: #16213e; color: #e0e0e0; }
+.action-sheet-handle {
+  width: 40px; height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.action-sheet h3 {
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.action-sheet-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  border: 2px solid #e8e8e8;
+  background: #fff;
+  border-radius: 14px;
+  font-family: 'Heebo';
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: right;
+  text-decoration: none;
+  color: var(--text);
+  transition: var(--transition);
+}
+body.dark .action-sheet-btn { background: #1a2744; border-color: #2d3a5e; color: #e0e0e0; }
+.action-sheet-btn:hover, .action-sheet-btn:focus-visible {
+  border-color: var(--primary);
+  background: var(--sky);
+  transform: translateX(-3px);
+  color: var(--primary);
+}
+body.dark .action-sheet-btn:hover { background: #1a3a6a; color: var(--accent-light); }
+.action-sheet-btn .bi {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--sky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.action-sheet-btn.call .bi { background: #e8f5e9; color: #2e7d32; }
+.action-sheet-btn.sms .bi { background: #e3f2fd; color: #1565c0; }
+.action-sheet-btn.whatsapp .bi { background: #d4f1d8; color: #25d366; }
+.action-sheet-btn.email .bi { background: #fff3e0; color: #e65100; }
+.action-sheet-btn.danger .bi { background: #fce4ec; color: #c62828; }
+.action-sheet-btn .label-area { flex: 1; }
+.action-sheet-btn .sub { font-size: 0.78rem; color: var(--text-light); font-weight: 400; }
+.action-sheet-cancel {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 12px;
+  font-family: 'Heebo';
+  font-weight: 600;
+  cursor: pointer;
+}
+body.dark .action-sheet-cancel { background: #0f1c33; color: #e0e0e0; }
+
+/* ===== SEARCH RESULTS ===== */
+.search-results {
+  display: none;
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  z-index: 2000;
+  padding: 16px;
+}
+.search-results.active { display: block; animation: fadeIn 0.2s; }
+body.dark .search-results { background: #16213e; color: #e0e0e0; }
+.search-result-item {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--sky);
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--text);
+  border-right: 3px solid var(--primary);
+  transition: var(--transition);
+}
+body.dark .search-result-item { background: #1a2744; color: #e0e0e0; }
+.search-result-item:hover, .search-result-item:focus-visible {
+  background: var(--primary);
+  color: #fff;
+  transform: translateX(-3px);
+}
+.search-result-item .res-section {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 4px;
+}
+.search-result-item:hover .res-section { color: var(--accent-light); }
+.search-result-item .res-title { font-weight: 700; font-size: 0.95rem; }
+.search-result-item .res-snippet { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+.search-results .no-results {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-light);
+}
+.search-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.search-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+/* ===== ANNOUNCEMENTS (הודעות מהוועד) ===== */
+.announcements-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.announcement-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--card-shadow);
+  border-right: 5px solid var(--primary);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+body.dark .announcement-card { background: #16213e; }
+.announcement-card:hover { box-shadow: var(--card-hover); transform: translateY(-3px); }
+.announcement-card.urgent { border-right-color: var(--danger); background: #fff8f8; }
+body.dark .announcement-card.urgent { background: #2a1818; }
+.announcement-card.event { border-right-color: var(--accent); background: #fffaf0; }
+body.dark .announcement-card.event { background: #2a2418; }
+.announcement-card.info { border-right-color: #1565c0; background: #f0f7ff; }
+body.dark .announcement-card.info { background: #18242a; }
+.announcement-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+.announcement-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.announcement-tag.urgent { background: #fce4ec; color: #c62828; }
+.announcement-tag.event { background: #fff3e0; color: #e65100; }
+.announcement-tag.info { background: #e3f2fd; color: #1565c0; }
+.announcement-tag.update { background: #e8f5e9; color: #2e7d32; }
+.announcement-card h4 {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.announcement-card p {
+  font-size: 0.92rem;
+  color: var(--text-light);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+body.dark .announcement-card p { color: #b0b0c0; }
+.announcement-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.announcement-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Heebo';
+  transition: var(--transition);
+}
+.announcement-btn:hover { background: var(--primary-dark); transform: scale(1.04); }
+.announcement-btn.outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary-light);
+}
+.announcement-btn.outline:hover { background: var(--primary); color: #fff; }
+body.dark .announcement-btn.outline { color: var(--accent-light); border-color: var(--accent); }
+
+/* ===== ENHANCED SECURITY CARDS ===== */
+.security-card .phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 16px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+.security-card .phone-link:hover { background: #a71d2a; transform: scale(1.05); }
+.security-card .phone-link.alt { background: var(--primary); }
+.security-card .phone-link.alt:hover { background: var(--primary-dark); }
+
 /* ===== ENHANCED HERO PARTICLES ===== */
 .hero-particles {
   position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
@@ -837,6 +1116,56 @@ body.dark .faq-a { background: #16213e; border-color: #333; }
   margin: 0;
 }
 
+/* ===== ACCESSIBILITY ===== */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  right: 0;
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 0 0 0 12px;
+  z-index: 9999;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ===== PHONE DIRECTORY ===== */
 .phone-item {
   display: flex; align-items: center; gap: 12px; padding: 12px 16px;
@@ -861,11 +1190,14 @@ body.dark .phone-item { background: #16213e; }
 </head>
 <body>
 
+<!-- ===== SKIP TO CONTENT ===== -->
+<a href="#mainContent" class="skip-link">דלג לתוכן הראשי</a>
+
 <!-- ===== DARK MODE + A11Y ===== -->
-<button class="dark-toggle" onclick="toggleDark()" title="מצב לילה"><i class="bi bi-moon-fill"></i></button>
-<div class="a11y-widget">
-  <button class="a11y-btn" onclick="changeFontSize(1)" title="הגדל טקסט">A+</button>
-  <button class="a11y-btn" onclick="changeFontSize(-1)" title="הקטן טקסט">A-</button>
+<button class="dark-toggle" onclick="toggleDark()" title="מצב לילה" aria-label="החלף מצב לילה/יום"><i class="bi bi-moon-fill" aria-hidden="true"></i></button>
+<div class="a11y-widget" role="group" aria-label="הגדלת טקסט">
+  <button class="a11y-btn" onclick="changeFontSize(1)" title="הגדל טקסט" aria-label="הגדל טקסט">A+</button>
+  <button class="a11y-btn" onclick="changeFontSize(-1)" title="הקטן טקסט" aria-label="הקטן טקסט">A-</button>
 </div>
 
 <!-- ===== NEWS TICKER ===== -->
@@ -883,7 +1215,7 @@ body.dark .phone-item { background: #16213e; }
 <div class="toast-msg" id="toast"></div>
 
 <!-- ===== NAVBAR ===== -->
-<nav class="navbar-main" id="navbar">
+<nav class="navbar-main" id="navbar" role="navigation" aria-label="ניווט ראשי">
   <div class="container">
     <div class="d-flex align-items-center justify-content-between">
       <a href="#" class="navbar-brand-area text-decoration-none">
@@ -895,7 +1227,7 @@ body.dark .phone-item { background: #16213e; }
           <div class="subtitle">תורה · קהילה · ישוב הדעת</div>
         </div>
       </a>
-      <button class="mobile-toggle" onclick="toggleMenu()"><i class="bi bi-list"></i></button>
+      <button class="mobile-toggle" onclick="toggleMenu()" aria-label="פתח/סגור תפריט" aria-expanded="false" aria-controls="navMenu"><i class="bi bi-list" aria-hidden="true"></i></button>
       <ul class="nav-menu" id="navMenu">
         <li>
           <a href="#about">הישוב <i class="bi bi-chevron-down"></i></a>
@@ -924,11 +1256,12 @@ body.dark .phone-item { background: #16213e; }
           </div>
         </li>
         <li>
-          <a href="#news">חדשות <i class="bi bi-chevron-down"></i></a>
+          <a href="#news">חדשות <i class="bi bi-chevron-down" aria-hidden="true"></i></a>
           <div class="dropdown-mega">
-            <a href="#news"><i class="bi bi-newspaper"></i> חדשות</a>
-            <a href="#simchot"><i class="bi bi-emoji-smile"></i> שמחות</a>
-            <a href="#security"><i class="bi bi-exclamation-triangle"></i> חירום</a>
+            <a href="#announcements"><i class="bi bi-megaphone" aria-hidden="true"></i> הודעות מהוועד</a>
+            <a href="#news"><i class="bi bi-newspaper" aria-hidden="true"></i> חדשות</a>
+            <a href="#simchot"><i class="bi bi-emoji-smile" aria-hidden="true"></i> שמחות</a>
+            <a href="#security"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> חירום</a>
           </div>
         </li>
         <li><a href="#contact">פנייה מקוונת</a></li>
@@ -949,8 +1282,11 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </nav>
 
+<!-- ===== MAIN CONTENT ===== -->
+<main id="mainContent">
+
 <!-- ===== HERO ===== -->
-<section class="hero" id="home">
+<section class="hero" id="home" aria-label="ברוכים הבאים למעלה עמוס">
   <div class="hero-slides">
     <div class="hero-slide active" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/1280px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg')"></div>
     <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/5/5c/Ma%27ale_Amos.jpg')"></div>
@@ -959,7 +1295,7 @@ body.dark .phone-item { background: #16213e; }
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
   <div class="hero-content">
-    <svg width="120" height="120" viewBox="0 0 200 200" style="margin-bottom:18px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.4))">
+    <svg width="120" height="120" viewBox="0 0 200 200" style="margin-bottom:18px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.4))" role="img" aria-label="לוגו מעלה עמוס">
       <defs>
         <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
@@ -971,62 +1307,94 @@ body.dark .phone-item { background: #16213e; }
         </linearGradient>
       </defs>
       <circle cx="100" cy="100" r="95" fill="url(#circleGrad)" stroke="#fff" stroke-width="3"/>
-      <!-- Mountains -->
       <path d="M 30,140 L 70,80 L 100,110 L 140,60 L 170,140 Z" fill="url(#mountainGrad)" opacity="0.95"/>
-      <!-- Sun -->
       <circle cx="140" cy="60" r="15" fill="#fff7d6" opacity="0.9"/>
-      <!-- Star of David -->
       <g transform="translate(100,160)">
         <path d="M 0,-12 L 10.4,6 L -10.4,6 Z" fill="#fff" opacity="0.95"/>
         <path d="M 0,12 L -10.4,-6 L 10.4,-6 Z" fill="#fff" opacity="0.95"/>
       </g>
-      <!-- Outer text border -->
       <text x="100" y="36" text-anchor="middle" fill="#fff" font-family="Frank Ruhl Libre,serif" font-size="14" font-weight="700">מעלה עמוס</text>
     </svg>
-    <h1 style="font-family:'Frank Ruhl Libre',serif;font-size:4rem;font-weight:900;letter-spacing:3px;text-shadow:3px 3px 12px rgba(0,0,0,0.6);background:linear-gradient(135deg,#fff,#fff7d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">✦ מעלה עמוס ✦</h1>
+    <h1 style="font-family:'Frank Ruhl Libre',serif;font-size:4rem;font-weight:900;letter-spacing:3px;text-shadow:3px 3px 12px rgba(0,0,0,0.6);background:linear-gradient(135deg,#fff,#fff7d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">מעלה עמוס</h1>
     <p class="tagline" style="font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;letter-spacing:6px;color:#fff7d6;text-shadow:2px 2px 8px rgba(0,0,0,0.6);margin-top:8px">בס"ד · תורה · קהילה · ישוב הדעת</p>
-    <div class="hero-search">
-      <i class="bi bi-search"></i>
-      <input type="text" placeholder="🔍 חיפוש באתר... (חדשות, עסקים, גמ״חים, אירועים)" id="siteSearch" oninput="searchSite(this.value)">
+    <div class="hero-search" role="search">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input type="search" placeholder="חיפוש באתר... (חדשות, אירועים, גמחים, עסקים)" id="siteSearch" oninput="searchSite(this.value)" onfocus="if(this.value)searchSite(this.value)" aria-label="חיפוש באתר">
     </div>
-    <div class="hero-quick-links">
-      <a href="#contact"><i class="bi bi-envelope"></i> פנייה מקוונת</a>
-      <a href="#events"><i class="bi bi-calendar3"></i> לוח אירועים</a>
-      <a href="#security"><i class="bi bi-shield-check"></i> ביטחון</a>
-      <a href="#marketplace"><i class="bi bi-shop"></i> עסקים מקומיים</a>
+    <div class="hero-quick-links" role="navigation" aria-label="קישורים מהירים">
+      <a href="#announcements" aria-label="הודעות מהוועד"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות מהוועד</a>
+      <a href="#contact" aria-label="פנייה מקוונת"><i class="bi bi-envelope" aria-hidden="true"></i> פנייה מקוונת</a>
+      <a href="#events" aria-label="לוח אירועים"><i class="bi bi-calendar3" aria-hidden="true"></i> לוח אירועים</a>
+      <a href="#security" aria-label="ביטחון"><i class="bi bi-shield-check" aria-hidden="true"></i> ביטחון</a>
+      <a href="#marketplace" aria-label="עסקים מקומיים"><i class="bi bi-shop" aria-hidden="true"></i> עסקים מקומיים</a>
     </div>
   </div>
   <div class="scroll-down"><i class="bi bi-chevron-double-down"></i></div>
 </section>
 
 <!-- ===== FLOATING WIDGETS ===== -->
-<div class="floating-widgets">
-  <button class="float-btn emergency" onclick="window.open('tel:106')">
-    <i class="bi bi-telephone-fill"></i>
-    <span class="tooltip-text">מוקד 106</span>
+<div class="floating-widgets" role="group" aria-label="פעולות מהירות">
+  <button class="float-btn emergency" onclick="quickCall106()" aria-label="חייג למוקד חירום 106">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    <span class="tooltip-text">מוקד 106 — חייג</span>
   </button>
-  <button class="float-btn report" onclick="document.getElementById('security').scrollIntoView({behavior:'smooth'})">
-    <i class="bi bi-exclamation-triangle-fill"></i>
+  <button class="float-btn report" onclick="openReportMenu()" aria-label="דיווח מפגע ביטחוני">
+    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
     <span class="tooltip-text">דיווח מפגע ביטחוני</span>
   </button>
-  <button class="float-btn phone" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
-    <i class="bi bi-chat-dots-fill"></i>
-    <span class="tooltip-text">צור קשר</span>
+  <button class="float-btn phone" onclick="openContactMenu()" aria-label="פתח אפשרויות קשר">
+    <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+    <span class="tooltip-text">צור קשר — שיחה / SMS / וואטסאפ</span>
   </button>
-  <button class="float-btn admin-btn" onclick="openAdmin()">
-    <i class="bi bi-gear-fill"></i>
+  <button class="float-btn admin-btn" onclick="openAdmin()" aria-label="פתח לוח ניהול">
+    <i class="bi bi-gear-fill" aria-hidden="true"></i>
     <span class="tooltip-text">ניהול האתר</span>
   </button>
 </div>
 
-<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  <i class="bi bi-arrow-up"></i>
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="חזרה לראש העמוד">
+  <i class="bi bi-arrow-up" aria-hidden="true"></i>
 </button>
+
+<!-- ===== ACTION SHEETS ===== -->
+<div class="action-sheet-overlay" id="actionSheetOverlay" onclick="if(event.target===this)closeActionSheet()" role="dialog" aria-modal="true" aria-label="תפריט פעולות">
+  <div class="action-sheet" id="actionSheetContent">
+    <div class="action-sheet-handle"></div>
+    <div id="actionSheetBody"></div>
+    <button class="action-sheet-cancel" onclick="closeActionSheet()">ביטול</button>
+  </div>
+</div>
+
+<!-- ===== SEARCH RESULTS ===== -->
+<div class="search-results" id="searchResults" role="region" aria-label="תוצאות חיפוש">
+  <div class="search-results-header">
+    <strong><i class="bi bi-search" aria-hidden="true"></i> תוצאות חיפוש</strong>
+    <button class="search-close-btn" onclick="closeSearch()" aria-label="סגור חיפוש"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+  <div id="searchResultsBody"></div>
+</div>
 
 <!-- ===== DAILY TORAH ===== -->
 <section style="padding:24px 0;background:linear-gradient(135deg,#f5f0e6,#fff8e1);border-bottom:1px solid #e0d5b8">
   <div class="container">
     <div id="dailyTorah" style="text-align:center;max-width:600px;margin:0 auto"></div>
+  </div>
+</section>
+
+<!-- ===== ANNOUNCEMENTS — הודעות מהוועד ===== -->
+<section class="section" id="announcements" aria-labelledby="announcementsTitle">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2 id="announcementsTitle"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות מהוועד</h2>
+      <div class="section-line"></div>
+      <p>עדכונים חשובים, החלטות והכרזות רשמיות מועד הישוב</p>
+    </div>
+    <div class="announcements-list fade-up" id="announcementsList"></div>
+    <div class="text-center mt-4 fade-up">
+      <button class="tab-btn" onclick="showToast('ארכיון הודעות מהוועד יתווסף בעז\'\'ה')" aria-label="הצג הודעות נוספות מהארכיון">
+        <i class="bi bi-archive" aria-hidden="true"></i> ארכיון הודעות
+      </button>
+    </div>
   </div>
 </section>
 
@@ -1068,7 +1436,7 @@ body.dark .phone-item { background: #16213e; }
       </div>
     </div>
     <div class="map-container fade-up">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3367!2d35.2296!3d31.5964!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1502e61e7ec8c36b%3A0x5bdc0d5c8c1e7f10!2z157Xotec15Qg16LXnteV16E!5e0!3m2!1siw!2sil!4v1" allowfullscreen loading="lazy"></iframe>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3367!2d35.2296!3d31.5964!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1502e61e7ec8c36b%3A0x5bdc0d5c8c1e7f10!2z157Xotec15Qg16LXnteV16E!5e0!3m2!1siw!2sil!4v1" allowfullscreen loading="lazy" title="מפת מעלה עמוס" aria-label="מפת המיקום של מעלה עמוס"></iframe>
     </div>
   </div>
 </section>
@@ -1082,17 +1450,17 @@ body.dark .phone-item { background: #16213e; }
       <p>תמונות מהישוב והסביבה</p>
     </div>
     <div class="gallery-grid fade-up">
-      <div class="gallery-item"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/640px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg" alt="מעלה עמוס מהאוויר"><div class="gallery-caption">מעלה עמוס - מבט מהאוויר</div></div>
-      <div class="gallery-item"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ma%27ale_Amos.jpg/640px-Ma%27ale_Amos.jpg" alt="מעלה עמוס"><div class="gallery-caption">מעלה עמוס</div></div>
-      <div class="gallery-item"><img src="images/kolel_1.jpg" alt="כולל אברכים"><div class="gallery-caption">כולל שבות עמי</div></div>
-      <div class="gallery-item"><img src="images/talmud_1.jpg" alt="תלמוד תורה"><div class="gallery-caption">תלמוד תורה</div></div>
-      <div class="gallery-item"><img src="images/charity_1.jpg" alt="ארגון חסד"><div class="gallery-caption">ארגון החסד - קמחא דפסחא</div></div>
-      <div class="gallery-item"><img src="images/zimmer_maale_amos.jpg" alt="צימר מעלה עמוס"><div class="gallery-caption">צימר במעלה עמוס</div></div>
-      <div class="gallery-item"><img src="images/ptihat_kayitz.png" alt="פתיחת קיץ"><div class="gallery-caption">הפנינג פתיחת קיץ</div></div>
-      <div class="gallery-item"><img src="images/toshvei_maale_amos.jpg" alt="תושבי מעלה עמוס"><div class="gallery-caption">ארגון החסד - תושבי מעלה עמוס</div></div>
-      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/kolel/2.jpg" alt="כולל שבות עמי" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">לימוד תורה בכולל</div></div>
-      <div class="gallery-item"><img src="https://maaleamos.co.il/pictures/charity/2.jpg" alt="חסד" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">חלוקת מזון לנזקקים</div></div>
-      <div class="gallery-item"><img src="images/zimmer_maale_amos_2.jpg" alt="צימר"><div class="gallery-caption">צימר - מרפסת עם נוף</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/640px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg" alt="מעלה עמוס מבט מהאוויר"><div class="gallery-caption">מעלה עמוס - מבט מהאוויר</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Ma%27ale_Amos.jpg/640px-Ma%27ale_Amos.jpg" alt="מעלה עמוס"><div class="gallery-caption">מעלה עמוס</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/kolel_1.jpg" alt="כולל אברכים שבות עמי"><div class="gallery-caption">כולל שבות עמי</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/talmud_1.jpg" alt="תלמוד תורה במעלה עמוס"><div class="gallery-caption">תלמוד תורה</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/charity_1.jpg" alt="ארגון חסד קמחא דפסחא"><div class="gallery-caption">ארגון החסד - קמחא דפסחא</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/zimmer_maale_amos.jpg" alt="צימר אירוח במעלה עמוס"><div class="gallery-caption">צימר במעלה עמוס</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/ptihat_kayitz.png" alt="הפנינג פתיחת קיץ"><div class="gallery-caption">הפנינג פתיחת קיץ</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/toshvei_maale_amos.jpg" alt="תושבי מעלה עמוס בארגון חסד"><div class="gallery-caption">ארגון החסד - תושבי מעלה עמוס</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/kolel/2.jpg" alt="לימוד תורה בכולל" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">לימוד תורה בכולל</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/charity/2.jpg" alt="חלוקת מזון לנזקקים" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">חלוקת מזון לנזקקים</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="images/zimmer_maale_amos_2.jpg" alt="צימר עם מרפסת ונוף"><div class="gallery-caption">צימר - מרפסת עם נוף</div></div>
     </div>
   </div>
 </section>
@@ -1315,19 +1683,54 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== COMMUNITY ===== -->
-<section class="section" id="community">
+<section class="section" id="community" aria-labelledby="communityTitle">
   <div class="container">
     <div class="section-header fade-up">
-      <h2><i class="bi bi-people"></i> חיי קהילה</h2>
+      <h2 id="communityTitle"><i class="bi bi-people" aria-hidden="true"></i> חיי קהילה</h2>
       <div class="section-line"></div>
+      <p>ועדים, ארגונים, שירותים קהילתיים ומסגרות חברתיות</p>
     </div>
     <div class="services-grid fade-up">
-      <div class="service-card"><div class="icon icon-gold"><i class="bi bi-stars"></i></div><h4>שמחות</h4><p>מזל טוב ואירועים</p></div>
-      <div class="service-card"><div class="icon icon-green"><i class="bi bi-people-fill"></i></div><h4>ועד מקומי</h4><p>ניהול ענייני הישוב</p></div>
-      <div class="service-card"><div class="icon icon-blue"><i class="bi bi-heart"></i></div><h4>ארגון החסד</h4><p>קמחא דפסחא ותמיכה</p></div>
-      <div class="service-card"><div class="icon icon-purple"><i class="bi bi-envelope-paper"></i></div><h4>קהילתון</h4><p>עיתון הישוב</p></div>
-      <div class="service-card"><div class="icon icon-orange"><i class="bi bi-chat-dots"></i></div><h4>ישר ולעניין</h4><p>קבוצת הודעות קהילתית</p></div>
-      <div class="service-card"><div class="icon icon-teal"><i class="bi bi-tree"></i></div><h4>אטרקציות</h4><p>הרודיון, מערת חריטון, עין עמוס</p></div>
+      <a href="#simchot" class="service-card" aria-label="עבור ללוח שמחות">
+        <div class="icon icon-gold"><i class="bi bi-stars" aria-hidden="true"></i></div>
+        <h4>לוח שמחות</h4>
+        <p>מזל טוב לבעלי השמחה</p>
+      </a>
+      <a href="#leadership" class="service-card" aria-label="ועד מקומי">
+        <div class="icon icon-green"><i class="bi bi-people-fill" aria-hidden="true"></i></div>
+        <h4>ועד מקומי</h4>
+        <p>ניהול ענייני הישוב</p>
+      </a>
+      <a href="https://maaleamos.co.il" target="_blank" rel="noopener" class="service-card" aria-label="עבור לאתר ארגון החסד">
+        <div class="icon icon-blue"><i class="bi bi-heart" aria-hidden="true"></i></div>
+        <h4>ארגון החסד</h4>
+        <p>קמחא דפסחא, חלוקת מזון</p>
+      </a>
+      <a href="mailto:maaleiton@gmail.com" class="service-card" aria-label="שלח אימייל לקהילתון">
+        <div class="icon icon-purple"><i class="bi bi-envelope-paper" aria-hidden="true"></i></div>
+        <h4>קהילתון</h4>
+        <p>עיתון הקהילה</p>
+      </a>
+      <a href="#gemachim" class="service-card" aria-label="עבור לגמחים">
+        <div class="icon icon-orange"><i class="bi bi-chat-dots" aria-hidden="true"></i></div>
+        <h4>גמ"חים</h4>
+        <p>רשת חסד קהילתית</p>
+      </a>
+      <a href="#attractions" class="service-card" aria-label="עבור לאטרקציות">
+        <div class="icon icon-teal"><i class="bi bi-tree" aria-hidden="true"></i></div>
+        <h4>אטרקציות</h4>
+        <p>הרודיון, חריטון, עין עמוס</p>
+      </a>
+      <a href="#shuls" class="service-card" aria-label="עבור לבתי כנסת">
+        <div class="icon icon-pink"><i class="bi bi-book" aria-hidden="true"></i></div>
+        <h4>בתי כנסת</h4>
+        <p>זמני תפילות ומניינים</p>
+      </a>
+      <a href="#education" class="service-card" aria-label="עבור למוסדות חינוך">
+        <div class="icon icon-red"><i class="bi bi-mortarboard" aria-hidden="true"></i></div>
+        <h4>חינוך</h4>
+        <p>ת"תים, גני ילדים, כולל</p>
+      </a>
     </div>
   </div>
 </section>
@@ -1357,10 +1760,54 @@ body.dark .phone-item { background: #16213e; }
       </div>
     </div>
     <div class="security-cards fade-up">
-      <div class="security-card"><i class="bi bi-telephone-outbound"></i><h4>קו חירום</h4><p>מוקד 106 — 24/7</p></div>
-      <div class="security-card"><i class="bi bi-person-badge"></i><h4>רכז ביטחון</h4><p>פניות בנושאי ביטחון שוטף</p></div>
-      <div class="security-card"><i class="bi bi-exclamation-diamond"></i><h4>דיווח מפגע</h4><p>דווחו מיד על חשד</p></div>
-      <div class="security-card"><i class="bi bi-file-earmark-text"></i><h4>הנחיות חירום</h4><p>מקלטים ונקודות כינוס</p></div>
+      <div class="security-card">
+        <i class="bi bi-telephone-outbound" aria-hidden="true"></i>
+        <h4>קו חירום</h4>
+        <p>מוקד מועצה אזורית — 24/7</p>
+        <a class="phone-link" href="tel:106" aria-label="חייג למוקד 106"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 106</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-person-badge" aria-hidden="true"></i>
+        <h4>רכז ביטחון</h4>
+        <p>פניות בנושאי ביטחון שוטף וכוננות</p>
+        <a class="phone-link alt" href="tel:0299317670" aria-label="חייג לרכז ביטחון"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 02-9931767</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-exclamation-diamond" aria-hidden="true"></i>
+        <h4>דיווח מפגע</h4>
+        <p>דיווח מיידי על חשד וסכנות</p>
+        <button class="phone-link" onclick="openReportMenu()" style="border:none;cursor:pointer" aria-label="פתח אפשרויות דיווח"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> דווח עכשיו</button>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+        <h4>הנחיות חירום</h4>
+        <p>מקלטים ונקודות כינוס</p>
+        <a class="phone-link alt" href="#emergency" aria-label="עבור למידע מקלטים"><i class="bi bi-info-circle-fill" aria-hidden="true"></i> מידע מלא</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+        <h4>משטרה</h4>
+        <p>חירום ארצי</p>
+        <a class="phone-link" href="tel:100" aria-label="חייג למשטרה 100"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 100</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-heart-pulse" aria-hidden="true"></i>
+        <h4>מד"א</h4>
+        <p>חירום רפואי</p>
+        <a class="phone-link" href="tel:101" aria-label="חייג למדא 101"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 101</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-fire" aria-hidden="true"></i>
+        <h4>כבאות</h4>
+        <p>שריפה / חילוץ</p>
+        <a class="phone-link" href="tel:102" aria-label="חייג לכבאות 102"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 102</a>
+      </div>
+      <div class="security-card">
+        <i class="bi bi-broadcast" aria-hidden="true"></i>
+        <h4>פיקוד העורף</h4>
+        <p>הנחיות בזמן אזעקה</p>
+        <a class="phone-link alt" href="tel:104" aria-label="חייג לפיקוד העורף 104"><i class="bi bi-telephone-fill" aria-hidden="true"></i> 104</a>
+      </div>
     </div>
   </div>
 </section>
@@ -1794,8 +2241,11 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
+</main>
+<!-- ===== /MAIN ===== -->
+
 <!-- ===== FOOTER ===== -->
-<footer class="footer">
+<footer class="footer" role="contentinfo">
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4">
@@ -2055,6 +2505,71 @@ const DEFAULT_TICKER = [
   'אושרה תכנית הרחבה — 120 יח"ד חדשות'
 ];
 
+const DEFAULT_ANNOUNCEMENTS = [
+  {
+    type: 'urgent',
+    typeLabel: 'דחוף',
+    title: 'תרגיל חירום ביישוב — יום שלישי',
+    body: 'בתיאום עם פיקוד העורף יתקיים תרגיל חירום בישוב ביום שלישי בשעה 10:00. נא להישמע להוראות ולהיכנס למרחב מוגן.',
+    date: 'כ"ז בניסן תשפ"ו',
+    icon: 'bi-exclamation-octagon-fill',
+    cta: 'הנחיות חירום',
+    ctaLink: '#emergency'
+  },
+  {
+    type: 'event',
+    typeLabel: 'אירוע',
+    title: 'אסיפת תושבים שנתית — בעז"ה',
+    body: 'מוזמנים לאסיפת התושבים השנתית בה יוצגו דוחות הוועד, הצבעות ותכניות לשנה הבאה. בית הכנסת המרכזי, יום ראשון בשעה 20:30.',
+    date: 'כ"ה בניסן תשפ"ו',
+    icon: 'bi-calendar2-event',
+    cta: 'הוסף ליומן',
+    ctaLink: '#events'
+  },
+  {
+    type: 'info',
+    typeLabel: 'מידע',
+    title: 'תקנון ועדת תכנון — עדכון',
+    body: 'עודכן תקנון ועדת תכנון ובניה. ניתן לעיין בתקנון המלא במשרדי הוועד או באתר. תוקף החל מתחילת חודש אייר.',
+    date: 'כ"ב בניסן תשפ"ו',
+    icon: 'bi-file-earmark-text-fill',
+    cta: 'צור קשר',
+    ctaLink: '#contact'
+  },
+  {
+    type: 'update',
+    typeLabel: 'עדכון',
+    title: 'שיפוץ כביש הכניסה — סיום',
+    body: 'בשעה טובה הסתיימו עבודות שיפוץ כביש הכניסה לישוב. תודה לתושבים על הסבלנות במהלך העבודות.',
+    date: 'כ\' בניסן תשפ"ו',
+    icon: 'bi-check-circle-fill',
+    cta: '',
+    ctaLink: ''
+  },
+  {
+    type: 'event',
+    typeLabel: 'אירוע',
+    title: 'מסיבת ל"ג בעומר קהילתית',
+    body: 'מסיבת ל"ג בעומר ומדורה קהילתית במגרש המרכזי. הרבה ילדים, גרעינים, שירה ושמחה לכל המשפחה. בעז"ה ב-10 במאי בשעה 19:00.',
+    date: 'י"ח בניסן תשפ"ו',
+    icon: 'bi-fire',
+    cta: 'פרטים',
+    ctaLink: '#events'
+  },
+  {
+    type: 'info',
+    typeLabel: 'מידע',
+    title: 'גביית ועד שכונתי — רבעון 2',
+    body: 'תזכורת: תשלום ועד שכונתי לרבעון השני יבוצע עד סוף החודש. ניתן לשלם באתר באזור התושבים או ישירות במשרד הוועד.',
+    date: 'ט"ו בניסן תשפ"ו',
+    icon: 'bi-credit-card-fill',
+    cta: 'תשלום מקוון',
+    ctaLink: '#residents'
+  }
+];
+
+var announcementsData = DEFAULT_ANNOUNCEMENTS;
+
 // ===== LOAD DATA (from data.json first, then localStorage override) =====
 var newsData = DEFAULT_NEWS;
 var eventsData = DEFAULT_EVENTS;
@@ -2080,6 +2595,7 @@ function loadGlobalData() {
       if (data.simchot && data.simchot.length) simchotData = data.simchot;
       if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
       if (data.ticker && data.ticker.length) tickerData = data.ticker;
+      if (data.announcements && data.announcements.length) announcementsData = data.announcements;
       renderAll();
     })
     .catch(function() { renderAll(); });
@@ -2095,7 +2611,8 @@ function publishToGitHub() {
     market: marketData,
     simchot: simchotData,
     gemachim: gemachimData,
-    ticker: tickerData
+    ticker: tickerData,
+    announcements: announcementsData
   };
   var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
   // First get current file SHA
@@ -2163,7 +2680,11 @@ function renderSimchot() {
 
 function renderGemachim() {
   document.getElementById('gemachGrid').innerHTML = gemachimData.map(function(g) {
-    return '<div class="gemach-card"><i class="bi ' + g.icon + '"></i><h4>' + g.name + '</h4><p>' + g.desc + '</p><div class="phone"><i class="bi bi-telephone"></i> ' + g.phone + '</div></div>';
+    var phoneClean = (g.phone || '').replace(/[^\d]/g, '');
+    var phoneHtml = phoneClean
+      ? '<a href="tel:' + phoneClean + '" class="phone" style="text-decoration:none" aria-label="חייג ל' + g.name + ' - ' + g.phone + '"><i class="bi bi-telephone" aria-hidden="true"></i> ' + g.phone + '</a>'
+      : '';
+    return '<div class="gemach-card"><i class="bi ' + g.icon + '" aria-hidden="true"></i><h4>' + g.name + '</h4><p>' + g.desc + '</p>' + phoneHtml + '</div>';
   }).join('');
 }
 
@@ -2173,8 +2694,42 @@ function renderTicker() {
   }).join('');
 }
 
+function renderAnnouncements() {
+  var el = document.getElementById('announcementsList');
+  if (!el) return;
+  el.innerHTML = announcementsData.map(function(a) {
+    var ctaHtml = '';
+    if (a.cta && a.ctaLink) {
+      var isExternal = a.ctaLink.indexOf('http') === 0 || a.ctaLink.indexOf('tel:') === 0 || a.ctaLink.indexOf('mailto:') === 0;
+      ctaHtml = '<a class="announcement-btn" href="' + a.ctaLink + '"' + (isExternal ? ' target="_blank" rel="noopener"' : '') + ' aria-label="' + a.cta + ' - ' + a.title + '"><i class="bi bi-arrow-left" aria-hidden="true"></i> ' + a.cta + '</a>';
+    }
+    var shareHtml = '<button class="announcement-btn outline" onclick="shareAnnouncement(\'' + encodeURIComponent(a.title) + '\',\'' + encodeURIComponent(a.body) + '\')" aria-label="שתף ' + a.title + ' בוואטסאפ"><i class="bi bi-whatsapp" aria-hidden="true"></i> שתף</button>';
+    return '<article class="announcement-card ' + (a.type || 'info') + '" tabindex="0">' +
+      '<div class="announcement-meta">' +
+        '<span class="announcement-tag ' + (a.type || 'info') + '"><i class="bi ' + (a.icon || 'bi-megaphone') + '" aria-hidden="true"></i> ' + (a.typeLabel || 'הודעה') + '</span>' +
+        '<span><i class="bi bi-calendar3" aria-hidden="true"></i> ' + (a.date || '') + '</span>' +
+      '</div>' +
+      '<h4>' + a.title + '</h4>' +
+      '<p>' + a.body + '</p>' +
+      '<div class="announcement-actions">' + ctaHtml + shareHtml + '</div>' +
+    '</article>';
+  }).join('');
+}
+
+function shareAnnouncement(title, body) {
+  var t = decodeURIComponent(title);
+  var b = decodeURIComponent(body);
+  var msg = '*' + t + '*%0A%0A' + encodeURIComponent(b) + '%0A%0A' + encodeURIComponent('פרטים נוספים: ' + location.href);
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
 // ===== INTERACTIONS =====
-function toggleMenu() { document.getElementById('navMenu').classList.toggle('open'); }
+function toggleMenu() {
+  var menu = document.getElementById('navMenu');
+  menu.classList.toggle('open');
+  var btn = document.querySelector('.mobile-toggle');
+  if (btn) btn.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
+}
 document.querySelectorAll('.nav-menu > li > a').forEach(function(a) {
   a.addEventListener('click', function(e) {
     if (window.innerWidth <= 991 && this.parentElement.querySelector('.dropdown-mega')) {
@@ -2477,61 +3032,198 @@ openAdmin = function() {
 };
 
 function renderAll() {
-  renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker();
+  renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); renderAnnouncements();
   if (typeof observeFadeUp === 'function') setTimeout(observeFadeUp, 100);
+  // Rebuild search index after dynamic content
+  setTimeout(buildSearchIndex, 200);
 }
 
 // ===== SEARCH =====
-function searchSite(q) {
-  var sections = document.querySelectorAll('.section');
-  if (!q || q.length < 2) {
-    sections.forEach(function(s) { s.style.display = ''; });
-    document.getElementById('searchResults') && (document.getElementById('searchResults').style.display = 'none');
-    return;
-  }
-  q = q.toLowerCase();
+var SEARCH_INDEX = [];
+var searchDebounceTimer;
 
-  // Build search index from all data sources
-  var results = [];
-  function addIfMatch(item, type, sectionId) {
-    var text = ((item.title||'') + ' ' + (item.desc||'') + ' ' + (item.cat||'') + ' ' + (item.name||'')).toLowerCase();
-    if (text.includes(q)) results.push({...item, _type: type, _section: sectionId});
-  }
-  (newsData||[]).forEach(function(n,i) { addIfMatch({...n, _idx: i}, 'חדשות', 'news'); });
-  (eventsData||[]).forEach(function(e) { addIfMatch(e, 'אירועים', 'events'); });
-  (marketData||[]).forEach(function(m) { addIfMatch(m, 'עסקים', 'marketplace'); });
-  (gemachimData||[]).forEach(function(g) { addIfMatch(g, 'גמ"חים', 'gemachim'); });
-  (simchotData||[]).forEach(function(s) { addIfMatch(s, 'שמחות', 'simchot'); });
-
-  // Show search results overlay
-  var sr = document.getElementById('searchResults');
-  if (!sr) {
-    sr = document.createElement('div');
-    sr.id = 'searchResults';
-    sr.style.cssText = 'position:fixed;top:80px;right:50%;transform:translateX(50%);width:90%;max-width:600px;max-height:60vh;overflow-y:auto;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.2);padding:16px;z-index:200;direction:rtl';
-    document.body.appendChild(sr);
-  }
-  sr.style.display = 'block';
-  if (!results.length) {
-    sr.innerHTML = '<p style="text-align:center;padding:20px;color:#888">לא נמצאו תוצאות עבור "' + q + '"</p>';
-  } else {
-    sr.innerHTML = '<h4 style="margin-bottom:12px">' + results.length + ' תוצאות עבור "' + q + '"</h4>' +
-      results.slice(0, 30).map(function(r) {
-        return '<div style="padding:10px;border-bottom:1px solid #eee;cursor:pointer" onclick="document.getElementById(\'' + r._section + '\').scrollIntoView({behavior:\'smooth\'});document.getElementById(\'searchResults\').style.display=\'none\';document.getElementById(\'siteSearch\').value=\'\'">' +
-          '<span style="background:var(--primary);color:white;padding:2px 8px;border-radius:8px;font-size:11px;margin-left:6px">' + r._type + '</span>' +
-          '<b>' + (r.title || r.name || '') + '</b>' +
-          (r.desc ? '<div style="font-size:13px;color:#666;margin-top:4px">' + r.desc.substring(0,120) + '</div>' : '') +
-        '</div>';
-      }).join('');
-  }
+function buildSearchIndex() {
+  SEARCH_INDEX = [];
+  // Index all sections with id and h2 title
+  document.querySelectorAll('section[id]').forEach(function(sec) {
+    var id = sec.id;
+    var titleEl = sec.querySelector('h2, h3');
+    var title = titleEl ? titleEl.textContent.trim() : id;
+    // Each section indexed
+    SEARCH_INDEX.push({
+      type: 'section',
+      section: title,
+      title: title,
+      snippet: (sec.querySelector('.section-header p') || {}).textContent || '',
+      anchor: '#' + id
+    });
+    // Index sub-cards (h3, h4 titles) inside this section
+    sec.querySelectorAll('h3, h4').forEach(function(h) {
+      var t = h.textContent.trim();
+      if (!t || t === title) return;
+      var p = h.parentElement;
+      var snippet = (p.querySelector('p') || {}).textContent || '';
+      SEARCH_INDEX.push({
+        type: 'item',
+        section: title,
+        title: t,
+        snippet: snippet.substring(0, 100),
+        anchor: '#' + id
+      });
+    });
+  });
+  // Index dynamic data
+  newsData.forEach(function(n) {
+    SEARCH_INDEX.push({type:'news', section:'חדשות', title:n.title, snippet:n.desc||'', anchor:'#news'});
+  });
+  eventsData.forEach(function(e) {
+    SEARCH_INDEX.push({type:'event', section:'אירועים', title:e.title, snippet:(e.desc||'') + ' | ' + (e.location||''), anchor:'#events'});
+  });
+  marketData.forEach(function(m) {
+    SEARCH_INDEX.push({type:'market', section:'עסקים', title:m.title, snippet:(m.desc||'') + ' | ' + (m.price||''), anchor:'#marketplace'});
+  });
+  gemachimData.forEach(function(g) {
+    SEARCH_INDEX.push({type:'gemach', section:'גמ"חים', title:g.name, snippet:(g.desc||'') + ' ' + (g.phone||''), anchor:'#gemachim'});
+  });
+  simchotData.forEach(function(s) {
+    SEARCH_INDEX.push({type:'simcha', section:'שמחות', title:s.family, snippet:s.details||'', anchor:'#simchot'});
+  });
+  announcementsData.forEach(function(a) {
+    SEARCH_INDEX.push({type:'announcement', section:'הודעות מהוועד', title:a.title, snippet:a.body||'', anchor:'#announcements'});
+  });
 }
 
+function searchSite(q) {
+  clearTimeout(searchDebounceTimer);
+  if (!q || q.length < 2) {
+    closeSearch();
+    return;
+  }
+  searchDebounceTimer = setTimeout(function() {
+    if (SEARCH_INDEX.length === 0) buildSearchIndex();
+    var ql = q.toLowerCase().trim();
+    var results = SEARCH_INDEX.filter(function(item) {
+      return (item.title && item.title.toLowerCase().includes(ql)) ||
+             (item.snippet && item.snippet.toLowerCase().includes(ql)) ||
+             (item.section && item.section.toLowerCase().includes(ql));
+    });
+    // Sort: title match first, then snippet
+    results.sort(function(a,b) {
+      var at = a.title.toLowerCase().includes(ql) ? 0 : 1;
+      var bt = b.title.toLowerCase().includes(ql) ? 0 : 1;
+      return at - bt;
+    });
+    renderSearchResults(results, q);
+  }, 200);
+}
+
+function highlightMatch(text, q) {
+  if (!text) return '';
+  var ql = q.toLowerCase();
+  var lower = text.toLowerCase();
+  var idx = lower.indexOf(ql);
+  if (idx === -1) return text.substring(0, 100);
+  var start = Math.max(0, idx - 20);
+  var end = Math.min(text.length, idx + ql.length + 60);
+  var snippet = (start > 0 ? '...' : '') + text.substring(start, end) + (end < text.length ? '...' : '');
+  // Escape HTML
+  snippet = snippet.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Highlight (case-insensitive)
+  var regex = new RegExp(ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  return snippet.replace(regex, '<mark style="background:var(--accent-light);color:var(--primary-dark);padding:1px 3px;border-radius:3px">$&</mark>');
+}
+
+function renderSearchResults(results, q) {
+  var box = document.getElementById('searchResults');
+  var body = document.getElementById('searchResultsBody');
+  if (!box || !body) return;
+  box.classList.add('active');
+  if (results.length === 0) {
+    body.innerHTML = '<div class="no-results"><i class="bi bi-search" style="font-size:2rem;display:block;margin-bottom:8px"></i>לא נמצאו תוצאות עבור "' + q + '"</div>';
+    return;
+  }
+  body.innerHTML = '<div style="font-size:0.85rem;color:var(--text-light);margin-bottom:10px"><strong>' + results.length + '</strong> תוצאות עבור "<strong>' + q + '</strong>"</div>' +
+    results.slice(0, 30).map(function(r) {
+      return '<a class="search-result-item" href="' + r.anchor + '" onclick="closeSearch()">' +
+        '<span class="res-section"><i class="bi bi-tag-fill" aria-hidden="true"></i> ' + r.section + '</span>' +
+        '<div class="res-title">' + highlightMatch(r.title, q) + '</div>' +
+        (r.snippet ? '<div class="res-snippet">' + highlightMatch(r.snippet, q) + '</div>' : '') +
+      '</a>';
+    }).join('') +
+    (results.length > 30 ? '<div style="text-align:center;color:var(--text-light);font-size:0.85rem;padding:10px">+ עוד ' + (results.length - 30) + ' תוצאות. צמצמו את החיפוש.</div>' : '');
+}
+
+function closeSearch() {
+  var box = document.getElementById('searchResults');
+  if (box) box.classList.remove('active');
+}
+
+// Close search on click outside or Escape
 document.addEventListener('click', function(e) {
-  var sr = document.getElementById('searchResults');
+  var box = document.getElementById('searchResults');
   var input = document.getElementById('siteSearch');
-  if (sr && !sr.contains(e.target) && e.target !== input) sr.style.display = 'none';
+  if (box && box.classList.contains('active')) {
+    if (!box.contains(e.target) && e.target !== input) closeSearch();
+  }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeSearch();
 });
 
+// ===== ACTION SHEETS (FLOATING WIDGETS) =====
+function openActionSheet(html) {
+  var overlay = document.getElementById('actionSheetOverlay');
+  document.getElementById('actionSheetBody').innerHTML = html;
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  // Focus first button for keyboard
+  setTimeout(function() {
+    var firstBtn = overlay.querySelector('.action-sheet-btn');
+    if (firstBtn) firstBtn.focus();
+  }, 100);
+}
+function closeActionSheet() {
+  document.getElementById('actionSheetOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeActionSheet();
+});
+
+function quickCall106() {
+  // Open action sheet with multiple emergency options instead of immediate dial
+  openActionSheet(
+    '<h3><i class="bi bi-shield-exclamation" aria-hidden="true"></i> חירום וביטחון</h3>' +
+    '<a class="action-sheet-btn danger" href="tel:106" onclick="closeActionSheet()" aria-label="חייג למוקד 106"><i class="bi bi-telephone-fill" aria-hidden="true"></i><div class="label-area">מוקד 106 - מועצה אזורית<div class="sub">פעיל 24/7</div></div></a>' +
+    '<a class="action-sheet-btn danger" href="tel:100" onclick="closeActionSheet()" aria-label="חייג למשטרה 100"><i class="bi bi-shield-fill" aria-hidden="true"></i><div class="label-area">משטרה - 100<div class="sub">חירום ארצי</div></div></a>' +
+    '<a class="action-sheet-btn danger" href="tel:101" onclick="closeActionSheet()" aria-label="חייג למדא 101"><i class="bi bi-heart-pulse-fill" aria-hidden="true"></i><div class="label-area">מד"א - 101<div class="sub">חירום רפואי</div></div></a>' +
+    '<a class="action-sheet-btn danger" href="tel:102" onclick="closeActionSheet()" aria-label="חייג לכבאות 102"><i class="bi bi-fire" aria-hidden="true"></i><div class="label-area">כבאות - 102<div class="sub">שריפה / חילוץ</div></div></a>' +
+    '<a class="action-sheet-btn" href="tel:104" onclick="closeActionSheet()" aria-label="חייג לפיקוד העורף 104"><i class="bi bi-broadcast" aria-hidden="true"></i><div class="label-area">פיקוד העורף - 104<div class="sub">הנחיות בזמן אזעקה</div></div></a>'
+  );
+}
+
+function openReportMenu() {
+  openActionSheet(
+    '<h3><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> דיווח מפגע ביטחוני</h3>' +
+    '<a class="action-sheet-btn danger" href="tel:106" onclick="closeActionSheet()" aria-label="התקשר למוקד 106"><i class="bi bi-telephone-fill" aria-hidden="true"></i><div class="label-area">חייג למוקד 106<div class="sub">דיווח מיידי בטלפון</div></div></a>' +
+    '<a class="action-sheet-btn sms" href="sms:106" onclick="closeActionSheet()" aria-label="שלח SMS למוקד 106"><i class="bi bi-chat-dots-fill" aria-hidden="true"></i><div class="label-area">SMS למוקד 106<div class="sub">הודעת טקסט</div></div></a>' +
+    '<a class="action-sheet-btn whatsapp" href="https://wa.me/972504400106" target="_blank" rel="noopener" onclick="closeActionSheet()" aria-label="שלח וואטסאפ למוקד"><i class="bi bi-whatsapp" aria-hidden="true"></i><div class="label-area">וואטסאפ למוקד<div class="sub">תיעוד דיווח עם תמונה</div></div></a>' +
+    '<button class="action-sheet-btn" onclick="closeActionSheet();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'});" aria-label="פתח טופס פנייה מקוונת"><i class="bi bi-envelope-paper-fill" aria-hidden="true"></i><div class="label-area">טופס פנייה מקוונת<div class="sub">דיווח עם פרטים מלאים</div></div></button>'
+  );
+}
+
+function openContactMenu() {
+  openActionSheet(
+    '<h3><i class="bi bi-chat-dots-fill" aria-hidden="true"></i> צור קשר עם המזכירות</h3>' +
+    '<a class="action-sheet-btn call" href="tel:0299317670" onclick="closeActionSheet()" aria-label="חייג למזכירות"><i class="bi bi-telephone-fill" aria-hidden="true"></i><div class="label-area">חייג למזכירות<div class="sub">02-9931767 | א\'-ה\' 08:00-16:00</div></div></a>' +
+    '<a class="action-sheet-btn sms" href="sms:0299317670" onclick="closeActionSheet()" aria-label="שלח SMS למזכירות"><i class="bi bi-chat-text-fill" aria-hidden="true"></i><div class="label-area">SMS למזכירות<div class="sub">הודעת טקסט</div></div></a>' +
+    '<a class="action-sheet-btn whatsapp" href="https://wa.me/972299317670" target="_blank" rel="noopener" onclick="closeActionSheet()" aria-label="שלח וואטסאפ למזכירות"><i class="bi bi-whatsapp" aria-hidden="true"></i><div class="label-area">וואטסאפ למזכירות<div class="sub">תיעוד והעברת קבצים</div></div></a>' +
+    '<a class="action-sheet-btn email" href="mailto:office@maaleamos.org.il" onclick="closeActionSheet()" aria-label="שלח אימייל למזכירות"><i class="bi bi-envelope-fill" aria-hidden="true"></i><div class="label-area">אימייל למזכירות<div class="sub">office@maaleamos.org.il</div></div></a>' +
+    '<button class="action-sheet-btn" onclick="closeActionSheet();document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'});" aria-label="פתח טופס פנייה"><i class="bi bi-envelope-paper" aria-hidden="true"></i><div class="label-area">טופס פנייה מקוונת<div class="sub">פנייה רשמית עם פרטים</div></div></button>'
+  );
+}
+
+// ===== NEWS ARTICLE MODAL (from earlier commit, retained) =====
 function openNewsArticle(idx) {
   var n = newsData[idx];
   if (!n) return;
@@ -2539,7 +3231,9 @@ function openNewsArticle(idx) {
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'articleModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
     modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
     document.body.appendChild(modal);
   }
@@ -2547,7 +3241,7 @@ function openNewsArticle(idx) {
   var fullText = n.fullText || n.desc;
   modal.innerHTML = '<div style="background:white;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;border-radius:18px;direction:rtl">' +
     '<div style="height:280px;background-image:url(\'' + n.img + '\');background-size:cover;background-position:center;position:relative">' +
-      '<button onclick="document.getElementById(\'articleModal\').style.display=\'none\'" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.9);border:0;width:36px;height:36px;border-radius:50%;font-size:22px;cursor:pointer">×</button>' +
+      '<button onclick="document.getElementById(\'articleModal\').style.display=\'none\'" aria-label="סגור כתבה" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.9);border:0;width:36px;height:36px;border-radius:50%;font-size:22px;cursor:pointer">&times;</button>' +
       '<span class="badge-cat" style="position:absolute;bottom:14px;right:14px">' + n.cat + '</span>' +
     '</div>' +
     '<div style="padding:24px">' +

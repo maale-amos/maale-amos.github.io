@@ -1,7 +1,7 @@
 {
-  "name": "\u05de\u05e2\u05dc\u05d4 \u05e2\u05de\u05d5\u05e1",
-  "short_name": "\u05de\u05e2\u05dc\u05d4 \u05e2\u05de\u05d5\u05e1",
-  "description": "\u05d0\u05ea\u05e8 \u05d4\u05d9\u05e9\u05d5\u05d1 \u05de\u05e2\u05dc\u05d4 \u05e2\u05de\u05d5\u05e1 \u2014 \u05ea\u05d5\u05e8\u05d4 \u00b7 \u05e7\u05d4\u05d9\u05dc\u05d4 \u00b7 \u05d9\u05e9\u05d5\u05d1 \u05d4\u05d3\u05e2\u05ea",
+  "name": "מעלה עמוס - הישוב",
+  "short_name": "מעלה עמוס",
+  "description": "אתר הישוב מעלה עמוס — תורה · קהילה · ישוב הדעת",
   "start_url": "/maale-amos/",
   "scope": "/maale-amos/",
   "display": "standalone",
@@ -10,11 +10,51 @@
   "lang": "he",
   "background_color": "#fafaf7",
   "theme_color": "#1a5c3a",
+  "categories": ["lifestyle", "social", "education"],
   "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "https://maaleamos.co.il/pictures/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "דיווח מפגע",
+      "short_name": "דיווח",
+      "description": "דיווח מפגע ביטחוני",
+      "url": "/maale-amos/#security",
+      "icons": [{"src":"images/logo.png","sizes":"96x96"}]
+    },
+    {
+      "name": "לוח אירועים",
+      "short_name": "אירועים",
+      "url": "/maale-amos/#events",
+      "icons": [{"src":"images/logo.png","sizes":"96x96"}]
+    },
+    {
+      "name": "פנייה מקוונת",
+      "short_name": "פנייה",
+      "url": "/maale-amos/#contact",
+      "icons": [{"src":"images/logo.png","sizes":"96x96"}]
+    },
+    {
+      "name": "אזור תושבים",
+      "short_name": "תושבים",
+      "url": "/maale-amos/#residents",
+      "icons": [{"src":"images/logo.png","sizes":"96x96"}]
     }
   ]
 }
