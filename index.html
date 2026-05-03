@@ -959,11 +959,35 @@ body.dark .phone-item { background: #16213e; }
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
   <div class="hero-content">
-    <h1>בס"ד — מעלה עמוס</h1>
-    <p class="tagline">תורה · קהילה · ישוב הדעת</p>
+    <svg width="120" height="120" viewBox="0 0 200 200" style="margin-bottom:18px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.4))">
+      <defs>
+        <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#d4a514"/>
+        </linearGradient>
+        <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1a4d8a"/>
+          <stop offset="100%" stop-color="#4a7eb8"/>
+        </linearGradient>
+      </defs>
+      <circle cx="100" cy="100" r="95" fill="url(#circleGrad)" stroke="#fff" stroke-width="3"/>
+      <!-- Mountains -->
+      <path d="M 30,140 L 70,80 L 100,110 L 140,60 L 170,140 Z" fill="url(#mountainGrad)" opacity="0.95"/>
+      <!-- Sun -->
+      <circle cx="140" cy="60" r="15" fill="#fff7d6" opacity="0.9"/>
+      <!-- Star of David -->
+      <g transform="translate(100,160)">
+        <path d="M 0,-12 L 10.4,6 L -10.4,6 Z" fill="#fff" opacity="0.95"/>
+        <path d="M 0,12 L -10.4,-6 L 10.4,-6 Z" fill="#fff" opacity="0.95"/>
+      </g>
+      <!-- Outer text border -->
+      <text x="100" y="36" text-anchor="middle" fill="#fff" font-family="Frank Ruhl Libre,serif" font-size="14" font-weight="700">מעלה עמוס</text>
+    </svg>
+    <h1 style="font-family:'Frank Ruhl Libre',serif;font-size:4rem;font-weight:900;letter-spacing:3px;text-shadow:3px 3px 12px rgba(0,0,0,0.6);background:linear-gradient(135deg,#fff,#fff7d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">✦ מעלה עמוס ✦</h1>
+    <p class="tagline" style="font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;letter-spacing:6px;color:#fff7d6;text-shadow:2px 2px 8px rgba(0,0,0,0.6);margin-top:8px">בס"ד · תורה · קהילה · ישוב הדעת</p>
     <div class="hero-search">
       <i class="bi bi-search"></i>
-      <input type="text" placeholder="חיפוש באתר..." id="siteSearch" oninput="searchSite(this.value)">
+      <input type="text" placeholder="🔍 חיפוש באתר... (חדשות, עסקים, גמ״חים, אירועים)" id="siteSearch" oninput="searchSite(this.value)">
     </div>
     <div class="hero-quick-links">
       <a href="#contact"><i class="bi bi-envelope"></i> פנייה מקוונת</a>
