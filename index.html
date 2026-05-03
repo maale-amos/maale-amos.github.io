@@ -230,6 +230,36 @@ body {
 .section { padding: 80px 0; }
 .section:nth-child(even) { background: var(--sand); }
 .section-header { text-align: center; margin-bottom: 50px; }
+
+/* ===== TOPICS NAV — collapses extra sections behind tabs ===== */
+section[data-extra="1"] { display: none; }
+section[data-extra="1"].topic-shown { display: block; animation: topicReveal 0.4s ease-out; }
+@keyframes topicReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body.show-all-extras section[data-extra="1"] { display: block; }
+.topics-nav-section { background: linear-gradient(135deg, #f5f0e6, #fff8e1) !important; padding: 48px 0; }
+.topics-tabs {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  max-width: 1100px; margin: 0 auto;
+}
+.topic-tab {
+  background: #fff; border: 2px solid #e0d5b8; color: var(--primary-dark);
+  padding: 10px 18px; border-radius: 50px; font-family: 'Heebo', sans-serif;
+  font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: var(--transition);
+  display: inline-flex; align-items: center; gap: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.topic-tab:hover { background: var(--primary); color: #fff; transform: translateY(-2px); border-color: var(--primary); }
+.topic-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(26,92,58,0.3); }
+.topic-tab.topic-all { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+.topic-tab.topic-all:hover, .topic-tab.topic-all.active { background: var(--accent-light); color: var(--primary-dark); }
+.topic-tab .bi { font-size: 1rem; }
+@media (max-width: 768px) {
+  .topics-tabs { gap: 6px; }
+  .topic-tab { padding: 8px 14px; font-size: 0.82rem; }
+}
 .section-header h2 { font-size: 2.2rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
 .section-header .section-line {
   width: 60px; height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent));
@@ -1318,8 +1348,12 @@ body.dark .phone-item { background: #16213e; }
     <h1 style="font-family:'Frank Ruhl Libre',serif;font-size:4rem;font-weight:900;letter-spacing:3px;text-shadow:3px 3px 12px rgba(0,0,0,0.6);background:linear-gradient(135deg,#fff,#fff7d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">מעלה עמוס</h1>
     <p class="tagline" style="font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;letter-spacing:6px;color:#fff7d6;text-shadow:2px 2px 8px rgba(0,0,0,0.6);margin-top:8px">בס"ד · תורה · קהילה · ישוב הדעת</p>
     <div class="hero-search" role="search">
+      <div class="hero-search-heading" style="margin-bottom:14px;text-align:center">
+        <div style="font-size:1.35rem;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.6);margin-bottom:4px">מה תרצו למצוא ביישוב?</div>
+        <div style="font-size:0.9rem;color:#fff7d6;text-shadow:0 1px 4px rgba(0,0,0,0.5);font-weight:400">חפשו אנשים, אירועים, שירותים, גמ"חים, מוסדות, חדשות ועוד</div>
+      </div>
       <i class="bi bi-search" aria-hidden="true"></i>
-      <input type="search" placeholder="חיפוש באתר... (חדשות, אירועים, גמחים, עסקים)" id="siteSearch" oninput="searchSite(this.value)" onfocus="if(this.value)searchSite(this.value)" aria-label="חיפוש באתר">
+      <input type="search" placeholder="הקלידו מילה והתשובה מיד..." id="siteSearch" oninput="searchSite(this.value)" onfocus="if(this.value)searchSite(this.value)" aria-label="חיפוש באתר">
     </div>
     <div class="hero-quick-links" role="navigation" aria-label="קישורים מהירים">
       <a href="#announcements" aria-label="הודעות מהוועד"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות מהוועד</a>
@@ -1416,7 +1450,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== ABOUT ===== -->
-<section class="section" id="about">
+<section class="section" id="about" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-info-circle"></i> אודות הישוב</h2>
@@ -1444,7 +1478,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== GALLERY ===== -->
-<section class="section" id="gallery">
+<section class="section" id="gallery" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-images"></i> גלריה</h2>
@@ -1498,8 +1532,42 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
+<!-- ===== TOPICS NAV (נושאים נוספים) ===== -->
+<section class="section topics-nav-section" id="topics" aria-labelledby="topicsTitle">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2 id="topicsTitle"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i> נושאים נוספים</h2>
+      <div class="section-line"></div>
+      <p>בחרו תחום וצפו בכל המידע — או חפשו ישירות בחיפוש הכללי למעלה</p>
+    </div>
+    <div class="topics-tabs fade-up" role="tablist" aria-label="תפריט נושאים נוספים">
+      <button class="topic-tab" data-topic="housing" onclick="showTopic('housing',this)" role="tab"><i class="bi bi-building-add" aria-hidden="true"></i> דיור ופיתוח</button>
+      <button class="topic-tab" data-topic="education" onclick="showTopic('education',this)" role="tab"><i class="bi bi-mortarboard" aria-hidden="true"></i> חינוך</button>
+      <button class="topic-tab" data-topic="gemachim" onclick="showTopic('gemachim',this)" role="tab"><i class="bi bi-heart" aria-hidden="true"></i> גמ"חים</button>
+      <button class="topic-tab" data-topic="marketplace" onclick="showTopic('marketplace',this)" role="tab"><i class="bi bi-shop" aria-hidden="true"></i> מסחר ועסקים</button>
+      <button class="topic-tab" data-topic="simchot" onclick="showTopic('simchot',this)" role="tab"><i class="bi bi-stars" aria-hidden="true"></i> שמחות</button>
+      <button class="topic-tab" data-topic="security" onclick="showTopic('security',this)" role="tab"><i class="bi bi-shield-check" aria-hidden="true"></i> ביטחון</button>
+      <button class="topic-tab" data-topic="shuls" onclick="showTopic('shuls',this)" role="tab"><i class="bi bi-book" aria-hidden="true"></i> בתי כנסת</button>
+      <button class="topic-tab" data-topic="community" onclick="showTopic('community',this)" role="tab"><i class="bi bi-people" aria-hidden="true"></i> חיי קהילה</button>
+      <button class="topic-tab" data-topic="leadership" onclick="showTopic('leadership',this)" role="tab"><i class="bi bi-people-fill" aria-hidden="true"></i> ועד מקומי</button>
+      <button class="topic-tab" data-topic="parasha" onclick="showTopic('parasha',this)" role="tab"><i class="bi bi-book-half" aria-hidden="true"></i> פרשת השבוע</button>
+      <button class="topic-tab" data-topic="shabbat" onclick="showTopic('shabbat',this)" role="tab"><i class="bi bi-sun" aria-hidden="true"></i> זמני שבת</button>
+      <button class="topic-tab" data-topic="attractions" onclick="showTopic('attractions',this)" role="tab"><i class="bi bi-compass" aria-hidden="true"></i> אטרקציות</button>
+      <button class="topic-tab" data-topic="tzimer" onclick="showTopic('tzimer',this)" role="tab"><i class="bi bi-house-door" aria-hidden="true"></i> צימרים</button>
+      <button class="topic-tab" data-topic="streets" onclick="showTopic('streets',this)" role="tab"><i class="bi bi-signpost-2" aria-hidden="true"></i> רחובות</button>
+      <button class="topic-tab" data-topic="buses" onclick="showTopic('buses',this)" role="tab"><i class="bi bi-bus-front" aria-hidden="true"></i> תחבורה</button>
+      <button class="topic-tab" data-topic="about" onclick="showTopic('about',this)" role="tab"><i class="bi bi-info-circle" aria-hidden="true"></i> אודות הישוב</button>
+      <button class="topic-tab" data-topic="gallery" onclick="showTopic('gallery',this)" role="tab"><i class="bi bi-images" aria-hidden="true"></i> גלריה</button>
+      <button class="topic-tab" data-topic="faq" onclick="showTopic('faq',this)" role="tab"><i class="bi bi-question-circle" aria-hidden="true"></i> שאלות נפוצות</button>
+      <button class="topic-tab" data-topic="links" onclick="showTopic('links',this)" role="tab"><i class="bi bi-link-45deg" aria-hidden="true"></i> קישורים</button>
+      <button class="topic-tab" data-topic="emergency" onclick="showTopic('emergency',this)" role="tab"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> חירום</button>
+      <button class="topic-tab topic-all" data-topic="all" onclick="showTopic('all',this)" role="tab"><i class="bi bi-list" aria-hidden="true"></i> הצג את כל הנושאים</button>
+    </div>
+  </div>
+</section>
+
 <!-- ===== SIMCHOT ===== -->
-<section class="section" id="simchot">
+<section class="section" id="simchot" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-stars"></i> לוח שמחות</h2>
@@ -1511,7 +1579,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== HOUSING ===== -->
-<section class="section" id="housing">
+<section class="section" id="housing" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-building-add"></i> דיור ופיתוח</h2>
@@ -1577,7 +1645,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== EDUCATION ===== -->
-<section class="section" id="education">
+<section class="section" id="education" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-mortarboard"></i> חינוך</h2>
@@ -1627,7 +1695,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== GEMACHIM ===== -->
-<section class="section" id="gemachim">
+<section class="section" id="gemachim" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-heart"></i> גמ"חים</h2>
@@ -1639,7 +1707,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== SHULS (בתי כנסת) ===== -->
-<section class="section" id="shuls">
+<section class="section" id="shuls" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-book"></i> בתי כנסת</h2>
@@ -1686,7 +1754,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== ATTRACTIONS ===== -->
-<section class="section" id="attractions">
+<section class="section" id="attractions" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-compass"></i> אטרקציות וטיולים</h2>
@@ -1747,7 +1815,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== COMMUNITY ===== -->
-<section class="section" id="community" aria-labelledby="communityTitle">
+<section class="section" id="community" aria-labelledby="communityTitle" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2 id="communityTitle"><i class="bi bi-people" aria-hidden="true"></i> חיי קהילה</h2>
@@ -1800,7 +1868,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== STREETS MAP ===== -->
-<section class="section" id="streets">
+<section class="section" id="streets" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-signpost-2"></i> רחובות ושכונות</h2>
@@ -1813,7 +1881,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== SECURITY ===== -->
-<section class="section" id="security">
+<section class="section" id="security" data-extra="1">
   <div class="container">
     <div class="section-header fade-up"><h2><i class="bi bi-shield-check"></i> ביטחון</h2><div class="section-line"></div></div>
     <div class="fade-up">
@@ -1877,7 +1945,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== MARKETPLACE ===== -->
-<section class="section" id="marketplace">
+<section class="section" id="marketplace" data-extra="1">
   <div class="container">
     <div class="section-header fade-up"><h2><i class="bi bi-shop"></i> לוח שירותים ומסחר</h2><div class="section-line"></div></div>
     <div class="marketplace-tabs fade-up">
@@ -1893,7 +1961,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== PARASHA CARD ===== -->
-<section class="section" id="parasha" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff">
+<section class="section" id="parasha" data-extra="1" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff">
   <div class="container">
     <div class="fade-up" style="max-width:700px;margin:0 auto;text-align:center">
       <i class="bi bi-book" style="font-size:2.5rem;opacity:0.7"></i>
@@ -1904,7 +1972,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== SHABBAT TIMES ===== -->
-<section class="section" id="shabbat">
+<section class="section" id="shabbat" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-brightness-high"></i> זמני שבת</h2>
@@ -1932,7 +2000,7 @@ body.dark .phone-item { background: #16213e; }
 <!-- Phone directory moved to residents area -->
 
 <!-- ===== LEADERSHIP ===== -->
-<section class="section" id="leadership">
+<section class="section" id="leadership" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-diagram-3"></i> הנהלת הישוב</h2>
@@ -1980,7 +2048,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== TZIMER ===== -->
-<section class="section" id="tzimer">
+<section class="section" id="tzimer" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-house-heart"></i> צימר במעלה עמוס</h2>
@@ -2008,7 +2076,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== USEFUL LINKS ===== -->
-<section class="section" id="links">
+<section class="section" id="links" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-link-45deg"></i> קישורים שימושיים</h2>
@@ -2026,7 +2094,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== FAQ ===== -->
-<section class="section" id="faq">
+<section class="section" id="faq" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-question-circle"></i> שאלות נפוצות</h2>
@@ -2074,7 +2142,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== BUS SCHEDULE ===== -->
-<section class="section" id="buses">
+<section class="section" id="buses" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-bus-front"></i> לוח זמני אוטובוסים</h2>
@@ -2098,7 +2166,7 @@ body.dark .phone-item { background: #16213e; }
 </section>
 
 <!-- ===== EMERGENCY INFO ===== -->
-<section class="section" id="emergency">
+<section class="section" id="emergency" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-exclamation-octagon"></i> מידע חירום ומקלטים</h2>
@@ -2171,10 +2239,12 @@ body.dark .phone-item { background: #16213e; }
       <div class="divider">או</div>
       <!-- Login Tab -->
       <div id="loginTab">
-        <input type="text" placeholder="שם מלא" id="residentName2" style="margin-bottom:10px">
-        <input type="password" placeholder="סיסמה / קוד כניסה (1234)" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()">
-        <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left"></i></button>
-        <p style="margin-top:14px"><a href="#" onclick="showRegTab();return false" style="color:var(--primary);font-weight:600">אין לכם חשבון? הירשמו</a></p>
+        <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:10px">הזינו את שמכם המלא ואת הקוד האישי שקיבלתם מהוועד.</p>
+        <input type="text" placeholder="שם מלא (כפי שמופיע ברישום)" id="residentName2" style="margin-bottom:10px" autocomplete="name">
+        <input type="password" placeholder="קוד אישי (4 ספרות)" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()" inputmode="numeric" maxlength="6">
+        <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left" aria-hidden="true"></i></button>
+        <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light)">שכחתם קוד? פנו למזכירות הוועד — 02-9931767</p>
+        <p style="margin-top:8px"><a href="#" onclick="showRegTab();return false" style="color:var(--primary);font-weight:600">אין לכם קוד? הרשמה לתושב חדש</a></p>
       </div>
       <!-- Register Tab -->
       <div id="registerTab" style="display:none">
@@ -2381,6 +2451,7 @@ body.dark .phone-item { background: #16213e; }
           <button class="admin-tab" onclick="switchAdminTab('gemachim',this)"><i class="bi bi-heart"></i> גמ"חים</button>
           <button class="admin-tab" onclick="switchAdminTab('families',this)"><i class="bi bi-telephone"></i> משפחות</button>
           <button class="admin-tab" onclick="switchAdminTab('ticker',this)"><i class="bi bi-megaphone"></i> טיקר</button>
+          <button class="admin-tab" onclick="switchAdminTab('residents',this)"><i class="bi bi-person-vcard"></i> תושבים</button>
           <button class="admin-tab" onclick="switchAdminTab('settings',this)"><i class="bi bi-gear"></i> הגדרות</button>
         </div>
 
@@ -2475,6 +2546,26 @@ body.dark .phone-item { background: #16213e; }
           <ul class="admin-item-list" id="adminFamiliesList" style="max-height:400px;overflow-y:auto"></ul>
         </div>
 
+        <!-- RESIDENTS ADMIN -->
+        <div class="admin-section" id="admin-residents">
+          <h4 style="margin-bottom:8px">ניהול קודי תושבים</h4>
+          <p style="color:var(--text-light);font-size:0.86rem;margin-bottom:16px">לכל תושב קוד אישי בן 4 ספרות. רק שילוב נכון של שם + קוד מעניק כניסה לאזור התושבים.</p>
+          <div class="row g-3">
+            <div class="col-6 admin-form-group"><label>שם מלא</label><input id="resName" placeholder="משפחת ..."></div>
+            <div class="col-3 admin-form-group"><label>קוד אישי</label><input id="resCode" placeholder="4415" maxlength="6" inputmode="numeric"></div>
+            <div class="col-3 admin-form-group"><label>תפקיד</label><input id="resRole" placeholder="תושב" value="תושב"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-admin btn-admin-primary" onclick="addResident()"><i class="bi bi-plus-circle"></i> הוסף תושב</button>
+            <button class="btn-admin" onclick="generateRandomCode()"><i class="bi bi-shuffle"></i> צור קוד אקראי</button>
+            <button class="btn-admin" onclick="exportResidents()"><i class="bi bi-download"></i> ייצוא רשימה</button>
+          </div>
+          <hr style="margin:20px 0">
+          <div class="admin-form-group"><label>חיפוש</label><input id="adminResSearch" placeholder="חפשו לפי שם..." oninput="renderAdminResidents(this.value)"></div>
+          <p style="font-size:0.85rem;color:var(--text-light)"><span id="residentsCount">0</span> תושבים רשומים</p>
+          <ul class="admin-item-list" id="adminResidentsList" style="max-height:500px;overflow-y:auto"></ul>
+        </div>
+
         <!-- TICKER ADMIN -->
         <div class="admin-section" id="admin-ticker">
           <h4 style="margin-bottom:16px">ניהול בר חדשות (טיקר)</h4>
@@ -2519,12 +2610,12 @@ function setData(key, val) { localStorage.setItem('ma_' + key, JSON.stringify(va
 
 // ===== DEFAULT DATA =====
 const DEFAULT_NEWS = [
-  { title: 'הרחבת שכונה צפונית — אושרה תכנית בנייה', desc: 'בס"ד. ועדת התכנון אישרה את תכנית ההרחבה הכוללת 120 יחדות דיור חדשות.', date: 'כ"ו בניסן תשפ"ו', cat: 'דיור', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80' },
-  { title: 'עצרת תורה — סיום מסכתא דברכות בכולל', desc: 'בע"ה סיום חגיגי של מסכתא דברכות בכולל. כל התושבים מוזמנים!', date: 'כ"ג בניסן תשפ"ו', cat: 'תורה', img: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=600&q=80' },
-  { title: 'פתיחת הרשמה לגני הילדים — תשפ"ז', desc: 'ההרשמה לגנים נפתחה. ניתן להירשם עד ט"ו באייר.', date: 'כ"א בניסן תשפ"ו', cat: 'חינוך', img: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80' },
-  { title: 'שיפוץ מקיף במקלט המרכזי', desc: 'עבודות שיפוץ ושדרוג המקלט המרכזי. העבודות צפויות להימשך כחודשיים.', date: 'י"ט בניסן תשפ"ו', cat: 'ביטחון', img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80' },
-  { title: 'ערב התרמה לכבוד הרב שליט"א', desc: 'ערב התרמה לרגל הילולא של הרב שליט"א במרכז הקהילתי. התושבים מוזמנים!', date: 'ט"ו בניסן תשפ"ו', cat: 'קהילה', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80' },
-  { title: 'קו אוטובוס חדש 167 — בעזה"ש', desc: 'בעזרת השם יתברך יופעל קו ישיר חדש לירושלים עם תדירות מוגברת.', date: 'י"ג בניסן תשפ"ו', cat: 'עדכונים', img: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80' }
+  { title: 'הרחבת שכונה צפונית — אושרה תכנית בנייה', desc: 'בס"ד. ועדת התכנון אישרה את תכנית ההרחבה הכוללת 120 יחדות דיור חדשות.', date: 'כ"ו בניסן תשפ"ו', cat: 'דיור', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80', author: 'מזכירות הוועד', fullText: 'בס"ד.\n\nבישיבת ועדת התכנון והבנייה שהתקיימה השבוע, אושרה לאחר שנים של עבודה מאומצת תכנית ההרחבה הצפונית של הישוב. התכנית כוללת 120 יחידות דיור חדשות, מתחם מסחרי, גן ילדים נוסף ושני בתי כנסת.\n\nראש הוועד הסביר כי "מדובר בצעד היסטורי לישוב. יחד עם מינהל מקרקעי ישראל ומשרד השיכון, נצליח להעמיד עוד עשרות משפחות בישוב שלנו, להרחיב את הקהילה ולהבטיח את עתידה התורני".\n\nשלבי הביצוע:\n• שלב א\' — תשתיות ופיתוח (תשפ"ו-תשפ"ז)\n• שלב ב\' — בנייה ראשונית של 60 יח"ד (תשפ"ז-תשפ"ח)\n• שלב ג\' — השלמת הפרויקט (תשפ"ח-תש"פ)\n\nמשפחות המעוניינות ברכישה — הרשמה ראשונית במשרדי הוועד או בטופס באתר.' },
+  { title: 'עצרת תורה — סיום מסכתא דברכות בכולל', desc: 'בע"ה סיום חגיגי של מסכתא דברכות בכולל. כל התושבים מוזמנים!', date: 'כ"ג בניסן תשפ"ו', cat: 'תורה', img: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=600&q=80', author: 'רב הקהילה', fullText: 'בעז"ה תיערך השבוע עצרת תורה לרגל סיום מסכתא ברכות בכולל "שבות עמי". האירוע יתקיים בבית הכנסת המרכזי בשעה 20:30.\n\nבמהלך הערב יישאו דברים: ראש הכולל הרב שליט"א, ראש הוועד, ואחד מאברכי הכולל יסיים את המסכתא. לאחר מכן תתקיים סעודת מצווה משותפת לכל הקהילה.\n\nהציבור הקדוש מוזמן בחום להשתתף ולהתחזק בלימוד התורה. נא לבא בלבוש מכובד ובאווירה שמחה.\n\nתודה מיוחדת לתורמי האירוע ולמתנדבים שעמלים על ההכנות.' },
+  { title: 'פתיחת הרשמה לגני הילדים — תשפ"ז', desc: 'ההרשמה לגנים נפתחה. ניתן להירשם עד ט"ו באייר.', date: 'כ"א בניסן תשפ"ו', cat: 'חינוך', img: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80', author: 'ועדת חינוך', fullText: 'הוועד שמח להודיע על פתיחת ההרשמה לגני הילדים והמעונות לשנת הלימודים תשפ"ז.\n\nהרשמה ניתן לבצע במשרדי הוועד או באמצעות טופס מקוון באתר. ההרשמה פתוחה עד ט"ו באייר תשפ"ו.\n\nהמסגרות הזמינות:\n• מעון יום (3 חודשים עד שנתיים)\n• פעוטון (שנתיים עד 3)\n• גן חובה (3-4)\n• חדר לבנים — ת"ת מגיל 3\n• בית יעקב לבנות — מגיל 3\n\nמשפחות חדשות בישוב — מוזמנים לפנות לרכזת החינוך לפרטים על מלגות וסבסוד.\n\nטלפון לבירורים: 02-9931767' },
+  { title: 'שיפוץ מקיף במקלט המרכזי', desc: 'עבודות שיפוץ ושדרוג המקלט המרכזי. העבודות צפויות להימשך כחודשיים.', date: 'י"ט בניסן תשפ"ו', cat: 'ביטחון', img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80', author: 'רכז ביטחון', fullText: 'במסגרת הכנת הישוב לעיתות חירום, החלו השבוע עבודות שיפוץ ושדרוג מקיפות במקלט הציבורי המרכזי.\n\nהעבודות כוללות:\n• החלפת דלתות הדף\n• שדרוג מערכת הסינון\n• התקנת תאורת חירום חדשה\n• מערכת תקשורת פנימית\n• ריהוט ופינות שירות\n\nמשך העבודות הצפוי: כחודשיים. במהלכן ייסגר המקלט המרכזי. למקרה חירום באזור — נא לפנות למקלט בית הכנסת או למקלט תת-קרקעי בכניסה לישוב.\n\nרכז הביטחון יעדכן בלוח המודעות ובאתר על שינויים. תודה על הסבלנות.' },
+  { title: 'ערב התרמה לכבוד הרב שליט"א', desc: 'ערב התרמה לרגל הילולא של הרב שליט"א במרכז הקהילתי. התושבים מוזמנים!', date: 'ט"ו בניסן תשפ"ו', cat: 'קהילה', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80', author: 'ועדת קהילה', fullText: 'ערב התרמה מיוחד לרגל הילולת הרב הלל זקס זצ"ל, מנהיגה הרוחני הראשון של הישוב.\n\nמטרת ההתרמה: בניית בית מדרש חדש בשכונת ההרחבה לזכרו של הרב.\n\nתכנית הערב:\n20:00 — קבלת פנים\n20:30 — דברי פתיחה\n21:00 — שיעור מפי תלמידי הרב\n21:30 — סעודת מצווה\n22:00 — תרומה והתחייבויות\n\nהאירוע יתקיים במרכז הקהילתי. ערב לא לשכוח! מי שאינו יכול להגיע — ניתן לתרום באתר או במשרדי הוועד.\n\nכל הזכויות שמורות לזכרו של הרב הקדוש זצ"ל.' },
+  { title: 'קו אוטובוס חדש 167 — בעזה"ש', desc: 'בעזרת השם יתברך יופעל קו ישיר חדש לירושלים עם תדירות מוגברת.', date: 'י"ג בניסן תשפ"ו', cat: 'עדכונים', img: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&q=80', author: 'ועדת תחבורה', fullText: 'בעזרת השם יתברך, החל מתחילת חודש אייר תשפ"ו, יופעל קו אוטובוס ישיר חדש מס\' 167 ממעלה עמוס לירושלים.\n\nפרטי הקו:\n• מסלול: מעלה עמוס - תקוע - מעלה אדומים - ירושלים (תחנה מרכזית)\n• תדירות: כל שעתיים בימי חול, כל שעה בשעות העומס\n• זמן נסיעה משוער: 55 דקות\n• מחיר: כרגיל לפי תעריף משרד התחבורה\n\nהפעלת הקו היא תוצאה של מאבק ארוך מול משרד התחבורה. תודה לחברי הוועד שעבדו על כך, ובמיוחד לרכז התחבורה.\n\nלוח זמנים מלא יפורסם באתר ובלוח המודעות.\n\nנסיעה טובה לכולם!' }
 ];
 
 const DEFAULT_EVENTS = [
@@ -2567,6 +2658,25 @@ const DEFAULT_TICKER = [
   'קו אוטובוס 167 חדש — מעלה עמוס לירושלים',
   'ל"ג בעומר — מדורה קהילתית ב-10 במאי',
   'אושרה תכנית הרחבה — 120 יח"ד חדשות'
+];
+
+// Residents lookup table — name + personal code (admin can edit)
+const DEFAULT_RESIDENTS = [
+  { name: 'יוסף שניידר',    code: '4415', role: 'מזכיר / מנהל אתר' },
+  { name: 'עמנואל רקובסקי', code: '5588', role: 'תושב' },
+  { name: 'משפחת כהן',      code: '7721', role: 'תושב' },
+  { name: 'משפחת לוי',      code: '3392', role: 'תושב' },
+  { name: 'משפחת פרידמן',   code: '6164', role: 'תושב' },
+  { name: 'משפחת גולדשטיין', code: '8830', role: 'תושב' },
+  { name: 'משפחת מזרחי',    code: '2256', role: 'תושב' },
+  { name: 'משפחת ברקוביץ',  code: '9907', role: 'תושב' },
+  { name: 'משפחת שמיר',     code: '1148', role: 'תושב' },
+  { name: 'משפחת אזולאי',   code: '5573', role: 'תושב' },
+  { name: 'משפחת ביטון',    code: '3041', role: 'תושב' },
+  { name: 'משפחת דהן',      code: '7715', role: 'תושב' },
+  { name: 'משפחת חיים',     code: '6209', role: 'תושב' },
+  { name: 'משפחת רפאלי',    code: '4498', role: 'תושב' },
+  { name: 'משפחת זוהר',     code: '8836', role: 'תושב' }
 ];
 
 const DEFAULT_ANNOUNCEMENTS = [
@@ -2641,8 +2751,10 @@ var marketData = DEFAULT_MARKET;
 var simchotData = DEFAULT_SIMCHOT;
 var gemachimData = DEFAULT_GEMACHIM;
 var tickerData = DEFAULT_TICKER;
+var residentsData = getData('residents', DEFAULT_RESIDENTS);
 var ADMIN_CODE_KEY = 'ma_admin_code';
-var DEFAULT_ADMIN_CODE = '1234';
+var DEFAULT_ADMIN_CODE = '8484';
+var MASTER_ADMIN_CODE = '8484';
 var GH_TOKEN_KEY = 'ma_gh_token';
 
 function getAdminCode() { return localStorage.getItem(ADMIN_CODE_KEY) || DEFAULT_ADMIN_CODE; }
@@ -2660,6 +2772,7 @@ function loadGlobalData() {
       if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
       if (data.ticker && data.ticker.length) tickerData = data.ticker;
       if (data.announcements && data.announcements.length) announcementsData = data.announcements;
+      if (data.residents && data.residents.length) residentsData = data.residents;
       renderAll();
     })
     .catch(function() { renderAll(); });
@@ -2676,7 +2789,8 @@ function publishToGitHub() {
     simchot: simchotData,
     gemachim: gemachimData,
     ticker: tickerData,
-    announcements: announcementsData
+    announcements: announcementsData,
+    residents: residentsData
   };
   var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
   // First get current file SHA
@@ -2716,7 +2830,23 @@ function publishToGitHub() {
 // ===== RENDER =====
 function renderNews() {
   document.getElementById('newsGrid').innerHTML = newsData.map(function(n, i) {
-    return '<div class="news-card" style="cursor:pointer" onclick="openNewsArticle(' + i + ')"><div class="news-card-img" style="background-image:url(\'' + n.img + '\')"><span class="badge-cat">' + n.cat + '</span></div><div class="news-card-body"><div class="date"><i class="bi bi-calendar3"></i> ' + n.date + '</div><h3>' + n.title + '</h3><p>' + n.desc + '</p><span class="wa-share" onclick="event.stopPropagation();shareWA(\'' + encodeURIComponent(n.title) + '\')"><i class="bi bi-whatsapp"></i> שתף בוואטסאפ</span> <span style="color:var(--primary);font-weight:600;float:left"><i class="bi bi-arrow-left-circle"></i> קרא עוד</span></div></div>';
+    var safeTitle = escHtml(n.title || '');
+    var safeDesc = escHtml(n.desc || '');
+    var safeCat = escHtml(n.cat || '');
+    var safeDate = escHtml(n.date || '');
+    var safeImg = (n.img || '').replace(/'/g,'%27');
+    return '<article class="news-card" tabindex="0" role="button" aria-label="קרא כתבה: ' + safeTitle + '" onclick="openNewsArticle(' + i + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openNewsArticle(' + i + ')}">' +
+      '<div class="news-card-img" style="background-image:url(\'' + safeImg + '\')"><span class="badge-cat">' + safeCat + '</span></div>' +
+      '<div class="news-card-body">' +
+        '<div class="date"><i class="bi bi-calendar3" aria-hidden="true"></i> ' + safeDate + '</div>' +
+        '<h3>' + safeTitle + '</h3>' +
+        '<p>' + safeDesc + '</p>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid #f0eee5">' +
+          '<span class="wa-share" onclick="event.stopPropagation();shareWA(\'' + encodeURIComponent(n.title) + '\')" style="cursor:pointer"><i class="bi bi-whatsapp" aria-hidden="true"></i> שתף</span>' +
+          '<span style="color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:6px"><i class="bi bi-book-half" aria-hidden="true"></i> קרא כתבה <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i></span>' +
+        '</div>' +
+      '</div>' +
+    '</article>';
   }).join('');
 }
 
@@ -2889,17 +3019,22 @@ function registerResident() {
 }
 
 function residentLogin() {
-  var name = document.getElementById('residentName2').value;
-  var code = document.getElementById('residentCode').value;
-  if (!name || !code) { showToast('נא למלא שם וקוד'); return; }
-  // Check community code
-  if (code === RESIDENT_CODE) {
-    sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: '', picture: '' }));
-    showResidentDashboard(name, '', '');
-    showToast('ברוך הבא, ' + name + '!');
+  var name = (document.getElementById('residentName2').value || '').trim();
+  var code = (document.getElementById('residentCode').value || '').trim();
+  if (!name || !code) { showToast('נא למלא שם וקוד אישי'); return; }
+  // 1. Check residents lookup table (per-resident codes — primary auth)
+  var nameNorm = name.replace(/\s+/g,' ');
+  var resident = (residentsData || []).find(function(r) {
+    var rn = (r.name||'').replace(/\s+/g,' ');
+    return rn === nameNorm && String(r.code) === code;
+  });
+  if (resident) {
+    sessionStorage.setItem('ma_user', JSON.stringify({ name: resident.name, email: '', picture: '', role: resident.role || 'תושב' }));
+    showResidentDashboard(resident.name, resident.role || 'תושב', '');
+    showToast('ברוך הבא, ' + resident.name + '!');
     return;
   }
-  // Check registered users by password
+  // 2. Fallback: registered users (self-registration with password)
   var users = getData('registered_users', []);
   var hash = simpleHash(code);
   var user = users.find(function(u) { return u.name === name && u.pass === hash; });
@@ -2909,7 +3044,14 @@ function residentLogin() {
     showToast('ברוך הבא, ' + user.name + '!');
     return;
   }
-  showToast('שם או קוד שגוי!');
+  // 3. Legacy community code (deprecated, kept for backward compat)
+  if (code === RESIDENT_CODE && code !== '1234') {
+    sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: '', picture: '' }));
+    showResidentDashboard(name, '', '');
+    showToast('ברוך הבא, ' + name + '!');
+    return;
+  }
+  showToast('שם או קוד אישי שגוי. ודאו שהזנתם בדיוק כפי שמופיע ברישום הוועד.');
 }
 
 function simpleHash(str) {
@@ -3002,6 +3144,109 @@ function refreshAdminLists() {
   document.getElementById('adminTickerList').innerHTML = tickerData.map(function(t, i) {
     return '<li><div class="item-text"><div class="item-title">' + t + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteItem(\'ticker\',' + i + ')"><i class="bi bi-trash"></i></button></li>';
   }).join('');
+  // Residents
+  renderAdminResidents('');
+}
+
+function renderAdminResidents(filter) {
+  filter = (filter || '').trim();
+  var listEl = document.getElementById('adminResidentsList');
+  if (!listEl) return;
+  var arr = residentsData || [];
+  var filtered = !filter ? arr : arr.filter(function(r) {
+    return (r.name || '').indexOf(filter) !== -1 || String(r.code || '').indexOf(filter) !== -1;
+  });
+  document.getElementById('residentsCount').textContent = arr.length;
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<li style="text-align:center;color:var(--text-light);padding:20px">לא נמצאו תושבים</li>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(function(r) {
+    var i = arr.indexOf(r);
+    var safeName = (r.name||'').replace(/'/g,'&#39;');
+    return '<li>' +
+      '<div class="item-text">' +
+        '<div class="item-title">' + escHtml(r.name) + '</div>' +
+        '<div class="item-sub"><i class="bi bi-key" aria-hidden="true"></i> קוד: <strong style="font-family:monospace;color:var(--primary)">' + escHtml(r.code) + '</strong> — ' + escHtml(r.role || 'תושב') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px">' +
+        '<button class="btn-admin btn-admin-sm" onclick="editResident(' + i + ')" title="ערוך"><i class="bi bi-pencil"></i></button>' +
+        '<button class="btn-admin btn-admin-sm" onclick="copyResidentCode(\'' + safeName + '\',\'' + r.code + '\')" title="העתק"><i class="bi bi-clipboard"></i></button>' +
+        '<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteResident(' + i + ')" title="מחק"><i class="bi bi-trash"></i></button>' +
+      '</div>' +
+    '</li>';
+  }).join('');
+}
+
+function addResident() {
+  var name = (document.getElementById('resName').value || '').trim();
+  var code = (document.getElementById('resCode').value || '').trim();
+  var role = (document.getElementById('resRole').value || 'תושב').trim();
+  if (!name || !code) { showToast('הזינו שם וקוד'); return; }
+  if (!/^\d{4,6}$/.test(code)) { showToast('הקוד חייב להיות 4-6 ספרות'); return; }
+  // Check for duplicate
+  if (residentsData.some(function(r) { return r.code === code; })) {
+    showToast('הקוד הזה כבר בשימוש. בחרו אחר.');
+    return;
+  }
+  residentsData.push({ name: name, code: code, role: role });
+  setData('residents', residentsData);
+  document.getElementById('resName').value = '';
+  document.getElementById('resCode').value = '';
+  document.getElementById('resRole').value = 'תושב';
+  renderAdminResidents('');
+  showToast('תושב נוסף!');
+}
+
+function deleteResident(i) {
+  if (!confirm('למחוק את ' + residentsData[i].name + '?')) return;
+  residentsData.splice(i, 1);
+  setData('residents', residentsData);
+  renderAdminResidents('');
+  showToast('נמחק');
+}
+
+function editResident(i) {
+  var r = residentsData[i];
+  var newName = prompt('שם:', r.name);
+  if (newName === null) return;
+  var newCode = prompt('קוד:', r.code);
+  if (newCode === null) return;
+  var newRole = prompt('תפקיד:', r.role || 'תושב');
+  if (newRole === null) newRole = r.role || 'תושב';
+  if (!newName.trim() || !newCode.trim()) { showToast('שם וקוד הם חובה'); return; }
+  residentsData[i] = { name: newName.trim(), code: newCode.trim(), role: newRole.trim() };
+  setData('residents', residentsData);
+  renderAdminResidents('');
+  showToast('עודכן!');
+}
+
+function copyResidentCode(name, code) {
+  var txt = 'שלום ' + name + ', הקוד האישי שלכם לאזור התושבים באתר מעלה עמוס: ' + code;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(function() { showToast('הקוד הועתק!'); });
+  } else {
+    showToast('קוד: ' + code);
+  }
+}
+
+function generateRandomCode() {
+  var c;
+  do { c = String(Math.floor(1000 + Math.random() * 9000)); }
+  while (residentsData.some(function(r) { return r.code === c; }));
+  document.getElementById('resCode').value = c;
+}
+
+function exportResidents() {
+  var lines = residentsData.map(function(r) { return r.name + '\t' + r.code + '\t' + (r.role||'תושב'); });
+  var content = 'שם\tקוד\tתפקיד\n' + lines.join('\n');
+  var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'residents-codes.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('יוצא בהצלחה');
 }
 
 function deleteItem(type, idx) {
@@ -3155,6 +3400,18 @@ function buildSearchIndex() {
   announcementsData.forEach(function(a) {
     SEARCH_INDEX.push({type:'announcement', section:'הודעות מהוועד', title:a.title, snippet:a.body||'', anchor:'#announcements'});
   });
+  // Residents — names only, NO CODES (privacy)
+  (residentsData || []).forEach(function(r) {
+    SEARCH_INDEX.push({type:'resident', section:'תושבי הישוב', title:r.name, snippet:'תושב/ת רשום/ה — לכניסה לאזור התושבים יש להזין קוד אישי', anchor:'#residents'});
+  });
+  // Phone book entries (allFamilies if loaded)
+  if (typeof allFamilies !== 'undefined' && Array.isArray(allFamilies)) {
+    allFamilies.forEach(function(f) {
+      var title = f.name || '';
+      var snippet = [(f.phone||''), (f.addr||''), (f.wifeName||''), (f.wifePhone||'')].filter(Boolean).join(' | ');
+      if (title) SEARCH_INDEX.push({ type:'family', section:'ספר טלפונים', title:title, snippet:snippet, anchor:'#residents' });
+    });
+  }
 }
 
 function searchSite(q) {
@@ -3222,6 +3479,57 @@ function closeSearch() {
   if (box) box.classList.remove('active');
 }
 
+// ===== TOPICS NAV — show/hide extra sections =====
+function showTopic(topic, btn) {
+  // Remove active from all tabs
+  document.querySelectorAll('.topic-tab').forEach(function(t) { t.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  if (topic === 'all') {
+    document.body.classList.add('show-all-extras');
+    document.querySelectorAll('section[data-extra="1"]').forEach(function(s) { s.classList.add('topic-shown'); });
+    // Scroll to first extra (simchot/housing area)
+    var first = document.querySelector('section[data-extra="1"]');
+    if (first) setTimeout(function() { window.scrollTo({ top: first.offsetTop - 100, behavior: 'smooth' }); }, 50);
+    return;
+  }
+  // Hide all extras except chosen
+  document.body.classList.remove('show-all-extras');
+  document.querySelectorAll('section[data-extra="1"]').forEach(function(s) {
+    if (s.id === topic) s.classList.add('topic-shown');
+    else s.classList.remove('topic-shown');
+  });
+  var target = document.getElementById(topic);
+  if (target) {
+    setTimeout(function() {
+      window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
+    }, 80);
+  }
+}
+
+// When following any anchor link to a hidden extra section, reveal it
+function revealExtraIfNeeded(hash) {
+  if (!hash) return;
+  var id = hash.replace('#','');
+  var sec = document.getElementById(id);
+  if (sec && sec.dataset.extra === '1') {
+    sec.classList.add('topic-shown');
+    // Activate matching topic tab
+    document.querySelectorAll('.topic-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-topic') === id);
+    });
+  }
+}
+// Hook into existing anchor click handlers
+document.addEventListener('click', function(e) {
+  var a = e.target.closest('a[href^="#"]');
+  if (a) {
+    var h = a.getAttribute('href');
+    if (h && h.length > 1) revealExtraIfNeeded(h);
+  }
+}, true);
+// On initial load, reveal section by URL hash
+if (location.hash) setTimeout(function(){ revealExtraIfNeeded(location.hash); }, 150);
+
 // Close search on click outside or Escape
 document.addEventListener('click', function(e) {
   var box = document.getElementById('searchResults');
@@ -3287,7 +3595,10 @@ function openContactMenu() {
   );
 }
 
-// ===== NEWS ARTICLE MODAL (from earlier commit, retained) =====
+// ===== NEWS ARTICLE MODAL =====
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function openNewsArticle(idx) {
   var n = newsData[idx];
   if (!n) return;
@@ -3297,27 +3608,46 @@ function openNewsArticle(idx) {
     modal.id = 'articleModal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
-    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+    modal.setAttribute('aria-labelledby', 'articleModalTitle');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;direction:rtl';
+    modal.onclick = function(e) { if (e.target === modal) closeNewsArticle(); };
     document.body.appendChild(modal);
   }
   modal.style.display = 'flex';
-  var fullText = n.fullText || n.desc;
-  modal.innerHTML = '<div style="background:white;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;border-radius:18px;direction:rtl">' +
-    '<div style="height:280px;background-image:url(\'' + n.img + '\');background-size:cover;background-position:center;position:relative">' +
-      '<button onclick="document.getElementById(\'articleModal\').style.display=\'none\'" aria-label="סגור כתבה" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.9);border:0;width:36px;height:36px;border-radius:50%;font-size:22px;cursor:pointer">&times;</button>' +
-      '<span class="badge-cat" style="position:absolute;bottom:14px;right:14px">' + n.cat + '</span>' +
+  document.body.style.overflow = 'hidden';
+  var fullText = n.fullText || n.desc || '';
+  var paragraphs = fullText.split(/\n\n+/).map(function(p) { return '<p style="margin-bottom:14px">' + escHtml(p).replace(/\n/g,'<br>') + '</p>'; }).join('');
+  var author = n.author ? '<span style="color:#888;font-size:13px;display:inline-flex;align-items:center;gap:5px"><i class="bi bi-person-circle" aria-hidden="true"></i> ' + escHtml(n.author) + '</span>' : '';
+  modal.innerHTML = '<div style="background:#fff;max-width:760px;width:100%;margin:auto;border-radius:18px;direction:rtl;box-shadow:0 12px 40px rgba(0,0,0,0.4);overflow:hidden">' +
+    '<div style="height:300px;background-image:url(\'' + escHtml(n.img) + '\');background-size:cover;background-position:center;position:relative">' +
+      '<button onclick="closeNewsArticle()" aria-label="סגור כתבה" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.95);border:0;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center">&times;</button>' +
+      '<span style="position:absolute;bottom:14px;right:14px;background:var(--primary);color:#fff;padding:6px 16px;border-radius:20px;font-size:0.85rem;font-weight:700">' + escHtml(n.cat || '') + '</span>' +
     '</div>' +
-    '<div style="padding:24px">' +
-      '<div style="color:#888;font-size:13px;margin-bottom:8px"><i class="bi bi-calendar3"></i> ' + n.date + '</div>' +
-      '<h2 style="margin-bottom:14px;color:var(--primary)">' + n.title + '</h2>' +
-      '<p style="line-height:1.7;color:#333;white-space:pre-wrap">' + fullText + '</p>' +
-      '<div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;display:flex;gap:10px">' +
-        '<button onclick="shareWA(\'' + encodeURIComponent(n.title) + '\')" style="background:#25d366;color:white;border:0;padding:10px 18px;border-radius:8px;cursor:pointer"><i class="bi bi-whatsapp"></i> שתף</button>' +
-        '<button onclick="document.getElementById(\'articleModal\').style.display=\'none\'" style="background:#666;color:white;border:0;padding:10px 18px;border-radius:8px;cursor:pointer">סגור</button>' +
+    '<div style="padding:30px">' +
+      '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:14px">' +
+        '<span style="color:#888;font-size:13px;display:inline-flex;align-items:center;gap:5px"><i class="bi bi-calendar3" aria-hidden="true"></i> ' + escHtml(n.date || '') + '</span>' +
+        author +
+      '</div>' +
+      '<h2 id="articleModalTitle" style="margin-bottom:18px;color:var(--primary-dark);font-size:1.7rem;line-height:1.4">' + escHtml(n.title) + '</h2>' +
+      '<div style="line-height:1.85;color:#2c3e50;font-size:1.05rem">' + paragraphs + '</div>' +
+      '<div style="margin-top:28px;padding-top:18px;border-top:1px solid #eee;display:flex;gap:10px;flex-wrap:wrap">' +
+        '<button onclick="shareWA(\'' + encodeURIComponent(n.title) + '\')" style="background:#25d366;color:#fff;border:0;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:Heebo;font-weight:600"><i class="bi bi-whatsapp" aria-hidden="true"></i> שתף בוואטסאפ</button>' +
+        '<button onclick="window.print()" style="background:var(--primary);color:#fff;border:0;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:Heebo;font-weight:600"><i class="bi bi-printer" aria-hidden="true"></i> הדפס</button>' +
+        '<button onclick="closeNewsArticle()" style="background:#e0e0e0;color:#333;border:0;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:Heebo;font-weight:600;margin-inline-start:auto">סגור</button>' +
       '</div>' +
     '</div></div>';
 }
+function closeNewsArticle() {
+  var m = document.getElementById('articleModal');
+  if (m) m.style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var m = document.getElementById('articleModal');
+    if (m && m.style.display === 'flex') closeNewsArticle();
+  }
+});
 
 // ===== HERO SLIDESHOW =====
 var currentSlide = 0;
