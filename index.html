@@ -1408,7 +1408,9 @@ body.dark .phone-item { background: #16213e; }
     </div>
     <div class="news-grid fade-up" id="newsGrid"></div>
     <div class="text-center mt-4 fade-up">
-      <button class="tab-btn" onclick="showToast('בקרוב — ארכיון חדשות')">הצג עוד <i class="bi bi-arrow-down"></i></button>
+      <button class="tab-btn" onclick="showToast('בעז\'\'ה ארכיון החדשות יתווסף בקרוב')" aria-label="הצג עוד חדשות">
+        <i class="bi bi-arrow-down" aria-hidden="true"></i> הצג עוד חדשות
+      </button>
     </div>
   </div>
 </section>
@@ -1517,27 +1519,57 @@ body.dark .phone-item { background: #16213e; }
     </div>
     <div class="project-cards fade-up">
       <div class="project-card">
-        <div class="project-card-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/PikiWiki_Israel_5765_Judean_mountains.jpg/640px-PikiWiki_Israel_5765_Judean_mountains.jpg')"></div>
+        <div class="project-card-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/PikiWiki_Israel_5765_Judean_mountains.jpg/640px-PikiWiki_Israel_5765_Judean_mountains.jpg')" role="img" aria-label="שכונת קרית נוף"></div>
         <div class="project-card-body">
           <h4>קרית נוף — שכונת ההרחבה</h4>
-          <p>שכונת הרחבה חדשה. אבן פינה הונחה בתשע"ה (2015). קהילת ביאלא עברה בהמוניה לאזור ההרחבה.</p>
-          <span class="project-status status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem"></i> בביצוע</span>
+          <p>שכונת הרחבה חדשה. אבן פינה הונחה בתשע"ה. קהילת ביאלא עברה בהמוניה לאזור ההרחבה.</p>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>יח"ד מתוכננות:</strong> 120 | <strong>יח"ד מאוכלסות:</strong> 65</p>
+          <span class="project-status status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בביצוע</span>
         </div>
       </div>
       <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#1565c0,#42a5f5)"><i class="bi bi-building" style="font-size:3rem;color:#fff"></i></div>
+        <div class="project-card-img" style="background:linear-gradient(135deg,#1565c0,#42a5f5)" role="img" aria-label="מרכז מסחרי"><i class="bi bi-building" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
         <div class="project-card-body">
           <h4>מרכז מסחרי חדש</h4>
-          <p>חנויות, מרפאה ומשרדים במרכז הישוב.</p>
-          <span class="project-status status-planned"><i class="bi bi-circle-fill" style="font-size:0.5rem"></i> בתכנון</span>
+          <p>חנויות, מרפאה ומשרדים במרכז הישוב. אישור תב"ע 2026.</p>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>שטח:</strong> 1,200 מ"ר | <strong>חניות:</strong> 40</p>
+          <span class="project-status status-planned"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בתכנון</span>
         </div>
       </div>
       <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#2e7d32,#66bb6a)"><i class="bi bi-tree" style="font-size:3rem;color:#fff"></i></div>
+        <div class="project-card-img" style="background:linear-gradient(135deg,#2e7d32,#66bb6a)" role="img" aria-label="פארק קהילתי"><i class="bi bi-tree" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
         <div class="project-card-body">
           <h4>פארק קהילתי</h4>
           <p>מתקני משחק, מסלולי הליכה וגינה קהילתית.</p>
-          <span class="project-status status-done"><i class="bi bi-circle-fill" style="font-size:0.5rem"></i> הושלם</span>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>שטח:</strong> 4 דונם | <strong>מתקנים:</strong> 8</p>
+          <span class="project-status status-done"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> הושלם</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-card-img" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc)" role="img" aria-label="בית כנסת חדש"><i class="bi bi-house-heart" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
+        <div class="project-card-body">
+          <h4>בית כנסת בית מדרש חדש</h4>
+          <p>בית כנסת ובית מדרש בשכונת ההרחבה. תכנון ומימון מתקדם.</p>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>קיבולת:</strong> 200 מתפללים</p>
+          <span class="project-status status-planned"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בתכנון</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-card-img" style="background:linear-gradient(135deg,#e65100,#ff9800)" role="img" aria-label="כביש כניסה"><i class="bi bi-signpost-2" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
+        <div class="project-card-body">
+          <h4>שיפוץ כביש הכניסה</h4>
+          <p>סלילה מחדש של כביש הכניסה הראשי לישוב, מתחם בטיחות ותאורה.</p>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>אורך:</strong> 1.8 ק"מ | <strong>הסתיים:</strong> ניסן תשפ"ו</p>
+          <span class="project-status status-done"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> הושלם</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-card-img" style="background:linear-gradient(135deg,#0d47a1,#1976d2)" role="img" aria-label="מקווה חדש"><i class="bi bi-droplet-fill" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
+        <div class="project-card-body">
+          <h4>מקווה נשים — שיפוץ</h4>
+          <p>שיפוץ מקיף של מקווה הנשים ושדרוג מערכות החימום.</p>
+          <p style="font-size:0.85rem;margin-top:6px"><strong>צפי סיום:</strong> סיון תשפ"ו</p>
+          <span class="project-status status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בביצוע</span>
         </div>
       </div>
     </div>
@@ -1552,12 +1584,44 @@ body.dark .phone-item { background: #16213e; }
       <div class="section-line"></div>
     </div>
     <div class="edu-cards fade-up">
-      <div class="edu-card"><i class="bi bi-book"></i><h4>חדר לבנים</h4><p>תלמוד תורה לבנים בכל הגילאים.</p></div>
-      <div class="edu-card"><i class="bi bi-journal-richtext"></i><h4>ת"ת אידיש (ביאלא)</h4><p>תלמוד תורה בשפת האידיש לקהילת ביאלא.</p></div>
-      <div class="edu-card"><i class="bi bi-backpack"></i><h4>בית יעקב</h4><p>בית ספר לבנות עם תכנית לימודים עשירה.</p></div>
-      <div class="edu-card"><i class="bi bi-flower1"></i><h4>גני ילדים ומעונות</h4><p>גנים ומעונות יום (עמותת אלעידא). קוד מוסד: 26094.</p></div>
-      <div class="edu-card"><i class="bi bi-people"></i><h4>כולל "שבות עמי"</h4><p>כולל אברכים, בעיקר לעולי חבר המדינות.</p></div>
-      <div class="edu-card"><i class="bi bi-house"></i><h4>מתנ"ס ושיעורים</h4><p>חוגים, שיעורי תורה, פעילויות קהילתיות לכל הגילאים.</p></div>
+      <div class="edu-card">
+        <i class="bi bi-book" aria-hidden="true"></i>
+        <h4>חדר לבנים</h4>
+        <p>תלמוד תורה לבנים מגיל 3 ועד גיל בר מצווה</p>
+        <p><strong>שעות:</strong> 08:00-13:30</p>
+        <a href="tel:0299317670" class="phone-link alt" style="margin-top:10px"><i class="bi bi-telephone-fill" aria-hidden="true"></i> פרטים</a>
+      </div>
+      <div class="edu-card">
+        <i class="bi bi-journal-richtext" aria-hidden="true"></i>
+        <h4>ת"ת אידיש (ביאלא)</h4>
+        <p>תלמוד תורה בשפת האידיש לקהילת חסידות ביאלא</p>
+        <p><strong>שעות:</strong> 08:30-14:00</p>
+      </div>
+      <div class="edu-card">
+        <i class="bi bi-backpack" aria-hidden="true"></i>
+        <h4>בית יעקב</h4>
+        <p>בית ספר לבנות עם תכנית לימודים עשירה: לימודי קודש וחול</p>
+        <p><strong>שעות:</strong> 08:00-14:00</p>
+      </div>
+      <div class="edu-card">
+        <i class="bi bi-flower1" aria-hidden="true"></i>
+        <h4>גני ילדים ומעונות</h4>
+        <p>גנים ומעונות יום (עמותת אלעידא)</p>
+        <p><strong>קוד מוסד:</strong> 26094</p>
+        <p><strong>גילאים:</strong> 3 חודשים עד 4 שנים</p>
+      </div>
+      <div class="edu-card">
+        <i class="bi bi-people" aria-hidden="true"></i>
+        <h4>כולל "שבות עמי"</h4>
+        <p>כולל אברכים, בעיקר לעולי חבר המדינות</p>
+        <p><strong>סדרים:</strong> בוקר וערב</p>
+      </div>
+      <div class="edu-card">
+        <i class="bi bi-house" aria-hidden="true"></i>
+        <h4>מתנ"ס ושיעורים</h4>
+        <p>חוגים, שיעורי תורה ופעילויות קהילתיות לכל הגילאים</p>
+        <p><strong>חוגים:</strong> ילדים, נשים, גברים</p>
+      </div>
     </div>
   </div>
 </section>
