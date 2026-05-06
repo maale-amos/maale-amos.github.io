@@ -990,7 +990,7 @@ body.dark .search-result-item { background: #1a2744; color: #e0e0e0; }
   color: var(--text-light);
 }
 
-/* ===== ANNOUNCEMENTS (הודעות מהוועד) ===== */
+/* ===== ANNOUNCEMENTS (הודעות המזכירות) ===== */
 .announcements-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1196,6 +1196,159 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   }
 }
 
+/* ===== EXPANDABLE BANNERS (leaders, stores, tzimers, newspaper, housing) ===== */
+.banner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.banner-card {
+  background: #fff;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: var(--transition);
+  border-top: 4px solid var(--primary);
+  position: relative;
+}
+.banner-card:hover { box-shadow: var(--card-hover); transform: translateY(-4px); }
+body.dark .banner-card { background: #16213e; }
+.banner-card-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--sand);
+  position: relative;
+}
+.banner-card-img.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #fff; font-size: 3rem;
+}
+.banner-card-body { padding: 18px 20px; }
+.banner-card-body h4 {
+  font-weight: 800; font-size: 1.05rem; margin-bottom: 6px;
+  color: var(--primary-dark);
+}
+body.dark .banner-card-body h4 { color: var(--accent-light); }
+.banner-card-body p {
+  font-size: 0.9rem; color: var(--text-light); line-height: 1.6;
+  margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.banner-card-body .open-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.82rem; color: var(--primary); font-weight: 600;
+}
+.banner-card-body .phone-call {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 8px; padding: 6px 14px;
+  background: var(--primary); color: #fff;
+  border-radius: 50px; text-decoration: none;
+  font-weight: 700; font-size: 0.85rem;
+  transition: var(--transition);
+}
+.banner-card-body .phone-call:hover { background: var(--primary-dark); }
+
+/* Banner detail modal */
+.banner-modal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 3500; padding: 20px; overflow-y: auto;
+  align-items: flex-start; justify-content: center;
+}
+.banner-modal.active { display: flex; animation: fadeIn 0.2s; }
+.banner-modal-content {
+  background: #fff; border-radius: var(--radius); max-width: 920px;
+  width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden;
+  margin: auto; direction: rtl;
+}
+body.dark .banner-modal-content { background: #16213e; color: #e0e0e0; }
+.banner-modal-close {
+  position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.95);
+  border: 0; width: 42px; height: 42px; border-radius: 50%;
+  font-size: 22px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center; z-index: 5;
+}
+.banner-modal-hero {
+  height: 320px; background-size: cover; background-position: center;
+  position: relative;
+}
+.banner-modal-hero.placeholder {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 4rem;
+}
+.banner-modal-body { padding: 32px; }
+.banner-modal-body h2 {
+  font-weight: 900; font-size: 1.8rem;
+  color: var(--primary-dark); margin-bottom: 14px;
+}
+body.dark .banner-modal-body h2 { color: var(--accent-light); }
+.banner-modal-body .article {
+  line-height: 1.85; font-size: 1.02rem;
+  color: var(--text); margin-bottom: 20px; white-space: pre-wrap;
+}
+body.dark .banner-modal-body .article { color: #d0d0d0; }
+.banner-modal-gallery {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px; margin-top: 16px;
+}
+.banner-modal-gallery img {
+  width: 100%; height: 130px; object-fit: cover; border-radius: 10px;
+  cursor: zoom-in; transition: var(--transition);
+}
+.banner-modal-gallery img:hover { transform: scale(1.04); }
+.banner-modal-pdfs {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px;
+}
+.banner-modal-pdfs a {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; background: var(--accent); color: var(--primary-dark);
+  border-radius: 50px; text-decoration: none; font-weight: 700;
+  font-size: 0.92rem; transition: var(--transition);
+}
+.banner-modal-pdfs a:hover { background: var(--accent-light); transform: translateY(-2px); }
+.banner-modal-meta {
+  display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px;
+  font-size: 0.88rem; color: var(--text-light);
+}
+.banner-modal-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.banner-modal-phone {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; background: var(--primary); color: #fff;
+  border-radius: 50px; text-decoration: none; font-weight: 700;
+  margin-top: 8px;
+}
+.banner-modal-phone:hover { background: var(--primary-dark); color: #fff; }
+
+/* Admin help block */
+.admin-help {
+  background: #fffbe6; border: 1px solid #ffe58f; border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 16px; font-size: 0.88rem;
+  color: #856404; line-height: 1.7;
+}
+body.dark .admin-help { background: #2a2418; border-color: #5a4818; color: #f5c542; }
+.admin-help i { color: #d49b00; margin-left: 4px; }
+.admin-help b { color: #b8870c; }
+
+/* Admin multi-image upload */
+.multi-img-list {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+}
+.multi-img-list .img-thumb {
+  position: relative; width: 80px; height: 80px;
+  border-radius: 8px; overflow: hidden; background: #eee;
+}
+.multi-img-list .img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.multi-img-list .img-thumb .rm {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(220,53,69,0.9); color: #fff;
+  border: none; border-radius: 50%; width: 22px; height: 22px;
+  font-size: 14px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+
 /* ===== PHONE DIRECTORY ===== */
 .phone-item {
   display: flex; align-items: center; gap: 12px; padding: 12px 16px;
@@ -1280,15 +1433,15 @@ body.dark .phone-item { background: #16213e; }
         <li>
           <a href="#marketplace">עסקים <i class="bi bi-chevron-down"></i></a>
           <div class="dropdown-mega">
-            <a href="#marketplace"><i class="bi bi-cart"></i> קניות</a>
-            <a href="#marketplace"><i class="bi bi-cup-hot"></i> פנאי ונופש</a>
+            <a href="#stores"><i class="bi bi-bag-check"></i> קניות</a>
+            <a href="#tzimer"><i class="bi bi-cup-hot"></i> פנאי ונופש</a>
             <a href="#marketplace"><i class="bi bi-person-badge"></i> נותני שירות</a>
           </div>
         </li>
         <li>
           <a href="#news">חדשות <i class="bi bi-chevron-down" aria-hidden="true"></i></a>
           <div class="dropdown-mega">
-            <a href="#announcements"><i class="bi bi-megaphone" aria-hidden="true"></i> הודעות מהוועד</a>
+            <a href="#announcements"><i class="bi bi-megaphone" aria-hidden="true"></i> הודעות המזכירות</a>
             <a href="#news"><i class="bi bi-newspaper" aria-hidden="true"></i> חדשות</a>
             <a href="#simchot"><i class="bi bi-emoji-smile" aria-hidden="true"></i> שמחות</a>
             <a href="#security"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> חירום</a>
@@ -1325,28 +1478,8 @@ body.dark .phone-item { background: #16213e; }
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
   <div class="hero-content">
-    <svg width="120" height="120" viewBox="0 0 200 200" style="margin-bottom:18px;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.4))" role="img" aria-label="לוגו מעלה עמוס">
-      <defs>
-        <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#d4a514"/>
-        </linearGradient>
-        <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#1a4d8a"/>
-          <stop offset="100%" stop-color="#4a7eb8"/>
-        </linearGradient>
-      </defs>
-      <circle cx="100" cy="100" r="95" fill="url(#circleGrad)" stroke="#fff" stroke-width="3"/>
-      <path d="M 30,140 L 70,80 L 100,110 L 140,60 L 170,140 Z" fill="url(#mountainGrad)" opacity="0.95"/>
-      <circle cx="140" cy="60" r="15" fill="#fff7d6" opacity="0.9"/>
-      <g transform="translate(100,160)">
-        <path d="M 0,-12 L 10.4,6 L -10.4,6 Z" fill="#fff" opacity="0.95"/>
-        <path d="M 0,12 L -10.4,-6 L 10.4,-6 Z" fill="#fff" opacity="0.95"/>
-      </g>
-      <text x="100" y="36" text-anchor="middle" fill="#fff" font-family="Frank Ruhl Libre,serif" font-size="14" font-weight="700">מעלה עמוס</text>
-    </svg>
     <h1 style="font-family:'Frank Ruhl Libre',serif;font-size:4rem;font-weight:900;letter-spacing:3px;text-shadow:3px 3px 12px rgba(0,0,0,0.6);background:linear-gradient(135deg,#fff,#fff7d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">מעלה עמוס</h1>
-    <p class="tagline" style="font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;letter-spacing:6px;color:#fff7d6;text-shadow:2px 2px 8px rgba(0,0,0,0.6);margin-top:8px">בס"ד · תורה · קהילה · ישוב הדעת</p>
+    <p class="tagline" style="font-family:'Frank Ruhl Libre',serif;font-size:1.4rem;letter-spacing:6px;color:#fff7d6;text-shadow:2px 2px 8px rgba(0,0,0,0.6);margin-top:8px">תורה · קהילה · ישוב הדעת</p>
     <div class="hero-search" role="search">
       <div class="hero-search-heading" style="margin-bottom:14px;text-align:center">
         <div style="font-size:1.35rem;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.6);margin-bottom:4px">מה תרצו למצוא ביישוב?</div>
@@ -1356,7 +1489,7 @@ body.dark .phone-item { background: #16213e; }
       <input type="search" placeholder="הקלידו מילה והתשובה מיד..." id="siteSearch" oninput="searchSite(this.value)" onfocus="if(this.value)searchSite(this.value)" aria-label="חיפוש באתר">
     </div>
     <div class="hero-quick-links" role="navigation" aria-label="קישורים מהירים">
-      <a href="#announcements" aria-label="הודעות מהוועד"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות מהוועד</a>
+      <a href="#announcements" aria-label="הודעות המזכירות"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות המזכירות</a>
       <a href="#contact" aria-label="פנייה מקוונת"><i class="bi bi-envelope" aria-hidden="true"></i> פנייה מקוונת</a>
       <a href="#events" aria-label="לוח אירועים"><i class="bi bi-calendar3" aria-hidden="true"></i> לוח אירועים</a>
       <a href="#security" aria-label="ביטחון"><i class="bi bi-shield-check" aria-hidden="true"></i> ביטחון</a>
@@ -1408,24 +1541,17 @@ body.dark .phone-item { background: #16213e; }
   <div id="searchResultsBody"></div>
 </div>
 
-<!-- ===== DAILY TORAH ===== -->
-<section style="padding:24px 0;background:linear-gradient(135deg,#f5f0e6,#fff8e1);border-bottom:1px solid #e0d5b8">
-  <div class="container">
-    <div id="dailyTorah" style="text-align:center;max-width:600px;margin:0 auto"></div>
-  </div>
-</section>
-
-<!-- ===== ANNOUNCEMENTS — הודעות מהוועד ===== -->
+<!-- ===== ANNOUNCEMENTS — הודעות המזכירות ===== -->
 <section class="section" id="announcements" aria-labelledby="announcementsTitle">
   <div class="container">
     <div class="section-header fade-up">
-      <h2 id="announcementsTitle"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות מהוועד</h2>
+      <h2 id="announcementsTitle"><i class="bi bi-megaphone-fill" aria-hidden="true"></i> הודעות המזכירות</h2>
       <div class="section-line"></div>
-      <p>עדכונים חשובים, החלטות והכרזות רשמיות מועד הישוב</p>
+      <p>עדכונים חשובים, החלטות והכרזות רשמיות ממזכירות הישוב</p>
     </div>
     <div class="announcements-list fade-up" id="announcementsList"></div>
     <div class="text-center mt-4 fade-up">
-      <button class="tab-btn" onclick="showToast('ארכיון הודעות מהוועד יתווסף בעז\'\'ה')" aria-label="הצג הודעות נוספות מהארכיון">
+      <button class="tab-btn" onclick="showToast('ארכיון הודעות המזכירות יתווסף בעז\'\'ה')" aria-label="הצג הודעות נוספות מהארכיון">
         <i class="bi bi-archive" aria-hidden="true"></i> ארכיון הודעות
       </button>
     </div>
@@ -1549,11 +1675,12 @@ body.dark .phone-item { background: #16213e; }
       <button class="topic-tab" data-topic="security" onclick="showTopic('security',this)" role="tab"><i class="bi bi-shield-check" aria-hidden="true"></i> ביטחון</button>
       <button class="topic-tab" data-topic="shuls" onclick="showTopic('shuls',this)" role="tab"><i class="bi bi-book" aria-hidden="true"></i> בתי כנסת</button>
       <button class="topic-tab" data-topic="community" onclick="showTopic('community',this)" role="tab"><i class="bi bi-people" aria-hidden="true"></i> חיי קהילה</button>
-      <button class="topic-tab" data-topic="leadership" onclick="showTopic('leadership',this)" role="tab"><i class="bi bi-people-fill" aria-hidden="true"></i> ועד מקומי</button>
-      <button class="topic-tab" data-topic="parasha" onclick="showTopic('parasha',this)" role="tab"><i class="bi bi-book-half" aria-hidden="true"></i> פרשת השבוע</button>
+      <button class="topic-tab" data-topic="leadership" onclick="showTopic('leadership',this)" role="tab"><i class="bi bi-people-fill" aria-hidden="true"></i> הנהלת הישוב</button>
+      <button class="topic-tab" data-topic="newspaper" onclick="showTopic('newspaper',this)" role="tab"><i class="bi bi-newspaper" aria-hidden="true"></i> ועדת העיתון</button>
+      <button class="topic-tab" data-topic="stores" onclick="showTopic('stores',this)" role="tab"><i class="bi bi-bag-check" aria-hidden="true"></i> קניות</button>
       <button class="topic-tab" data-topic="shabbat" onclick="showTopic('shabbat',this)" role="tab"><i class="bi bi-sun" aria-hidden="true"></i> זמני שבת</button>
       <button class="topic-tab" data-topic="attractions" onclick="showTopic('attractions',this)" role="tab"><i class="bi bi-compass" aria-hidden="true"></i> אטרקציות</button>
-      <button class="topic-tab" data-topic="tzimer" onclick="showTopic('tzimer',this)" role="tab"><i class="bi bi-house-door" aria-hidden="true"></i> צימרים</button>
+      <button class="topic-tab" data-topic="tzimer" onclick="showTopic('tzimer',this)" role="tab"><i class="bi bi-house-door" aria-hidden="true"></i> פנאי ונופש</button>
       <button class="topic-tab" data-topic="streets" onclick="showTopic('streets',this)" role="tab"><i class="bi bi-signpost-2" aria-hidden="true"></i> רחובות</button>
       <button class="topic-tab" data-topic="buses" onclick="showTopic('buses',this)" role="tab"><i class="bi bi-bus-front" aria-hidden="true"></i> תחבורה</button>
       <button class="topic-tab" data-topic="about" onclick="showTopic('about',this)" role="tab"><i class="bi bi-info-circle" aria-hidden="true"></i> אודות הישוב</button>
@@ -1578,69 +1705,15 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
-<!-- ===== HOUSING ===== -->
+<!-- ===== HOUSING — דיור ופיתוח ===== -->
 <section class="section" id="housing" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-building-add"></i> דיור ופיתוח</h2>
       <div class="section-line"></div>
+      <p>פרויקטים ושכונות בישוב — לחצו לצפייה בכתבה מלאה, תמונות ותכניות</p>
     </div>
-    <div class="project-cards fade-up">
-      <div class="project-card">
-        <div class="project-card-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/PikiWiki_Israel_5765_Judean_mountains.jpg/640px-PikiWiki_Israel_5765_Judean_mountains.jpg')" role="img" aria-label="שכונת קרית נוף"></div>
-        <div class="project-card-body">
-          <h4>קרית נוף — שכונת ההרחבה</h4>
-          <p>שכונת הרחבה חדשה. אבן פינה הונחה בתשע"ה. קהילת ביאלא עברה בהמוניה לאזור ההרחבה.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>יח"ד מתוכננות:</strong> 120 | <strong>יח"ד מאוכלסות:</strong> 65</p>
-          <span class="project-status status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בביצוע</span>
-        </div>
-      </div>
-      <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#1565c0,#42a5f5)" role="img" aria-label="מרכז מסחרי"><i class="bi bi-building" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
-        <div class="project-card-body">
-          <h4>מרכז מסחרי חדש</h4>
-          <p>חנויות, מרפאה ומשרדים במרכז הישוב. אישור תב"ע 2026.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>שטח:</strong> 1,200 מ"ר | <strong>חניות:</strong> 40</p>
-          <span class="project-status status-planned"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בתכנון</span>
-        </div>
-      </div>
-      <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#2e7d32,#66bb6a)" role="img" aria-label="פארק קהילתי"><i class="bi bi-tree" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
-        <div class="project-card-body">
-          <h4>פארק קהילתי</h4>
-          <p>מתקני משחק, מסלולי הליכה וגינה קהילתית.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>שטח:</strong> 4 דונם | <strong>מתקנים:</strong> 8</p>
-          <span class="project-status status-done"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> הושלם</span>
-        </div>
-      </div>
-      <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#6a1b9a,#ab47bc)" role="img" aria-label="בית כנסת חדש"><i class="bi bi-house-heart" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
-        <div class="project-card-body">
-          <h4>בית כנסת בית מדרש חדש</h4>
-          <p>בית כנסת ובית מדרש בשכונת ההרחבה. תכנון ומימון מתקדם.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>קיבולת:</strong> 200 מתפללים</p>
-          <span class="project-status status-planned"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בתכנון</span>
-        </div>
-      </div>
-      <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#e65100,#ff9800)" role="img" aria-label="כביש כניסה"><i class="bi bi-signpost-2" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
-        <div class="project-card-body">
-          <h4>שיפוץ כביש הכניסה</h4>
-          <p>סלילה מחדש של כביש הכניסה הראשי לישוב, מתחם בטיחות ותאורה.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>אורך:</strong> 1.8 ק"מ | <strong>הסתיים:</strong> ניסן תשפ"ו</p>
-          <span class="project-status status-done"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> הושלם</span>
-        </div>
-      </div>
-      <div class="project-card">
-        <div class="project-card-img" style="background:linear-gradient(135deg,#0d47a1,#1976d2)" role="img" aria-label="מקווה חדש"><i class="bi bi-droplet-fill" style="font-size:3rem;color:#fff" aria-hidden="true"></i></div>
-        <div class="project-card-body">
-          <h4>מקווה נשים — שיפוץ</h4>
-          <p>שיפוץ מקיף של מקווה הנשים ושדרוג מערכות החימום.</p>
-          <p style="font-size:0.85rem;margin-top:6px"><strong>צפי סיום:</strong> סיון תשפ"ו</p>
-          <span class="project-status status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> בביצוע</span>
-        </div>
-      </div>
-    </div>
+    <div class="banner-grid fade-up" id="housingGrid"></div>
   </div>
 </section>
 
@@ -1960,17 +2033,6 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </section>
 
-<!-- ===== PARASHA CARD ===== -->
-<section class="section" id="parasha" data-extra="1" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff">
-  <div class="container">
-    <div class="fade-up" style="max-width:700px;margin:0 auto;text-align:center">
-      <i class="bi bi-book" style="font-size:2.5rem;opacity:0.7"></i>
-      <h2 style="font-weight:900;margin:12px 0 6px" id="parashaTitle">פרשת השבוע</h2>
-      <div id="parashaContent" style="font-size:1.05rem;line-height:2;opacity:0.9"></div>
-    </div>
-  </div>
-</section>
-
 <!-- ===== SHABBAT TIMES ===== -->
 <section class="section" id="shabbat" data-extra="1">
   <div class="container">
@@ -1999,79 +2061,51 @@ body.dark .phone-item { background: #16213e; }
 
 <!-- Phone directory moved to residents area -->
 
-<!-- ===== LEADERSHIP ===== -->
+<!-- ===== LEADERSHIP — הנהלת הישוב ===== -->
 <section class="section" id="leadership" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
       <h2><i class="bi bi-diagram-3"></i> הנהלת הישוב</h2>
       <div class="section-line"></div>
+      <p>לחצו על כל באנר לצפייה בפרטים מלאים — תמונה, תיאור ופרטי קשר</p>
     </div>
-    <div class="services-grid fade-up">
-      <div class="service-card">
-        <div class="icon icon-green"><i class="bi bi-person-workspace"></i></div>
-        <h4>מזכיר הישוב</h4>
-        <p>איתן סעג</p>
-        <p style="font-size:0.78rem;color:var(--primary)">02-9931767</p>
-      </div>
-      <div class="service-card">
-        <div class="icon icon-blue"><i class="bi bi-people"></i></div>
-        <h4>רכז קהילה</h4>
-        <p>ריכוז ענייני הקהילה</p>
-        <p style="font-size:0.78rem;color:var(--primary)">kehila@maaleamos.org.il</p>
-      </div>
-      <div class="service-card">
-        <div class="icon icon-purple"><i class="bi bi-person-plus"></i></div>
-        <h4>רכז קליטה</h4>
-        <p>קליטת משפחות חדשות</p>
-        <p style="font-size:0.78rem;color:var(--primary)">klita@maaleamos.org.il</p>
-      </div>
-      <div class="service-card">
-        <div class="icon icon-gold"><i class="bi bi-heart"></i></div>
-        <h4>קופת הקהילה</h4>
-        <p>ארגון החסד</p>
-        <p style="font-size:0.78rem;color:var(--primary)">maaleamos.afd@gmail.com</p>
-      </div>
-      <div class="service-card">
-        <div class="icon icon-orange"><i class="bi bi-newspaper"></i></div>
-        <h4>ועדת עיתון</h4>
-        <p>קהילתון הישוב</p>
-        <p style="font-size:0.78rem;color:var(--primary)">maaleiton@gmail.com</p>
-      </div>
-      <div class="service-card">
-        <div class="icon icon-red"><i class="bi bi-shield-check"></i></div>
-        <h4>רכז ביטחון</h4>
-        <p>כוננות וביטחון שוטף</p>
-        <p style="font-size:0.78rem;color:var(--primary)">מוקד 106</p>
-      </div>
-    </div>
+    <div class="banner-grid fade-up" id="leadershipGrid"></div>
   </div>
 </section>
 
-<!-- ===== TZIMER ===== -->
+<!-- ===== NEWSPAPER COMMITTEE — ועדת העיתון ===== -->
+<section class="section" id="newspaper" data-extra="1">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2><i class="bi bi-newspaper"></i> ועדת העיתון — קהילתון</h2>
+      <div class="section-line"></div>
+      <p>עיתון הקהילה — לחצו לצפייה בעמוד הראשי של כל גיליון</p>
+    </div>
+    <div class="banner-grid fade-up" id="newspaperGrid"></div>
+  </div>
+</section>
+
+<!-- ===== TZIMER — פנאי ונופש - צימרים ותיירות ===== -->
 <section class="section" id="tzimer" data-extra="1">
   <div class="container">
     <div class="section-header fade-up">
-      <h2><i class="bi bi-house-heart"></i> צימר במעלה עמוס</h2>
+      <h2><i class="bi bi-house-heart"></i> פנאי ונופש — צימרים ומקומות אירוח</h2>
       <div class="section-line"></div>
-      <p>יחידת אירוח מפנקת בלב הישוב</p>
+      <p>צימרים, יחידות אירוח ומקומות תיירות במעלה עמוס וסביבה. לחצו על כל באנר לצפייה בתמונות ופרטים מלאים</p>
     </div>
-    <div class="about-grid fade-up">
-      <div class="about-text">
-        <h3>צימר מפנק במעלה עמוס</h3>
-        <p>דירת 3 חדרים מאובזרת לחלוטין בישוב החרדי מעלה עמוס. מושלמת למשפחות ולזוגות המחפשים שלווה ושקט בהרי יהודה.</p>
-        <p><i class="bi bi-check-circle text-success"></i> מיזוג אוויר</p>
-        <p><i class="bi bi-check-circle text-success"></i> אינטרנט מסונן (נטפרי)</p>
-        <p><i class="bi bi-check-circle text-success"></i> מרפסת עם פינת ישיבה וגריל</p>
-        <p><i class="bi bi-check-circle text-success"></i> אוכל בד"ץ זמין</p>
-        <p><i class="bi bi-check-circle text-success"></i> קרוב לאטרקציות: הרודיון, עין עמוס</p>
-        <div style="margin-top:16px">
-          <a href="tel:0533177636" style="display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:10px 24px;border-radius:50px;text-decoration:none;font-weight:700"><i class="bi bi-telephone"></i> אילה — 053-3177636</a>
-        </div>
-      </div>
-      <div class="about-visual" style="background-image:url('images/zimmer_maale_amos.jpg')">
-        <div class="about-visual-overlay"></div>
-      </div>
+    <div class="banner-grid fade-up" id="tzimerGrid"></div>
+  </div>
+</section>
+
+<!-- ===== STORES — קניות ועסקים מקומיים ===== -->
+<section class="section" id="stores" data-extra="1">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2><i class="bi bi-bag-check"></i> קניות — חנויות ועסקים בישוב</h2>
+      <div class="section-line"></div>
+      <p>סופר וחנויות הפועלות במעלה עמוס. לחצו על מספר הטלפון להתקשרות ישירה</p>
     </div>
+    <div class="banner-grid fade-up" id="storesGrid"></div>
   </div>
 </section>
 
@@ -2423,6 +2457,11 @@ body.dark .phone-item { background: #16213e; }
   </div>
 </footer>
 
+<!-- ===== BANNER DETAIL MODAL ===== -->
+<div class="banner-modal" id="bannerModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeBannerModal()">
+  <div class="banner-modal-content" id="bannerModalContent"></div>
+</div>
+
 <!-- ===== ADMIN CMS OVERLAY ===== -->
 <div class="admin-overlay" id="adminOverlay">
   <div class="admin-panel">
@@ -2449,8 +2488,14 @@ body.dark .phone-item { background: #16213e; }
           <button class="admin-tab" onclick="switchAdminTab('simchot',this)"><i class="bi bi-stars"></i> שמחות</button>
           <button class="admin-tab" onclick="switchAdminTab('market',this)"><i class="bi bi-shop"></i> מודעות</button>
           <button class="admin-tab" onclick="switchAdminTab('gemachim',this)"><i class="bi bi-heart"></i> גמ"חים</button>
+          <button class="admin-tab" onclick="switchAdminTab('leadership',this)"><i class="bi bi-people-fill"></i> הנהלת הישוב</button>
+          <button class="admin-tab" onclick="switchAdminTab('newspaper',this)"><i class="bi bi-newspaper"></i> ועדת העיתון</button>
+          <button class="admin-tab" onclick="switchAdminTab('housing',this)"><i class="bi bi-building-add"></i> דיור ופיתוח</button>
+          <button class="admin-tab" onclick="switchAdminTab('stores',this)"><i class="bi bi-bag-check"></i> קניות</button>
+          <button class="admin-tab" onclick="switchAdminTab('tzimer',this)"><i class="bi bi-house-heart"></i> פנאי ונופש</button>
           <button class="admin-tab" onclick="switchAdminTab('families',this)"><i class="bi bi-telephone"></i> משפחות</button>
           <button class="admin-tab" onclick="switchAdminTab('ticker',this)"><i class="bi bi-megaphone"></i> טיקר</button>
+          <button class="admin-tab" onclick="switchAdminTab('announcements',this)"><i class="bi bi-megaphone-fill"></i> הודעות המזכירות</button>
           <button class="admin-tab" onclick="switchAdminTab('residents',this)"><i class="bi bi-person-vcard"></i> תושבים</button>
           <button class="admin-tab" onclick="switchAdminTab('settings',this)"><i class="bi bi-gear"></i> הגדרות</button>
         </div>
@@ -2528,6 +2573,164 @@ body.dark .phone-item { background: #16213e; }
           <button class="btn-admin btn-admin-primary" onclick="addGemach()"><i class="bi bi-plus-circle"></i> הוסף גמ"ח</button>
           <hr style="margin:20px 0"><h5>גמ"חים:</h5>
           <ul class="admin-item-list" id="adminGemachList"></ul>
+        </div>
+
+        <!-- LEADERSHIP ADMIN -->
+        <div class="admin-section" id="admin-leadership">
+          <h4 style="margin-bottom:8px">ניהול באנרים — הנהלת הישוב</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>איך מוסיפים באנר?</b> מלאו את כל השדות, העלו תמונה של האדם, ולחצו "הוסף באנר". הבאנר יופיע בלשונית "הנהלת הישוב" כאשר התושבים יבחרו בה. כל באנר ניתן לחיצה ויפתח חלון עם תמונה גדולה ופרטים מלאים.
+          </div>
+          <div class="admin-form-group"><label>שם / תפקיד באנר (לדוגמה: ועד מקומי, מזכיר הישוב, רכז קהילה)</label><input id="leadTitle" placeholder="מזכיר הישוב"></div>
+          <div class="admin-form-group"><label>שם האדם המכהן</label><input id="leadPerson" placeholder="שם פרטי ושם משפחה"></div>
+          <div class="admin-form-group"><label>תיאור קצר (יוצג על הבאנר)</label><input id="leadShort" placeholder="ניהול שוטף של ענייני הישוב"></div>
+          <div class="admin-form-group"><label>טקסט מורחב (יוצג בחלון שייפתח)</label><textarea id="leadFull" rows="5" placeholder="פרטים נוספים על האדם, תפקידו, ניסיונו וכדומה"></textarea></div>
+          <div class="admin-form-group"><label>טלפון ליצירת קשר</label><input id="leadPhone" placeholder="02-9931767"></div>
+          <div class="admin-form-group"><label>אימייל</label><input id="leadEmail" placeholder="email@maaleamos.org.il"></div>
+          <div class="admin-form-group"><label>תמונה (קישור או העלאה — מוצגת בצד שמאל בחלון)</label>
+            <input id="leadImg" placeholder="https://...">
+            <div class="img-upload-area" onclick="document.getElementById('leadFileInput').click()" style="margin-top:8px">
+              <i class="bi bi-cloud-arrow-up" style="font-size:1.5rem;color:var(--primary)"></i>
+              <p style="margin:2px 0 0;font-size:0.8rem">או לחצו להעלות תמונה</p>
+              <input type="file" id="leadFileInput" accept="image/*" onchange="handleCmsImageUpload(this,'leadImgPreview');document.getElementById('leadImg').value='uploaded'">
+              <img id="leadImgPreview" class="img-preview" style="display:none">
+            </div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addLeader()"><i class="bi bi-plus-circle"></i> הוסף באנר</button>
+          <hr style="margin:20px 0"><h5>באנרים קיימים:</h5>
+          <ul class="admin-item-list" id="adminLeadershipList"></ul>
+        </div>
+
+        <!-- NEWSPAPER ADMIN -->
+        <div class="admin-section" id="admin-newspaper">
+          <h4 style="margin-bottom:8px">ניהול גיליונות — ועדת העיתון</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>איך מוסיפים גיליון?</b> כל שבוע מעלים תמונה של העמוד הראשי של העיתון (קהילתון). מלאו את שם הגיליון/פרשה והעלו את תמונת העמוד. תושבים יוכלו ללחוץ ולראות את הגיליון בגדול.
+          </div>
+          <div class="admin-form-group"><label>שם הגיליון / פרשת השבוע</label><input id="paperTitle" placeholder="גיליון פרשת בהר תשפ&quot;ו"></div>
+          <div class="admin-form-group"><label>תאריך</label><input id="paperDate" placeholder="כ&quot;ז בניסן תשפ&quot;ו"></div>
+          <div class="admin-form-group"><label>תקציר / נושא הגיליון (אופציונלי)</label><textarea id="paperDesc" rows="3" placeholder="כתבת השער, מאמרי דעה, סיקור אירועים..."></textarea></div>
+          <div class="admin-form-group"><label>תמונת העמוד הראשי</label>
+            <input id="paperImg" placeholder="https://...">
+            <div class="img-upload-area" onclick="document.getElementById('paperFileInput').click()" style="margin-top:8px">
+              <i class="bi bi-cloud-arrow-up" style="font-size:1.5rem;color:var(--primary)"></i>
+              <p style="margin:2px 0 0;font-size:0.8rem">לחצו להעלות תמונה של עמוד הקהילתון</p>
+              <input type="file" id="paperFileInput" accept="image/*" onchange="handleCmsImageUpload(this,'paperImgPreview');document.getElementById('paperImg').value='uploaded'">
+              <img id="paperImgPreview" class="img-preview" style="display:none">
+            </div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addNewspaper()"><i class="bi bi-plus-circle"></i> הוסף גיליון</button>
+          <hr style="margin:20px 0"><h5>גיליונות קיימים:</h5>
+          <ul class="admin-item-list" id="adminNewspaperList"></ul>
+        </div>
+
+        <!-- HOUSING ADMIN -->
+        <div class="admin-section" id="admin-housing">
+          <h4 style="margin-bottom:8px">ניהול באנרים — דיור ופיתוח</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>איך מוסיפים באנר?</b> מלאו כותרת, סטטוס וכתבה. ניתן להעלות <b>תמונה ראשית</b> שתוצג על הבאנר, וכן <b>תמונות נוספות</b> וקבצי <b>PDF של תכניות</b> שיוצגו בחלון הגדול שייפתח בלחיצה. התושבים ילחצו על הבאנר כדי לקרוא את הכתבה המלאה ולצפות בקבצים.
+          </div>
+          <div class="admin-form-group"><label>כותרת הפרויקט</label><input id="housingTitle" placeholder="קרית נוף — שכונת ההרחבה"></div>
+          <div class="admin-form-group"><label>תיאור קצר (יוצג על הבאנר)</label><input id="housingShort" placeholder="שכונת הרחבה חדשה — 120 יח&quot;ד"></div>
+          <div class="admin-form-group"><label>סטטוס</label>
+            <select id="housingStatus">
+              <option value="planned">בתכנון</option>
+              <option value="active">בביצוע</option>
+              <option value="done">הושלם</option>
+            </select>
+          </div>
+          <div class="admin-form-group"><label>כתבה מלאה</label><textarea id="housingFull" rows="6" placeholder="פרטים מלאים על הפרויקט — שלבי ביצוע, תכניות, תאריכים, אנשי קשר..."></textarea></div>
+          <div class="admin-form-group"><label>תמונה ראשית</label>
+            <input id="housingImg" placeholder="https://...">
+            <div class="img-upload-area" onclick="document.getElementById('housingFileInput').click()" style="margin-top:8px">
+              <i class="bi bi-cloud-arrow-up" style="font-size:1.5rem;color:var(--primary)"></i>
+              <p style="margin:2px 0 0;font-size:0.8rem">לחצו להעלות תמונה ראשית</p>
+              <input type="file" id="housingFileInput" accept="image/*" onchange="handleCmsImageUpload(this,'housingImgPreview');document.getElementById('housingImg').value='uploaded'">
+              <img id="housingImgPreview" class="img-preview" style="display:none">
+            </div>
+          </div>
+          <div class="admin-form-group"><label>תמונות נוספות (גלריה — אפשר להעלות מספר תמונות)</label>
+            <input type="file" id="housingExtraImgs" accept="image/*" multiple onchange="handleMultiImageUpload(this,'housingExtraPreview','housingExtraData')">
+            <div class="multi-img-list" id="housingExtraPreview"></div>
+          </div>
+          <div class="admin-form-group"><label>קבצי PDF של תכניות (אופציונלי — אפשר מספר קבצים)</label>
+            <input type="file" id="housingPdfs" accept="application/pdf" multiple onchange="handleMultiPdfUpload(this,'housingPdfPreview','housingPdfData')">
+            <div id="housingPdfPreview" style="margin-top:8px;font-size:0.85rem;color:var(--text-light)"></div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addHousing()"><i class="bi bi-plus-circle"></i> הוסף באנר</button>
+          <hr style="margin:20px 0"><h5>באנרים קיימים:</h5>
+          <ul class="admin-item-list" id="adminHousingList"></ul>
+        </div>
+
+        <!-- STORES ADMIN -->
+        <div class="admin-section" id="admin-stores">
+          <h4 style="margin-bottom:8px">ניהול באנרים — קניות (סופר וחנויות)</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>איך מוסיפים חנות?</b> מלאו שם החנות, כיתוב על העסק, והעלו תמונה. <b>הוסיפו טלפון</b> כדי שיופיע באנר קטן לחיץ — לחיצה תפתח חיוג ישיר. הבאנר יופיע בלשונית "קניות".
+          </div>
+          <div class="admin-form-group"><label>שם החנות</label><input id="storeTitle" placeholder="סופר מעלה עמוס"></div>
+          <div class="admin-form-group"><label>תיאור / כיתוב</label><textarea id="storeDesc" rows="3" placeholder="סופר מקומי, מוצרי מזון בכשרות מהודרת, פתוח א'-ה' 08:00-21:00"></textarea></div>
+          <div class="admin-form-group"><label>טלפון ליצירת קשר (יופיע כבאנר קטן לחיץ)</label><input id="storePhone" placeholder="02-9931767"></div>
+          <div class="admin-form-group"><label>תמונה אחת</label>
+            <input id="storeImg" placeholder="https://...">
+            <div class="img-upload-area" onclick="document.getElementById('storeFileInput').click()" style="margin-top:8px">
+              <i class="bi bi-cloud-arrow-up" style="font-size:1.5rem;color:var(--primary)"></i>
+              <p style="margin:2px 0 0;font-size:0.8rem">לחצו להעלות תמונה</p>
+              <input type="file" id="storeFileInput" accept="image/*" onchange="handleCmsImageUpload(this,'storeImgPreview');document.getElementById('storeImg').value='uploaded'">
+              <img id="storeImgPreview" class="img-preview" style="display:none">
+            </div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addStore()"><i class="bi bi-plus-circle"></i> הוסף חנות</button>
+          <hr style="margin:20px 0"><h5>חנויות קיימות:</h5>
+          <ul class="admin-item-list" id="adminStoresList"></ul>
+        </div>
+
+        <!-- TZIMER ADMIN -->
+        <div class="admin-section" id="admin-tzimer">
+          <h4 style="margin-bottom:8px">ניהול באנרים — צימרים ופנאי ונופש</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>איך מוסיפים צימר/אטרקציה?</b> מלאו שם, כיתוב מורחב, העלו <b>עד 8 תמונות</b>, והוסיפו טלפון. כל באנר ניתן ללחיצה ויפתח חלון עם הגלריה והתיאור המלא.
+          </div>
+          <div class="admin-form-group"><label>שם הצימר / מקום התיירות</label><input id="tzimerTitle" placeholder="צימר מעלה עמוס"></div>
+          <div class="admin-form-group"><label>תיאור קצר (יוצג על הבאנר)</label><input id="tzimerShort" placeholder="יחידת אירוח מפנקת לזוג + ילדים"></div>
+          <div class="admin-form-group"><label>כיתוב מורחב (יוצג בחלון שייפתח)</label><textarea id="tzimerFull" rows="5" placeholder="פרטים על המקום, מתקנים, סביבה, אטרקציות סמוכות..."></textarea></div>
+          <div class="admin-form-group"><label>טלפון להזמנות</label><input id="tzimerPhone" placeholder="053-3177636"></div>
+          <div class="admin-form-group"><label>תמונות (עד 8)</label>
+            <input type="file" id="tzimerImgs" accept="image/*" multiple onchange="handleMultiImageUpload(this,'tzimerImgsPreview','tzimerImgsData',8)">
+            <div class="multi-img-list" id="tzimerImgsPreview"></div>
+            <p style="font-size:0.8rem;color:var(--text-light);margin-top:4px">ניתן לבחור עד 8 תמונות</p>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="addTzimer()"><i class="bi bi-plus-circle"></i> הוסף באנר</button>
+          <hr style="margin:20px 0"><h5>באנרים קיימים:</h5>
+          <ul class="admin-item-list" id="adminTzimerList"></ul>
+        </div>
+
+        <!-- ANNOUNCEMENTS ADMIN -->
+        <div class="admin-section" id="admin-announcements">
+          <h4 style="margin-bottom:8px">ניהול הודעות המזכירות</h4>
+          <div class="admin-help">
+            <i class="bi bi-info-circle-fill"></i>
+            <b>הוסיפו הודעה רשמית</b> שתוצג בעמוד הראשי תחת "הודעות המזכירות".
+          </div>
+          <div class="admin-form-group"><label>סוג</label>
+            <select id="annType">
+              <option value="info">מידע</option>
+              <option value="urgent">דחוף</option>
+              <option value="event">אירוע</option>
+              <option value="update">עדכון</option>
+            </select>
+          </div>
+          <div class="admin-form-group"><label>כותרת</label><input id="annTitle" placeholder="כותרת ההודעה"></div>
+          <div class="admin-form-group"><label>תוכן</label><textarea id="annBody" rows="3" placeholder="גוף ההודעה..."></textarea></div>
+          <div class="admin-form-group"><label>תאריך עברי</label><input id="annDate" placeholder='כ"ז בניסן תשפ"ו'></div>
+          <button class="btn-admin btn-admin-primary" onclick="addAnnouncement()"><i class="bi bi-plus-circle"></i> הוסף הודעה</button>
+          <hr style="margin:20px 0"><h5>הודעות קיימות:</h5>
+          <ul class="admin-item-list" id="adminAnnouncementsList"></ul>
         </div>
 
         <!-- FAMILIES ADMIN -->
@@ -3398,7 +3601,7 @@ function buildSearchIndex() {
     SEARCH_INDEX.push({type:'simcha', section:'שמחות', title:s.family, snippet:s.details||'', anchor:'#simchot'});
   });
   announcementsData.forEach(function(a) {
-    SEARCH_INDEX.push({type:'announcement', section:'הודעות מהוועד', title:a.title, snippet:a.body||'', anchor:'#announcements'});
+    SEARCH_INDEX.push({type:'announcement', section:'הודעות המזכירות', title:a.title, snippet:a.body||'', anchor:'#announcements'});
   });
   // Residents — names only, NO CODES (privacy)
   (residentsData || []).forEach(function(r) {
@@ -4060,13 +4263,7 @@ var torahQuotes = [
   {text: 'כל ישראל ערבים זה לזה', src: 'סנהדרין קכ:'},
   {text: 'דע לפני מי אתה עומד', src: 'אבות דף ג:'}
 ];
-function renderDailyTorah() {
-  var el = document.getElementById('dailyTorah');
-  if (!el) return;
-  var doy = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
-  var q = torahQuotes[doy % torahQuotes.length];
-  el.innerHTML = '<i class="bi bi-quote" style="font-size:1.5rem;color:var(--accent);opacity:0.5"></i><p style="font-size:1.1rem;font-weight:600;margin:8px 0 4px;line-height:1.8">"' + q.text + '"</p><p style="font-size:0.85rem;color:var(--text-light);margin:0">(' + q.src + ')</p>';
-}
+function renderDailyTorah() { /* removed per request */ }
 
 // ===== PHONE DIRECTORY =====
 var allFamilies = [];
@@ -4145,31 +4342,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function() {});
 }
 
-// ===== PARASHA CONTENT =====
-function loadParashaContent() {
-  // Get parasha name from Hebcal
-  fetch('https://www.hebcal.com/shabbat?cfg=json&geonameid=295530&m=50')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var items = data.items || [];
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].category === 'parashat') {
-          var title = items[i].hebrew || items[i].title;
-          document.getElementById('parashaTitle').textContent = title;
-          // Short dvar torah based on parasha
-          var link = items[i].link || '';
-          document.getElementById('parashaContent').innerHTML =
-            '<p style="margin-top:16px">"וידבר ה\' אל משה לאמר" — כל שבוע אנו מתחדשים עם דברי התורה הקדושה. בואו ללמוד יחד את פרשת <strong>' + title + '</strong> בשיעורי הרב בבית הכנסת המרכזי.</p>' +
-            '<div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' +
-            '<a href="#shuls" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 24px;border-radius:50px;text-decoration:none;font-weight:600"><i class="bi bi-clock"></i> זמני תפילות</a>' +
-            '<a href="#shabbat" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 24px;border-radius:50px;text-decoration:none;font-weight:600"><i class="bi bi-brightness-high"></i> זמני שבת</a>' +
-            '</div>';
-        }
-      }
-    })
-    .catch(function() {});
-}
-loadParashaContent();
+// (parasha section removed per request)
 
 // ===== HERO PARTICLES =====
 (function() {
