@@ -2814,8 +2814,11 @@ body.dark .phone-item { background: #16213e; }
           </div>
           <p style="font-size:0.78rem;color:var(--text-light);margin-top:6px"><b>ייבוא חד-פעמי:</b> לוקח את כל מה שיש כרגע ב-data.json (כתבות, אירועים, מודעות, גמ"חים, וכו') ומעלה לשייטס. שימושי בפעם הראשונה. שים לב — אם כבר יש תוכן בשיטס, ייווצרו כפילויות (לכל פריט id ייחודי).</p>
           <hr style="margin:20px 0">
-          <button class="btn-admin btn-admin-primary" style="width:100%;background:#28a745;font-size:1.1rem;padding:14px" onclick="publishToGitHub()"><i class="bi bi-cloud-arrow-up"></i> פרסם שינויים לכל המבקרים</button>
-          <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;text-align:center">לחיצה תעדכן את data.json ב-GitHub. כל המבקרים יראו את השינויים.</p>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px">
+            <div style="font-size:0.88rem;color:#166534"><i class="bi bi-info-circle-fill"></i> <b>הערה:</b> מאז שחיברנו את השייטס — כל הוספה כבר נשמרת חי בגוגל שיטס באופן אוטומטי. אין צורך ללחוץ "פרסם" אחרי כל פריט. הכפתור למטה מיועד רק לעדכון גיבוי ל-data.json (לא חובה).</div>
+          </div>
+          <button class="btn-admin btn-admin-primary" style="width:100%;background:#28a745;font-size:1.0rem;padding:12px;opacity:0.85" onclick="publishToGitHub()"><i class="bi bi-cloud-arrow-up"></i> עדכון גיבוי ל-data.json (לא חובה)</button>
+          <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;text-align:center">לחיצה דוחפת את הנתונים המקומיים ל-GitHub. רלוונטי אם השייטס לא היה זמין.</p>
           <hr style="margin:20px 0">
           <button class="btn-admin btn-admin-danger" onclick="if(confirm('למחוק את כל הנתונים המקומיים?')){localStorage.clear();location.reload()}"><i class="bi bi-trash"></i> אפס נתונים מקומיים</button>
         </div>
