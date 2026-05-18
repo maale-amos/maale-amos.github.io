@@ -124,6 +124,62 @@ function doPost(e) {
     return _jsonResponse({ ok: true, msg: 'אושר ונוסף לרשימת תושבים', code });
   }
 
+  // Admin CRUD across tabs. Body must include: token, tab, op, data (JSON).
+  // tab: news|events|announcements|market|simchot|gemachim|ticker
+  // op: add|update|delete
+  // data: object with column→value pairs. For update/delete must include 'id'.
+  if (action === 'admin_row') {
+    if (p.token !== ADMIN_TOKEN) return _jsonResponse({ ok: false, error: 'invalid token' });
+    const tab = (p.tab || '').toLowerCase();
+    const allowed = ['news', 'events', 'announcements', 'market', 'simchot', 'gemachim', 'ticker'];
+    if (allowed.indexOf(tab) < 0) return _jsonResponse({ ok: false, error: 'tab not allowed: ' + tab });
+    const sh = _sheet(tab);
+    if (!sh) return _jsonResponse({ ok: false, error: 'sheet open failed' });
+    const op = (p.op || '').toLowerCase();
+    let data;
+    try { data = JSON.parse(p.data || '{}'); }
+    catch (e) { return _jsonResponse({ ok: false, error: 'bad data json' }); }
+
+    if (op === 'add') {
+      let headers;
+      if (sh.getLastRow() === 0) {
+        headers = Object.keys(data);
+        if (headers.indexOf('id') < 0) headers.unshift('id');
+        sh.appendRow(headers);
+      } else {
+        headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h).trim());
+      }
+      if (!data.id) data.id = Date.now().toString(36);
+      const row = headers.map(h => data[h] !== undefined ? data[h] : '');
+      sh.appendRow(row);
+      return _jsonResponse({ ok: true, id: data.id });
+    }
+
+    if (op === 'update' || op === 'delete') {
+      if (!data.id) return _jsonResponse({ ok: false, error: 'id required' });
+      if (sh.getLastRow() < 2) return _jsonResponse({ ok: false, error: 'empty sheet' });
+      const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h).trim());
+      const idCol = headers.indexOf('id');
+      if (idCol < 0) return _jsonResponse({ ok: false, error: 'no id column' });
+      const allRows = sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
+      let rowIdx = -1;
+      for (let i = 0; i < allRows.length; i++) {
+        if (String(allRows[i][idCol]) === String(data.id)) { rowIdx = i + 2; break; }
+      }
+      if (rowIdx < 0) return _jsonResponse({ ok: false, error: 'id not found' });
+      if (op === 'delete') {
+        sh.deleteRow(rowIdx);
+        return _jsonResponse({ ok: true, deleted: data.id });
+      }
+      // update
+      const newRow = headers.map((h, i) => data[h] !== undefined ? data[h] : allRows[rowIdx - 2][i]);
+      sh.getRange(rowIdx, 1, 1, newRow.length).setValues([newRow]);
+      return _jsonResponse({ ok: true, updated: data.id });
+    }
+
+    return _jsonResponse({ ok: false, error: 'op required (add|update|delete)' });
+  }
+
   return _jsonResponse({ ok: false, error: 'unknown action: ' + action });
 }
 
