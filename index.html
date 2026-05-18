@@ -3531,10 +3531,7 @@ function addNews() {
   document.getElementById('newsTitle').value = ''; document.getElementById('newsDesc').value = '';
   showToast('חדשה נוספה!');
   // Dual-write to Sheets backend if configured (non-blocking)
-  backendWrite('news', 'add', item).then(function(r) {
-    if (r && r.ok) showToast('✓ סונכרן לשייטס');
-    else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
-  });
+  backendWrite('news', 'add', item).then(_backendSyncToast);
 }
 
 function addEvent() {
@@ -3544,35 +3541,43 @@ function addEvent() {
   eventsData.push(item);
   setData('events', eventsData); refreshAdminLists(); renderAll();
   showToast('אירוע נוסף!');
-  backendWrite('events', 'add', item).then(function(r) {
-    if (r && r.ok) showToast('✓ סונכרן לשייטס');
-    else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
-  });
+  backendWrite('events', 'add', item).then(_backendSyncToast);
+}
+
+function _backendSyncToast(r) {
+  if (r && r.ok) showToast('✓ סונכרן לשייטס');
+  else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
 }
 
 function addSimcha() {
   var f = document.getElementById('simchaFamily').value;
   if (!f) { showToast('הזינו שם משפחה'); return; }
   var now = new Date();
-  simchotData.unshift({ type: document.getElementById('simchaType').value, family: f, details: document.getElementById('simchaDetails').value, date: now.getDate() + '/' + (now.getMonth()+1) });
+  var item = { type: document.getElementById('simchaType').value, family: f, details: document.getElementById('simchaDetails').value, date: now.getDate() + '/' + (now.getMonth()+1) };
+  simchotData.unshift(item);
   setData('simchot', simchotData); refreshAdminLists(); renderAll();
   showToast('שמחה נוספה!');
+  backendWrite('simchot', 'add', item).then(_backendSyncToast);
 }
 
 function addMarketItem() {
   var t = document.getElementById('marketTitle').value;
   if (!t) { showToast('הזינו כותרת'); return; }
-  marketData.unshift({ title: t, desc: document.getElementById('marketDesc').value, price: document.getElementById('marketPrice').value, cat: document.getElementById('marketCat').value, seller: document.getElementById('marketSeller').value });
+  var item = { title: t, desc: document.getElementById('marketDesc').value, price: document.getElementById('marketPrice').value, cat: document.getElementById('marketCat').value, seller: document.getElementById('marketSeller').value };
+  marketData.unshift(item);
   setData('market', marketData); refreshAdminLists(); renderAll();
   showToast('מודעה נוספה!');
+  backendWrite('market', 'add', item).then(_backendSyncToast);
 }
 
 function addGemach() {
   var n = document.getElementById('gemachName').value;
   if (!n) { showToast('הזינו שם'); return; }
-  gemachimData.push({ name: n, desc: document.getElementById('gemachDesc').value, phone: document.getElementById('gemachPhone').value, icon: document.getElementById('gemachIcon').value || 'bi-heart' });
+  var item = { name: n, desc: document.getElementById('gemachDesc').value, phone: document.getElementById('gemachPhone').value, icon: document.getElementById('gemachIcon').value || 'bi-heart' };
+  gemachimData.push(item);
   setData('gemachim', gemachimData); refreshAdminLists(); renderAll();
   showToast('גמ"ח נוסף!');
+  backendWrite('gemachim', 'add', item).then(_backendSyncToast);
 }
 
 function addTicker() {
@@ -3582,6 +3587,7 @@ function addTicker() {
   setData('ticker', tickerData); refreshAdminLists(); renderTicker();
   document.getElementById('tickerMsg').value = '';
   showToast('הודעה נוספה!');
+  backendWrite('ticker', 'add', { msg: m }).then(_backendSyncToast);
 }
 
 function saveSettings() {
