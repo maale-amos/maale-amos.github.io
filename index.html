@@ -2791,7 +2791,17 @@ body.dark .phone-item { background: #16213e; }
           <h5><i class="bi bi-github"></i> חיבור GitHub (לפרסום גלובלי)</h5>
           <div class="admin-form-group"><label>GitHub Token</label><input type="password" id="settingGhToken" placeholder="ghp_... (הזינו פעם אחת)" value=""></div>
           <p style="font-size:0.78rem;color:var(--text-light)">צרו טוקן ב-github.com/settings/tokens עם הרשאת repo. הטוקן נשמר רק אצלכם.</p>
-          <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
+          <hr style="margin:16px 0">
+          <h5><i class="bi bi-database-fill-gear"></i> Apps Script Backend (סנכרון חי עם Google Sheets)</h5>
+          <div class="admin-form-group">
+            <label>Web App URL</label>
+            <input id="settingBackendUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" value="">
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-light)">אחרי deploy ב-script.google.com (קוד ב-backend/Code.gs בריפו), הדבק כאן את ה-Web App URL. בלי URL — האתר ימשיך לקרוא מ-data.json בלבד.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
+            <button class="btn-admin btn-admin-secondary" onclick="testBackendConnection()" style="background:#0891b2;color:#fff"><i class="bi bi-check2-circle"></i> בדוק חיבור</button>
+          </div>
           <hr style="margin:20px 0">
           <button class="btn-admin btn-admin-primary" style="width:100%;background:#28a745;font-size:1.1rem;padding:14px" onclick="publishToGitHub()"><i class="bi bi-cloud-arrow-up"></i> פרסם שינויים לכל המבקרים</button>
           <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;text-align:center">לחיצה תעדכן את data.json ב-GitHub. כל המבקרים יראו את השינויים.</p>
@@ -3552,17 +3562,47 @@ function saveSettings() {
   if (ghToken) {
     localStorage.setItem(GH_TOKEN_KEY, ghToken);
   }
+  var backendField = document.getElementById('settingBackendUrl');
+  if (backendField) {
+    var backendUrl = backendField.value.trim();
+    if (backendUrl) localStorage.setItem(BACKEND_URL_KEY, backendUrl);
+    else localStorage.removeItem(BACKEND_URL_KEY);
+  }
   var el = document.getElementById('currentResCode');
   if (el) el.textContent = RESIDENT_CODE;
   showToast('הגדרות נשמרו!');
 }
 
-// Load saved token into field on admin open
+function testBackendConnection() {
+  var url = (document.getElementById('settingBackendUrl').value || '').trim();
+  if (!url) { showToast('הזן URL'); return; }
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) {
+    showToast('URL לא תקין (חייב להיות /macros/s/.../exec)');
+    return;
+  }
+  showToast('בודק חיבור...');
+  fetch(url + '?action=health&t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.ok && data.service === 'maale-amos-backend') {
+        showToast('✓ חיבור תקין! ' + (data.ts || ''));
+      } else {
+        showToast('תגובה לא צפויה: ' + JSON.stringify(data).slice(0,80));
+      }
+    })
+    .catch(function(e) {
+      showToast('שגיאה: ' + (e.message || 'לא ניתן להתחבר'));
+    });
+}
+
+// Load saved token + backend URL into fields on admin open
 var origOpenAdmin = openAdmin;
 openAdmin = function() {
   origOpenAdmin();
   var tokenField = document.getElementById('settingGhToken');
   if (tokenField && getGhToken()) tokenField.value = getGhToken();
+  var backendField = document.getElementById('settingBackendUrl');
+  if (backendField && getBackendUrl()) backendField.value = getBackendUrl();
 };
 
 function renderAll() {
