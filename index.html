@@ -2973,7 +2973,10 @@ var BACKEND_URL_KEY = 'ma_backend_url';
 
 function getAdminCode() { return localStorage.getItem(ADMIN_CODE_KEY) || DEFAULT_ADMIN_CODE; }
 function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
-function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || ''; }
+// Default points to ai-email-agent project (netfree-approved). All maale-amos
+// actions are dispatched there with the 'maale_' prefix.
+var DEFAULT_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzhRqTLE4fjjDqrH1we-JlGZ15R-ws8b_gfWF1xF1ewailaiyiS_YXqUhRtb3cQghVt/exec';
+function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || DEFAULT_BACKEND_URL; }
 
 // Static admin token — matches ADMIN_TOKEN in backend/Code.gs. The frontend
 // only sends this from the admin panel after the local admin code is verified,
@@ -2986,7 +2989,7 @@ function backendWrite(tab, op, data) {
   var url = getBackendUrl();
   if (!url) return Promise.resolve({ ok: false, error: 'no_backend' });
   var body = new URLSearchParams();
-  body.set('action', 'admin_row');
+  body.set('action', 'maale_admin_row');
   body.set('token', BACKEND_ADMIN_TOKEN);
   body.set('tab', tab);
   body.set('op', op);
@@ -3018,7 +3021,7 @@ function loadGlobalData() {
       var backendUrl = getBackendUrl();
       if (!backendUrl) { renderAll(); return; }
       // Fetch from Apps Script and override fields it provides
-      return fetch(backendUrl + '?action=all&t=' + Date.now())
+      return fetch(backendUrl + '?action=maale_all&t=' + Date.now())
         .then(function(r) { return r.json(); })
         .then(function(b) {
           if (b && b.ok) {
@@ -3280,7 +3283,7 @@ function registerResident() {
   var backendUrl = getBackendUrl();
   if (backendUrl) {
     var body = new URLSearchParams();
-    body.set('action', 'register');
+    body.set('action', 'maale_register');
     body.set('name', name);
     body.set('phone', phone);
     body.set('address', addr || '');
@@ -3653,7 +3656,7 @@ function testBackendConnection() {
     return;
   }
   showToast('בודק חיבור...');
-  fetch(url + '?action=health&t=' + Date.now())
+  fetch(url + '?action=maale_health&t=' + Date.now())
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && data.ok && data.service === 'maale-amos-backend') {
@@ -4342,7 +4345,7 @@ function handleCmsImageUpload(input, previewId) {
     if (getBackendUrl()) {
       showToast('מעלה תמונה ל-Drive...');
       var body = new URLSearchParams();
-      body.set('action', 'upload_image');
+      body.set('action', 'maale_upload_image');
       body.set('token', BACKEND_ADMIN_TOKEN);
       body.set('filename', file.name);
       body.set('mimeType', file.type || 'image/jpeg');
