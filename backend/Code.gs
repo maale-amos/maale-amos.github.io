@@ -109,6 +109,35 @@ function doPost(e) {
     return _jsonResponse({ ok: true, msg: 'נרשמתָ. הוועד יאשר את הבקשה.' });
   }
 
+  // Upload an image to a dedicated Drive folder, return its public-read URL.
+  // Body: token, filename, mimeType, dataBase64 (data URL prefix stripped).
+  if (action === 'upload_image') {
+    if (p.token !== ADMIN_TOKEN) return _jsonResponse({ ok: false, error: 'invalid token' });
+    const filename = (p.filename || ('image_' + Date.now() + '.jpg')).replace(/[^a-zA-Z0-9א-ת._-]/g, '_');
+    const mimeType = p.mimeType || 'image/jpeg';
+    const dataBase64 = (p.dataBase64 || '').replace(/^data:[^;]+;base64,/, '');
+    if (!dataBase64) return _jsonResponse({ ok: false, error: 'no image data' });
+    try {
+      // Find or create the "maale-amos-images" folder, get/create it shared
+      const folderName = 'maale-amos-images';
+      let folder;
+      const it = DriveApp.getFoldersByName(folderName);
+      if (it.hasNext()) folder = it.next();
+      else folder = DriveApp.createFolder(folderName);
+      // Make folder public-read once (idempotent)
+      try { folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+      const blob = Utilities.newBlob(Utilities.base64Decode(dataBase64), mimeType, filename);
+      const file = folder.createFile(blob);
+      try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+      // Direct view URL (works as <img src>)
+      const fileId = file.getId();
+      const url = 'https://drive.google.com/uc?export=view&id=' + fileId;
+      return _jsonResponse({ ok: true, url: url, id: fileId, filename: filename });
+    } catch (e) {
+      return _jsonResponse({ ok: false, error: String(e) });
+    }
+  }
+
   if (action === 'approve_registration') {
     if (p.token !== ADMIN_TOKEN) return _jsonResponse({ ok: false, error: 'invalid token' });
     const rowIdx = parseInt(p.row || '0', 10);
