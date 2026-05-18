@@ -3425,7 +3425,10 @@ function residentLogout() {
 })();
 
 // ===== ADMIN CMS =====
-function openAdmin() { document.getElementById('adminOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; }
+function openAdmin() { document.getElementById('adminOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; if (location.hash !== '#admin') location.hash = 'admin'; }
+// Auto-open admin if URL has #admin
+window.addEventListener('hashchange', function() { if (location.hash === '#admin') openAdmin(); });
+if (location.hash === '#admin') setTimeout(openAdmin, 100);
 function closeAdmin() { document.getElementById('adminOverlay').classList.remove('active'); document.body.style.overflow = ''; }
 
 function adminLogin() {
