@@ -4207,8 +4207,15 @@ var counterObserver = new IntersectionObserver(function(entries) {
 }, { threshold: 0.5 });
 document.querySelectorAll('[data-target]').forEach(function(el) { counterObserver.observe(el); });
 
-// Close admin on escape
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAdmin(); });
+// Close admin on escape + Ctrl+K to focus site search
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAdmin();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    var s = document.getElementById('siteSearch');
+    if (s) { s.focus(); s.select(); s.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+});
 
 // ===== DARK MODE =====
 function toggleDark() {
