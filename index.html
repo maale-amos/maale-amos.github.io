@@ -2959,24 +2959,46 @@ var ADMIN_CODE_KEY = 'ma_admin_code';
 var DEFAULT_ADMIN_CODE = '8484';
 var MASTER_ADMIN_CODE = '8484';
 var GH_TOKEN_KEY = 'ma_gh_token';
+var BACKEND_URL_KEY = 'ma_backend_url';
 
 function getAdminCode() { return localStorage.getItem(ADMIN_CODE_KEY) || DEFAULT_ADMIN_CODE; }
 function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
+function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || ''; }
 
-// Load data.json from GitHub (global data visible to all)
+// Load data: data.json (static) + optional Apps Script backend (live from Sheets)
+// If a backend URL is configured (localStorage 'ma_backend_url'), its fields
+// override the static ones. Fields the backend doesn't yet expose (market,
+// simchot, gemachim, ticker) keep coming from data.json.
 function loadGlobalData() {
+  var applyJson = function(data) {
+    if (data.news && data.news.length) newsData = data.news;
+    if (data.events && data.events.length) eventsData = data.events;
+    if (data.market && data.market.length) marketData = data.market;
+    if (data.simchot && data.simchot.length) simchotData = data.simchot;
+    if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
+    if (data.ticker && data.ticker.length) tickerData = data.ticker;
+    if (data.announcements && data.announcements.length) announcementsData = data.announcements;
+    if (data.residents && data.residents.length) residentsData = data.residents;
+  };
   fetch('data.json?t=' + Date.now())
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.news && data.news.length) newsData = data.news;
-      if (data.events && data.events.length) eventsData = data.events;
-      if (data.market && data.market.length) marketData = data.market;
-      if (data.simchot && data.simchot.length) simchotData = data.simchot;
-      if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
-      if (data.ticker && data.ticker.length) tickerData = data.ticker;
-      if (data.announcements && data.announcements.length) announcementsData = data.announcements;
-      if (data.residents && data.residents.length) residentsData = data.residents;
-      renderAll();
+      applyJson(data);
+      var backendUrl = getBackendUrl();
+      if (!backendUrl) { renderAll(); return; }
+      // Fetch from Apps Script and override fields it provides
+      return fetch(backendUrl + '?action=all&t=' + Date.now())
+        .then(function(r) { return r.json(); })
+        .then(function(b) {
+          if (b && b.ok) {
+            if (b.news && b.news.length) newsData = b.news;
+            if (b.events && b.events.length) eventsData = b.events;
+            if (b.announcements && b.announcements.length) announcementsData = b.announcements;
+            if (b.residents && b.residents.length) residentsData = b.residents;
+          }
+          renderAll();
+        })
+        .catch(function() { renderAll(); });
     })
     .catch(function() { renderAll(); });
 }
