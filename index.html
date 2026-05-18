@@ -3267,7 +3267,7 @@ function registerResident() {
   var pass = document.getElementById('regPass').value;
   if (!name || !phone || !pass) { showToast('נא למלא את כל השדות'); return; }
   if (pass.length < 4) { showToast('סיסמה חייבת לפחות 4 תווים'); return; }
-  // Save registration
+  // Save registration locally
   var users = getData('registered_users', []);
   var exists = users.find(function(u) { return u.phone === phone; });
   if (exists) { showToast('מספר זה כבר רשום. היכנסו!'); showLoginTab(); return; }
@@ -3276,6 +3276,23 @@ function registerResident() {
   sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: phone, picture: '' }));
   showResidentDashboard(name, phone, '');
   showToast('נרשמת בהצלחה! ברוך הבא, ' + name + '!');
+  // Push to backend registrations tab so the committee sees pending requests
+  var backendUrl = getBackendUrl();
+  if (backendUrl) {
+    var body = new URLSearchParams();
+    body.set('action', 'register');
+    body.set('name', name);
+    body.set('phone', phone);
+    body.set('address', addr || '');
+    body.set('email', '');
+    fetch(backendUrl, { method: 'POST', body: body })
+      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (r && r.ok) showToast('✓ נשלח לוועד לאישור');
+        else if (r && r.error) showToast('הודעה לוועד נכשלה: ' + r.error);
+      })
+      .catch(function() { /* silent — already saved locally */ });
+  }
 }
 
 function residentLogin() {
