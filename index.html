@@ -3610,13 +3610,16 @@ function addResident() {
     showToast('הקוד הזה כבר בשימוש. בחרו אחר.');
     return;
   }
-  residentsData.push({ name: name, code: code, role: role });
+  var item = { id: _newItemId(), name: name, code: code, role: role, status: 'אושר' };
+  residentsData.push(item);
   setData('residents', residentsData);
   document.getElementById('resName').value = '';
   document.getElementById('resCode').value = '';
   document.getElementById('resRole').value = 'תושב';
   renderAdminResidents('');
+  refreshAdminDashboard();
   showToast('תושב נוסף!');
+  backendWrite('residents', 'add', item).then(_backendSyncToast);
 }
 
 function deleteResident(i) {
