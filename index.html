@@ -2801,7 +2801,9 @@ body.dark .phone-item { background: #16213e; }
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
             <button class="btn-admin btn-admin-secondary" onclick="testBackendConnection()" style="background:#0891b2;color:#fff"><i class="bi bi-check2-circle"></i> בדוק חיבור לשיטס</button>
+            <button class="btn-admin btn-admin-secondary" onclick="importAllToSheets()" style="background:#15803d;color:#fff"><i class="bi bi-cloud-upload-fill"></i> ייבוא חד-פעמי של כל הנתונים לשיטס</button>
           </div>
+          <p style="font-size:0.78rem;color:var(--text-light);margin-top:6px"><b>ייבוא חד-פעמי:</b> לוקח את כל מה שיש כרגע ב-data.json (כתבות, אירועים, מודעות, גמ"חים, וכו') ומעלה לשייטס. שימושי בפעם הראשונה. שים לב — אם כבר יש תוכן בשיטס, ייווצרו כפילויות (לכל פריט id ייחודי).</p>
           <hr style="margin:20px 0">
           <button class="btn-admin btn-admin-primary" style="width:100%;background:#28a745;font-size:1.1rem;padding:14px" onclick="publishToGitHub()"><i class="bi bi-cloud-arrow-up"></i> פרסם שינויים לכל המבקרים</button>
           <p style="font-size:0.78rem;color:var(--text-light);margin-top:8px;text-align:center">לחיצה תעדכן את data.json ב-GitHub. כל המבקרים יראו את השינויים.</p>
@@ -3646,6 +3648,43 @@ function saveSettings() {
   var el = document.getElementById('currentResCode');
   if (el) el.textContent = RESIDENT_CODE;
   showToast('הגדרות נשמרו!');
+}
+
+async function importAllToSheets() {
+  if (!getBackendUrl()) { showToast('צריך URL של שרת תחילה'); return; }
+  if (!confirm('יועלו ' + (newsData.length+eventsData.length+marketData.length+simchotData.length+gemachimData.length+announcementsData.length+tickerData.length) + ' פריטים לשיטס. להמשיך?')) return;
+  showToast('מייבא...');
+  var datasets = [
+    { tab: 'news', items: newsData },
+    { tab: 'events', items: eventsData },
+    { tab: 'simchot', items: simchotData },
+    { tab: 'market', items: marketData },
+    { tab: 'gemachim', items: gemachimData },
+    { tab: 'announcements', items: announcementsData },
+  ];
+  var total = 0, failed = 0;
+  for (var i = 0; i < datasets.length; i++) {
+    var ds = datasets[i];
+    for (var j = 0; j < ds.items.length; j++) {
+      var it = ds.items[j];
+      if (!it.id) it.id = _newItemId();
+      try {
+        var r = await backendWrite(ds.tab, 'add', it);
+        if (r && r.ok) total++;
+        else failed++;
+      } catch (e) { failed++; }
+    }
+  }
+  // Tickers as plain strings
+  for (var k = 0; k < tickerData.length; k++) {
+    var msg = tickerData[k];
+    try {
+      var r = await backendWrite('ticker', 'add', { id: _newItemId(), msg: msg });
+      if (r && r.ok) total++;
+      else failed++;
+    } catch (e) { failed++; }
+  }
+  showToast('הועלה: ' + total + (failed ? ' (נכשלו: ' + failed + ')' : ''));
 }
 
 function testBackendConnection() {
