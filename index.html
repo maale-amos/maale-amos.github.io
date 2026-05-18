@@ -277,6 +277,17 @@ body.show-all-extras section[data-extra="1"] { display: block; }
   box-shadow: var(--card-shadow); transition: var(--transition); cursor: pointer;
 }
 .news-card:hover { transform: translateY(-6px); box-shadow: var(--card-hover); }
+.news-card.is-new::after {
+  content: 'חדש';
+  position: absolute; top: 12px; left: 12px;
+  background: var(--accent); color: #fff;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(200,150,12,.4);
+  animation: pulse 2s infinite;
+  z-index: 2;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.7} }
 .news-card-img { height: 200px; background-size: cover; background-position: center; position: relative; }
 .news-card-img .badge-cat {
   position: absolute; top: 14px; right: 14px; background: var(--primary);
@@ -3175,7 +3186,12 @@ function renderNews() {
     var safeCat = escHtml(n.cat || '');
     var safeDate = escHtml(n.date || '');
     var safeImg = (n.img || '').replace(/'/g,'%27');
-    return '<article class="news-card" tabindex="0" role="button" aria-label="קרא כתבה: ' + safeTitle + '" onclick="openNewsArticle(' + i + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openNewsArticle(' + i + ')}">' +
+    // Mark news created in last 48h as "new" — based on created_at if available
+    var isNew = false;
+    if (n.created_at) {
+      try { isNew = (Date.now() - new Date(n.created_at).getTime()) < 48 * 3600 * 1000; } catch(e) {}
+    }
+    return '<article class="news-card' + (isNew ? ' is-new' : '') + '" tabindex="0" role="button" aria-label="קרא כתבה: ' + safeTitle + '" onclick="openNewsArticle(' + i + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openNewsArticle(' + i + ')}">' +
       '<div class="news-card-img" style="background-image:url(\'' + safeImg + '\')"><span class="badge-cat">' + safeCat + '</span></div>' +
       '<div class="news-card-body">' +
         '<div class="date"><i class="bi bi-calendar3" aria-hidden="true"></i> ' + safeDate + '</div>' +
