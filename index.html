@@ -2480,6 +2480,17 @@ body.dark .phone-item { background: #16213e; }
       </div>
       <!-- Admin Content (hidden until login) -->
       <div id="adminContent" style="display:none">
+        <!-- Dashboard / sync status bar -->
+        <div id="adminDashboard" style="background:linear-gradient(120deg,#1a5c3a 0%,#2d8a5e 100%);color:#fff;padding:14px 18px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 4px 16px rgba(26,92,58,.25)">
+          <div>
+            <div style="font-size:1.15rem;font-weight:700;margin-bottom:2px">ברוך הבא, מנהל</div>
+            <div id="adminStatsLine" style="font-size:0.85rem;opacity:0.92">טוען נתונים...</div>
+          </div>
+          <div id="adminSyncBadge" style="background:rgba(255,255,255,0.15);padding:8px 14px;border-radius:999px;font-size:0.85rem;font-weight:500;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px)">
+            <span id="adminSyncDot" style="width:8px;height:8px;border-radius:50%;background:#fbbf24"></span>
+            <span id="adminSyncText">בודק שיטס...</span>
+          </div>
+        </div>
         <div class="admin-tabs">
           <button class="admin-tab active" onclick="switchAdminTab('news',this)"><i class="bi bi-newspaper"></i> חדשות</button>
           <button class="admin-tab" onclick="switchAdminTab('events',this)"><i class="bi bi-calendar3"></i> אירועים</button>
@@ -3367,9 +3378,45 @@ function adminLogin() {
     document.getElementById('adminContent').style.display = 'block';
     sessionStorage.setItem('ma_admin', '1');
     refreshAdminLists();
+    refreshAdminDashboard();
   } else {
     showToast('קוד שגוי!');
   }
+}
+
+function refreshAdminDashboard() {
+  var stats = document.getElementById('adminStatsLine');
+  if (stats) {
+    stats.innerHTML =
+      '<i class="bi bi-newspaper"></i> ' + newsData.length + ' חדשות &nbsp; · &nbsp;' +
+      '<i class="bi bi-calendar3"></i> ' + eventsData.length + ' אירועים &nbsp; · &nbsp;' +
+      '<i class="bi bi-shop"></i> ' + marketData.length + ' מודעות &nbsp; · &nbsp;' +
+      '<i class="bi bi-person-vcard"></i> ' + residentsData.length + ' תושבים';
+  }
+  // Check sync
+  var dot = document.getElementById('adminSyncDot');
+  var txt = document.getElementById('adminSyncText');
+  if (!dot || !txt) return;
+  if (!getBackendUrl()) {
+    dot.style.background = '#9ca3af';
+    txt.textContent = 'שיטס לא מוגדר';
+    return;
+  }
+  fetch(getBackendUrl() + '?action=maale_health&t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.ok) {
+        dot.style.background = '#10b981';
+        txt.textContent = '✓ שיטס מסונכרן';
+      } else {
+        dot.style.background = '#f59e0b';
+        txt.textContent = 'שיטס לא זמין';
+      }
+    })
+    .catch(function() {
+      dot.style.background = '#ef4444';
+      txt.textContent = 'אין חיבור לשיטס';
+    });
 }
 
 // Auto-login admin if session exists
