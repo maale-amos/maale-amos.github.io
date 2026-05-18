@@ -3511,10 +3511,18 @@ function exportResidents() {
 
 function deleteItem(type, idx) {
   var map = { news: newsData, events: eventsData, simchot: simchotData, market: marketData, gemachim: gemachimData, ticker: tickerData };
+  var removed = map[type][idx];
   map[type].splice(idx, 1);
   setData(type, map[type]);
   refreshAdminLists(); renderAll();
   showToast('נמחק!');
+  // If backend is configured AND the row has an id, also delete it from Sheets.
+  // Items added before backend was wired (or before this code) won't have id —
+  // for those the user must clean up the Sheet manually OR run a future
+  // "republish all to Sheets" tool.
+  if (removed && removed.id) {
+    backendWrite(type, 'delete', { id: removed.id }).then(_backendSyncToast);
+  }
 }
 
 function addNews() {
@@ -3525,7 +3533,7 @@ function addNews() {
   var fileInput = document.getElementById('newsFileInput');
   if (imgUrl === 'uploaded' && fileInput.dataset.dataUrl) imgUrl = fileInput.dataset.dataUrl;
   if (!imgUrl) imgUrl = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80';
-  var item = { title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl };
+  var item = { id: _newItemId(), title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl };
   newsData.unshift(item);
   setData('news', newsData); refreshAdminLists(); renderAll();
   document.getElementById('newsTitle').value = ''; document.getElementById('newsDesc').value = '';
@@ -3537,7 +3545,7 @@ function addNews() {
 function addEvent() {
   var t = document.getElementById('eventTitle').value;
   if (!t) { showToast('הזינו כותרת'); return; }
-  var item = { day: document.getElementById('eventDay').value, month: document.getElementById('eventMonth').value, title: t, desc: document.getElementById('eventDesc').value, time: document.getElementById('eventTime').value, location: document.getElementById('eventLoc').value };
+  var item = { id: _newItemId(), day: document.getElementById('eventDay').value, month: document.getElementById('eventMonth').value, title: t, desc: document.getElementById('eventDesc').value, time: document.getElementById('eventTime').value, location: document.getElementById('eventLoc').value };
   eventsData.push(item);
   setData('events', eventsData); refreshAdminLists(); renderAll();
   showToast('אירוע נוסף!');
@@ -3549,11 +3557,16 @@ function _backendSyncToast(r) {
   else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
 }
 
+// Generate a short unique id for new items (used by both local state and backend).
+function _newItemId() {
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+}
+
 function addSimcha() {
   var f = document.getElementById('simchaFamily').value;
   if (!f) { showToast('הזינו שם משפחה'); return; }
   var now = new Date();
-  var item = { type: document.getElementById('simchaType').value, family: f, details: document.getElementById('simchaDetails').value, date: now.getDate() + '/' + (now.getMonth()+1) };
+  var item = { id: _newItemId(), type: document.getElementById('simchaType').value, family: f, details: document.getElementById('simchaDetails').value, date: now.getDate() + '/' + (now.getMonth()+1) };
   simchotData.unshift(item);
   setData('simchot', simchotData); refreshAdminLists(); renderAll();
   showToast('שמחה נוספה!');
@@ -3563,7 +3576,7 @@ function addSimcha() {
 function addMarketItem() {
   var t = document.getElementById('marketTitle').value;
   if (!t) { showToast('הזינו כותרת'); return; }
-  var item = { title: t, desc: document.getElementById('marketDesc').value, price: document.getElementById('marketPrice').value, cat: document.getElementById('marketCat').value, seller: document.getElementById('marketSeller').value };
+  var item = { id: _newItemId(), title: t, desc: document.getElementById('marketDesc').value, price: document.getElementById('marketPrice').value, cat: document.getElementById('marketCat').value, seller: document.getElementById('marketSeller').value };
   marketData.unshift(item);
   setData('market', marketData); refreshAdminLists(); renderAll();
   showToast('מודעה נוספה!');
@@ -3573,7 +3586,7 @@ function addMarketItem() {
 function addGemach() {
   var n = document.getElementById('gemachName').value;
   if (!n) { showToast('הזינו שם'); return; }
-  var item = { name: n, desc: document.getElementById('gemachDesc').value, phone: document.getElementById('gemachPhone').value, icon: document.getElementById('gemachIcon').value || 'bi-heart' };
+  var item = { id: _newItemId(), name: n, desc: document.getElementById('gemachDesc').value, phone: document.getElementById('gemachPhone').value, icon: document.getElementById('gemachIcon').value || 'bi-heart' };
   gemachimData.push(item);
   setData('gemachim', gemachimData); refreshAdminLists(); renderAll();
   showToast('גמ"ח נוסף!');
