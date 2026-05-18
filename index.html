@@ -3525,18 +3525,29 @@ function addNews() {
   var fileInput = document.getElementById('newsFileInput');
   if (imgUrl === 'uploaded' && fileInput.dataset.dataUrl) imgUrl = fileInput.dataset.dataUrl;
   if (!imgUrl) imgUrl = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80';
-  newsData.unshift({ title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl });
+  var item = { title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl };
+  newsData.unshift(item);
   setData('news', newsData); refreshAdminLists(); renderAll();
   document.getElementById('newsTitle').value = ''; document.getElementById('newsDesc').value = '';
   showToast('חדשה נוספה!');
+  // Dual-write to Sheets backend if configured (non-blocking)
+  backendWrite('news', 'add', item).then(function(r) {
+    if (r && r.ok) showToast('✓ סונכרן לשייטס');
+    else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
+  });
 }
 
 function addEvent() {
   var t = document.getElementById('eventTitle').value;
   if (!t) { showToast('הזינו כותרת'); return; }
-  eventsData.push({ day: document.getElementById('eventDay').value, month: document.getElementById('eventMonth').value, title: t, desc: document.getElementById('eventDesc').value, time: document.getElementById('eventTime').value, location: document.getElementById('eventLoc').value });
+  var item = { day: document.getElementById('eventDay').value, month: document.getElementById('eventMonth').value, title: t, desc: document.getElementById('eventDesc').value, time: document.getElementById('eventTime').value, location: document.getElementById('eventLoc').value };
+  eventsData.push(item);
   setData('events', eventsData); refreshAdminLists(); renderAll();
   showToast('אירוע נוסף!');
+  backendWrite('events', 'add', item).then(function(r) {
+    if (r && r.ok) showToast('✓ סונכרן לשייטס');
+    else if (r && r.error && r.error !== 'no_backend') showToast('שגיאת סנכרון: ' + r.error);
+  });
 }
 
 function addSimcha() {
