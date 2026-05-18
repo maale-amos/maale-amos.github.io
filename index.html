@@ -2537,7 +2537,21 @@ body.dark .phone-item { background: #16213e; }
           <h4 style="margin-bottom:16px">ניהול חדשות</h4>
           <div class="admin-form-group"><label>כותרת</label><input id="newsTitle" placeholder="כותרת החדשה"></div>
           <div class="admin-form-group"><label>תיאור</label><textarea id="newsDesc" rows="3" placeholder="תיאור קצר"></textarea></div>
-          <div class="admin-form-group"><label>קטגוריה</label><input id="newsCat" placeholder="דיור / קהילה / חינוך..."></div>
+          <div class="admin-form-group"><label>קטגוריה</label>
+            <input id="newsCat" list="newsCatOptions" placeholder="דיור / קהילה / חינוך...">
+            <datalist id="newsCatOptions">
+              <option value="🏠 דיור">
+              <option value="🏘 קהילה">
+              <option value="📚 חינוך">
+              <option value="🕯 דת">
+              <option value="🚌 תחבורה">
+              <option value="🏪 כלכלה">
+              <option value="🛡 ביטחון">
+              <option value="🎉 אירועים">
+              <option value="📢 הודעות">
+              <option value="💬 אחר">
+            </datalist>
+          </div>
           <div class="admin-form-group"><label>תמונה (קישור או העלאה)</label><input id="newsImg" placeholder="https://...">
             <div class="img-upload-area" onclick="document.getElementById('newsFileInput').click()" style="margin-top:8px">
               <i class="bi bi-cloud-arrow-up" style="font-size:1.5rem;color:var(--primary)"></i>
