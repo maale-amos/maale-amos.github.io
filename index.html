@@ -4413,18 +4413,21 @@ function userPostSimcha() {
   var details = document.getElementById('userSimchaDetails').value;
   if (!family) { showToast('הזינו שם משפחה'); return; }
   var now = new Date();
-  simchotData.unshift({
+  var item = {
+    id: _newItemId(),
     type: document.getElementById('userSimchaType').value,
     family: family,
     details: details || 'מזל טוב!',
     date: now.getDate() + '/' + (now.getMonth()+1)
-  });
+  };
+  simchotData.unshift(item);
   setData('simchot', simchotData);
   renderSimchot();
   document.getElementById('userSimchaFamily').value = '';
   document.getElementById('userSimchaDetails').value = '';
   showResidentSection('inquiries');
   showToast('מזל טוב! השמחה פורסמה!');
+  backendWrite('simchot', 'add', item).then(_backendSyncToast);
 }
 
 // ===== USER POST AD =====
@@ -4434,13 +4437,15 @@ function userPostAd() {
   var user = sessionStorage.getItem('ma_user');
   var sellerName = '';
   if (user) { try { sellerName = JSON.parse(user).name; } catch(e) {} }
-  marketData.unshift({
+  var item = {
+    id: _newItemId(),
     title: title,
     desc: document.getElementById('userAdDesc').value,
     price: document.getElementById('userAdPrice').value || '',
     cat: document.getElementById('userAdCat').value,
     seller: sellerName || 'תושב'
-  });
+  };
+  marketData.unshift(item);
   setData('market', marketData);
   renderMarket();
   document.getElementById('userAdTitle').value = '';
@@ -4448,6 +4453,7 @@ function userPostAd() {
   document.getElementById('userAdPrice').value = '';
   showResidentSection('inquiries');
   showToast('המודעה פורסמה בלוח!');
+  backendWrite('market', 'add', item).then(_backendSyncToast);
 }
 
 // ===== FAMILIES MANAGEMENT =====
