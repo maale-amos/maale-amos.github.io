@@ -765,6 +765,17 @@ body.dark .admin-form-group input, body.dark .admin-form-group textarea, body.da
 body.dark .tab-btn { background: #16213e; color: #a0a0b0; border-color: #2d5a8e; }
 
 /* Dark mode toggle */
+.scroll-top-btn {
+  position: fixed; bottom: 22px; left: 22px; z-index: 998;
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: var(--primary); color: #fff; font-size: 1.2rem; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(26,92,58,.35);
+  transition: transform .2s ease, opacity .2s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.scroll-top-btn:hover { transform: translateY(-3px); }
+body.dark .scroll-top-btn { background: var(--primary-light, #2d8a5e); }
+
 .dark-toggle {
   position: fixed; top: 36px; left: 16px; z-index: 1055;
   width: 40px; height: 40px; border-radius: 50%; border: none;
@@ -1384,6 +1395,9 @@ body.dark .phone-item { background: #16213e; }
 
 <!-- ===== SKIP TO CONTENT ===== -->
 <a href="#mainContent" class="skip-link">דלג לתוכן הראשי</a>
+
+<!-- ===== SCROLL TO TOP ===== -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="חזרה לראש הדף" aria-label="חזרה לראש הדף" style="display:none"><i class="bi bi-arrow-up" aria-hidden="true"></i></button>
 
 <!-- ===== DARK MODE + A11Y ===== -->
 <button class="dark-toggle" onclick="toggleDark()" title="מצב לילה" aria-label="החלף מצב לילה/יום"><i class="bi bi-moon-fill" aria-hidden="true"></i></button>
@@ -4236,6 +4250,13 @@ if (localStorage.getItem('ma_dark') === '1') {
   document.body.classList.add('dark');
   document.querySelector('.dark-toggle i').className = 'bi bi-sun-fill';
 }
+
+// Show scroll-top button once user scrolls past 400px
+window.addEventListener('scroll', function() {
+  var btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  btn.style.display = (window.scrollY > 400) ? 'flex' : 'none';
+}, { passive: true });
 
 // ===== ACCESSIBILITY =====
 var fontLevel = 0;
