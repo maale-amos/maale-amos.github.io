@@ -2975,6 +2975,27 @@ function getAdminCode() { return localStorage.getItem(ADMIN_CODE_KEY) || DEFAULT
 function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
 function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || ''; }
 
+// Static admin token — matches ADMIN_TOKEN in backend/Code.gs. The frontend
+// only sends this from the admin panel after the local admin code is verified,
+// so it isn't exposed to anonymous visitors.
+var BACKEND_ADMIN_TOKEN = '<REDACTED_TOKEN>';
+
+// Write one row to the backend. tab/op/data per admin_row contract.
+// Returns a Promise. Safe to call without backend URL — resolves to {ok:false, error:'no_backend'}.
+function backendWrite(tab, op, data) {
+  var url = getBackendUrl();
+  if (!url) return Promise.resolve({ ok: false, error: 'no_backend' });
+  var body = new URLSearchParams();
+  body.set('action', 'admin_row');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('tab', tab);
+  body.set('op', op);
+  body.set('data', JSON.stringify(data || {}));
+  return fetch(url, { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .catch(function(e) { return { ok: false, error: String(e) }; });
+}
+
 // Load data: data.json (static) + optional Apps Script backend (live from Sheets)
 // If a backend URL is configured (localStorage 'ma_backend_url'), its fields
 // override the static ones. Fields the backend doesn't yet expose (market,
