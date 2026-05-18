@@ -2817,6 +2817,7 @@ body.dark .phone-item { background: #16213e; }
             <button class="btn-admin btn-admin-primary" onclick="saveSettings()"><i class="bi bi-save"></i> שמור הגדרות</button>
             <button class="btn-admin btn-admin-secondary" onclick="testBackendConnection()" style="background:#0891b2;color:#fff"><i class="bi bi-check2-circle"></i> בדוק חיבור לשיטס</button>
             <button class="btn-admin btn-admin-secondary" onclick="importAllToSheets()" style="background:#15803d;color:#fff"><i class="bi bi-cloud-upload-fill"></i> ייבוא חד-פעמי של כל הנתונים לשיטס</button>
+            <button class="btn-admin btn-admin-secondary" onclick="showPendingRegistrations()" style="background:#b45309;color:#fff"><i class="bi bi-person-check-fill"></i> אשר הרשמות ממתינות</button>
           </div>
           <p style="font-size:0.78rem;color:var(--text-light);margin-top:6px"><b>ייבוא חד-פעמי:</b> לוקח את כל מה שיש כרגע ב-data.json (כתבות, אירועים, מודעות, גמ"חים, וכו') ומעלה לשייטס. שימושי בפעם הראשונה. שים לב — אם כבר יש תוכן בשיטס, ייווצרו כפילויות (לכל פריט id ייחודי).</p>
           <hr style="margin:20px 0">
@@ -3062,6 +3063,47 @@ function loadGlobalData() {
 }
 
 // Publish all data to GitHub (admin only)
+function addAnnouncement() {
+  var type = document.getElementById('annType').value;
+  var title = document.getElementById('annTitle').value.trim();
+  var body = document.getElementById('annBody').value.trim();
+  var date = document.getElementById('annDate').value.trim();
+  if (!title || !body) { showToast('כותרת ותוכן הם שדות חובה'); return; }
+  var item = { id: _newItemId(), type: type, title: title, body: body, date: date };
+  announcementsData.unshift(item);
+  setData('announcements', announcementsData);
+  refreshAdminLists();
+  renderAll();
+  ['annTitle','annBody','annDate'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  showToast('הודעה נוספה!');
+  backendWrite('announcements', 'add', item).then(_backendSyncToast);
+}
+
+// Show pending registrations from local + invite admin to approve.
+function showPendingRegistrations() {
+  var users = getData('registered_users', []);
+  var pending = users.filter(function(u) { return u.status === 'pending'; });
+  if (!pending.length) { showToast('אין הרשמות ממתינות'); return; }
+  var lines = pending.map(function(u, i) { return (i+1) + '. ' + u.name + ' / ' + u.phone + (u.addr ? ' / ' + u.addr : ''); }).join('\n');
+  var name = prompt('הרשמות ממתינות:\n\n' + lines + '\n\nהקלד את השם המדויק כדי לאשר (או ביטול):');
+  if (!name) return;
+  name = name.trim();
+  var idx = users.findIndex(function(u) { return u.name === name && u.status === 'pending'; });
+  if (idx < 0) { showToast('לא נמצאה הרשמה ממתינה בשם זה'); return; }
+  users[idx].status = 'approved';
+  users[idx].approved_at = new Date().toISOString();
+  setData('registered_users', users);
+  // Also add to residents list (so name+code login via path 1 works too)
+  var code = String(Math.floor(1000 + Math.random() * 9000));
+  residentsData.push({ id: _newItemId(), name: users[idx].name, code: code, role: 'תושב', status: 'אושר', phone: users[idx].phone });
+  setData('residents', residentsData);
+  refreshAdminLists();
+  refreshAdminDashboard();
+  showToast('✓ ' + name + ' אושר. קוד אישי: ' + code);
+  backendWrite('residents', 'add', residentsData[residentsData.length - 1]).then(_backendSyncToast);
+}
+window.showPendingRegistrations = showPendingRegistrations;
+
 function publishToGitHub() {
   var token = getGhToken();
   if (!token) { showToast('הזינו GitHub Token בהגדרות תחילה'); return; }
@@ -3286,11 +3328,13 @@ function registerResident() {
   var users = getData('registered_users', []);
   var exists = users.find(function(u) { return u.phone === phone; });
   if (exists) { showToast('מספר זה כבר רשום. היכנסו!'); showLoginTab(); return; }
-  users.push({ name: name, phone: phone, addr: addr, pass: simpleHash(pass), registered: new Date().toISOString() });
+  // Save as PENDING — admin must approve before login is allowed.
+  users.push({ name: name, phone: phone, addr: addr, pass: simpleHash(pass), status: 'pending', registered: new Date().toISOString() });
   setData('registered_users', users);
-  sessionStorage.setItem('ma_user', JSON.stringify({ name: name, email: phone, picture: '' }));
-  showResidentDashboard(name, phone, '');
-  showToast('נרשמת בהצלחה! ברוך הבא, ' + name + '!');
+  // Reset form
+  ['regName','regPhone','regAddress','regPass'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  showLoginTab();
+  showToast('הבקשה נשלחה לוועד. תקבלו הודעה לאחר אישור.');
   // Push to backend registrations tab so the committee sees pending requests
   var backendUrl = getBackendUrl();
   if (backendUrl) {
@@ -3326,11 +3370,15 @@ function residentLogin() {
     showToast('ברוך הבא, ' + resident.name + '!');
     return;
   }
-  // 2. Fallback: registered users (self-registration with password)
+  // 2. Fallback: registered users (self-registration with password) — APPROVED only.
   var users = getData('registered_users', []);
   var hash = simpleHash(code);
   var user = users.find(function(u) { return u.name === name && u.pass === hash; });
   if (user) {
+    if (user.status !== 'approved') {
+      showToast('הבקשה שלך עדיין ממתינה לאישור הוועד.');
+      return;
+    }
     sessionStorage.setItem('ma_user', JSON.stringify({ name: user.name, email: user.phone, picture: '' }));
     showResidentDashboard(user.name, user.phone, '');
     showToast('ברוך הבא, ' + user.name + '!');
