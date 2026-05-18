@@ -271,7 +271,8 @@ body.show-all-extras section[data-extra="1"] { display: block; }
 .section-header p { color: var(--text-light); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
 
 /* ===== NEWS ===== */
-.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 24px; }
+@media (max-width: 480px) { .news-grid { gap: 16px; } }
 .news-card {
   background: #fff; border-radius: var(--radius); overflow: hidden;
   box-shadow: var(--card-shadow); transition: var(--transition); cursor: pointer;
