@@ -3668,9 +3668,27 @@ function editResident(i) {
 
 function copyResidentCode(name, code) {
   var txt = 'שלום ' + name + ', הקוד האישי שלכם לאזור התושבים באתר מעלה עמוס: ' + code;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(function() { showToast('הקוד הועתק!'); });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(
+      function() { showToast('הועתק! הדבק והעבר לתושב.'); },
+      function() { _fallbackCopy(txt, code); }
+    );
   } else {
+    _fallbackCopy(txt, code);
+  }
+}
+function _fallbackCopy(txt, code) {
+  // textarea trick for old/insecure contexts
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('הועתק!');
+  } catch (e) {
     showToast('קוד: ' + code);
   }
 }
