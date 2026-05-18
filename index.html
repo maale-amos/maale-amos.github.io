@@ -2998,13 +2998,13 @@ function publishToGitHub() {
   var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
   // First get current file SHA
   showToast('מפרסם שינויים...');
-  fetch('https://api.github.com/repos/yossi6742853/maale-amos/contents/data.json', {
+  fetch('https://api.github.com/repos/maale-amos/maale-amos.github.io/contents/data.json', {
     headers: { 'Authorization': 'token ' + token }
   })
   .then(function(r) { return r.json(); })
   .then(function(fileInfo) {
     var sha = fileInfo.sha || '';
-    return fetch('https://api.github.com/repos/yossi6742853/maale-amos/contents/data.json', {
+    return fetch('https://api.github.com/repos/maale-amos/maale-amos.github.io/contents/data.json', {
       method: 'PUT',
       headers: {
         'Authorization': 'token ' + token,
