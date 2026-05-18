@@ -610,11 +610,17 @@ body.show-all-extras section[data-extra="1"] { display: block; }
   display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 2px solid #e0e0e0; padding-bottom: 12px;
 }
 .admin-tab {
-  padding: 8px 18px; border: none; background: #f0f0f0; border-radius: 8px;
+  padding: 8px 18px; border: 2px solid transparent; background: #f0f0f0; border-radius: 10px;
   font-family: 'Heebo'; font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--transition);
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.admin-tab:hover { background: #e0e0e0; }
-.admin-tab.active { background: var(--primary); color: #fff; }
+.admin-tab:hover { background: #e0e0e0; transform: translateY(-1px); }
+.admin-tab.active {
+  background: var(--primary); color: #fff;
+  box-shadow: 0 4px 12px rgba(26,92,58,.35), inset 0 0 0 2px rgba(255,255,255,.2);
+  transform: translateY(-1px);
+}
+.admin-tab.active i { color: var(--accent-light); }
 .admin-section { display: none; }
 .admin-section.active { display: block; }
 .admin-form-group { margin-bottom: 16px; }
