@@ -4294,6 +4294,16 @@ window.addEventListener('scroll', function() {
   btn.style.display = (window.scrollY > 400) ? 'flex' : 'none';
 }, { passive: true });
 
+// Auto-refresh data from backend every 90s (only when tab is visible — saves bandwidth)
+setInterval(function() {
+  if (document.hidden) return;  // Don't poll when tab is in background
+  if (!getBackendUrl()) return;  // No backend → nothing to refresh
+  // Skip if admin overlay is open (user is editing)
+  var adminOverlay = document.getElementById('adminOverlay');
+  if (adminOverlay && adminOverlay.classList.contains('active')) return;
+  loadGlobalData();
+}, 90 * 1000);
+
 // ===== ACCESSIBILITY =====
 var fontLevel = 0;
 function changeFontSize(dir) {
