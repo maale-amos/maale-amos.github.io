@@ -4516,6 +4516,9 @@ function saveFamiliesLocal() {
 }
 
 function deleteFamily(idx) {
+  var fam = allFamilies[idx];
+  if (!fam) return;
+  if (!confirm('למחוק את ' + (fam.n || 'המשפחה') + '?')) return;
   allFamilies.splice(idx, 1);
   saveFamiliesLocal();
   renderAdminFamilies(document.getElementById('adminFamSearch') ? document.getElementById('adminFamSearch').value : '');
