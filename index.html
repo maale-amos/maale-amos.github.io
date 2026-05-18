@@ -3243,7 +3243,9 @@ function renderGemachim() {
 
 function renderTicker() {
   document.getElementById('tickerWrap').innerHTML = tickerData.map(function(t) {
-    return '<span><i class="bi bi-bell-fill"></i> ' + t + '</span>';
+    // Backward-compat: handle both string and {id,msg} shapes
+    var text = (typeof t === 'string') ? t : (t && t.msg) ? t.msg : '';
+    return text ? '<span><i class="bi bi-bell-fill"></i> ' + text + '</span>' : '';
   }).join('');
 }
 
@@ -3558,9 +3560,10 @@ function refreshAdminLists() {
   document.getElementById('adminGemachList').innerHTML = gemachimData.map(function(g, i) {
     return '<li><div class="item-text"><div class="item-title">' + g.name + '</div><div class="item-sub">' + g.phone + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteItem(\'gemachim\',' + i + ')"><i class="bi bi-trash"></i></button></li>';
   }).join('');
-  // Ticker
+  // Ticker — handle both string and {id,msg} shapes
   document.getElementById('adminTickerList').innerHTML = tickerData.map(function(t, i) {
-    return '<li><div class="item-text"><div class="item-title">' + t + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteItem(\'ticker\',' + i + ')"><i class="bi bi-trash"></i></button></li>';
+    var text = (typeof t === 'string') ? t : (t && t.msg) ? t.msg : '';
+    return '<li><div class="item-text"><div class="item-title">' + text + '</div></div><button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteItem(\'ticker\',' + i + ')"><i class="bi bi-trash"></i></button></li>';
   }).join('');
   // Residents
   renderAdminResidents('');
@@ -3765,11 +3768,13 @@ function addGemach() {
 function addTicker() {
   var m = document.getElementById('tickerMsg').value;
   if (!m) return;
-  tickerData.push(m);
+  // Store as object so delete-from-Sheets works (was plain string — couldn't be matched by id)
+  var item = { id: _newItemId(), msg: m };
+  tickerData.push(item);
   setData('ticker', tickerData); refreshAdminLists(); renderTicker();
   document.getElementById('tickerMsg').value = '';
   showToast('הודעה נוספה!');
-  backendWrite('ticker', 'add', { msg: m }).then(_backendSyncToast);
+  backendWrite('ticker', 'add', item).then(_backendSyncToast);
 }
 
 function saveSettings() {
