@@ -3617,15 +3617,22 @@ function addResident() {
 }
 
 function deleteResident(i) {
-  if (!confirm('למחוק את ' + residentsData[i].name + '?')) return;
+  var resident = residentsData[i];
+  if (!resident) return;
+  if (!confirm('למחוק את ' + resident.name + '?')) return;
   residentsData.splice(i, 1);
   setData('residents', residentsData);
   renderAdminResidents('');
   showToast('נמחק');
+  // Sync to Sheets if backend configured
+  if (resident.id) {
+    backendWrite('residents', 'delete', { id: resident.id }).then(_backendSyncToast);
+  }
 }
 
 function editResident(i) {
   var r = residentsData[i];
+  if (!r) return;
   var newName = prompt('שם:', r.name);
   if (newName === null) return;
   var newCode = prompt('קוד:', r.code);
@@ -3633,10 +3640,14 @@ function editResident(i) {
   var newRole = prompt('תפקיד:', r.role || 'תושב');
   if (newRole === null) newRole = r.role || 'תושב';
   if (!newName.trim() || !newCode.trim()) { showToast('שם וקוד הם חובה'); return; }
-  residentsData[i] = { name: newName.trim(), code: newCode.trim(), role: newRole.trim() };
+  // Preserve id + status + other fields; only update name/code/role
+  residentsData[i] = Object.assign({}, r, { name: newName.trim(), code: newCode.trim(), role: newRole.trim() });
   setData('residents', residentsData);
   renderAdminResidents('');
   showToast('עודכן!');
+  if (residentsData[i].id) {
+    backendWrite('residents', 'update', residentsData[i]).then(_backendSyncToast);
+  }
 }
 
 function copyResidentCode(name, code) {
