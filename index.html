@@ -776,6 +776,18 @@ body.dark .admin-form-group input, body.dark .admin-form-group textarea, body.da
 }
 body.dark .tab-btn { background: #16213e; color: #a0a0b0; border-color: #2d5a8e; }
 
+/* Print stylesheet — hide chrome, keep content */
+@media print {
+  .navbar-main, .news-ticker, .dark-toggle, .a11y-widget, .scroll-top-btn,
+  .float-btn, .mobile-toggle, .search-modal, .admin-overlay, .toast-msg,
+  .skip-link, .action-sheet, button, .nav-menu, footer { display: none !important; }
+  body { background: #fff !important; color: #000 !important; padding: 5mm; }
+  .news-card, .service-card, .event-item, .gemach-card { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+  a { color: #000 !important; text-decoration: underline; }
+  section { page-break-inside: avoid; }
+  .section-title { page-break-after: avoid; }
+}
+
 /* Dark mode toggle */
 .scroll-top-btn {
   position: fixed; bottom: 22px; left: 22px; z-index: 998;
