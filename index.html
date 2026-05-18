@@ -1410,10 +1410,6 @@ body.dark .phone-item { background: #16213e; }
 <div class="news-ticker">
   <div class="ticker-wrap" id="tickerWrap">
     <span><i class="bi bi-calendar-heart"></i> <span id="hebrewDateDisplay" style="font-weight:700"></span></span>
-    <span><i class="bi bi-bell-fill"></i> הרשמה לגני ילדים תשפ"ז נפתחה!</span>
-    <span><i class="bi bi-info-circle-fill"></i> קו אוטובוס 167 חדש — מעלה עמוס לירושלים</span>
-    <span><i class="bi bi-calendar-check"></i> ל"ג בעומר — מדורה קהילתית בע"ה</span>
-    <span><i class="bi bi-building"></i> אושרה תכנית הרחבה — 120 יח"ד חדשות</span>
   </div>
 </div>
 
@@ -3010,16 +3006,16 @@ const DEFAULT_ANNOUNCEMENTS = [
   }
 ];
 
-var announcementsData = DEFAULT_ANNOUNCEMENTS;
-
-// ===== LOAD DATA (from data.json first, then localStorage override) =====
-var newsData = DEFAULT_NEWS;
-var eventsData = DEFAULT_EVENTS;
-var marketData = DEFAULT_MARKET;
-var simchotData = DEFAULT_SIMCHOT;
-var gemachimData = DEFAULT_GEMACHIM;
-var tickerData = DEFAULT_TICKER;
-var residentsData = getData('residents', DEFAULT_RESIDENTS);
+// Demo data removed 2026-05-18 — site now starts empty; everything loads from Sheets.
+// The DEFAULT_* constants above are kept only as a one-time seed if Yosef explicitly chooses to import.
+var announcementsData = [];
+var newsData = [];
+var eventsData = [];
+var marketData = [];
+var simchotData = [];
+var gemachimData = [];
+var tickerData = [];
+var residentsData = getData('residents', []);
 var ADMIN_CODE_KEY = 'ma_admin_code';
 var DEFAULT_ADMIN_CODE = '8484';
 var MASTER_ADMIN_CODE = '8484';
@@ -3054,44 +3050,25 @@ function backendWrite(tab, op, data) {
     .catch(function(e) { return { ok: false, error: String(e) }; });
 }
 
-// Load data: data.json (static) + optional Apps Script backend (live from Sheets)
-// If a backend URL is configured (localStorage 'ma_backend_url'), its fields
-// override the static ones. Fields the backend doesn't yet expose (market,
-// simchot, gemachim, ticker) keep coming from data.json.
+// Load data ONLY from the Apps Script backend (Google Sheets). No demo,
+// no data.json fallback. Per user 2026-05-18: "הכל יהיה רק משייטס".
 function loadGlobalData() {
-  var applyJson = function(data) {
-    if (data.news && data.news.length) newsData = data.news;
-    if (data.events && data.events.length) eventsData = data.events;
-    if (data.market && data.market.length) marketData = data.market;
-    if (data.simchot && data.simchot.length) simchotData = data.simchot;
-    if (data.gemachim && data.gemachim.length) gemachimData = data.gemachim;
-    if (data.ticker && data.ticker.length) tickerData = data.ticker;
-    if (data.announcements && data.announcements.length) announcementsData = data.announcements;
-    if (data.residents && data.residents.length) residentsData = data.residents;
-  };
-  fetch('data.json?t=' + Date.now())
+  var backendUrl = getBackendUrl();
+  if (!backendUrl) { renderAll(); return; }
+  fetch(backendUrl + '?action=maale_all&t=' + Date.now())
     .then(function(r) { return r.json(); })
-    .then(function(data) {
-      applyJson(data);
-      var backendUrl = getBackendUrl();
-      if (!backendUrl) { renderAll(); return; }
-      // Fetch from Apps Script and override fields it provides
-      return fetch(backendUrl + '?action=maale_all&t=' + Date.now())
-        .then(function(r) { return r.json(); })
-        .then(function(b) {
-          if (b && b.ok) {
-            if (b.news && b.news.length) newsData = b.news;
-            if (b.events && b.events.length) eventsData = b.events;
-            if (b.announcements && b.announcements.length) announcementsData = b.announcements;
-            if (b.residents && b.residents.length) residentsData = b.residents;
-            if (b.market && b.market.length) marketData = b.market;
-            if (b.simchot && b.simchot.length) simchotData = b.simchot;
-            if (b.gemachim && b.gemachim.length) gemachimData = b.gemachim;
-            if (b.ticker && b.ticker.length) tickerData = b.ticker;
-          }
-          renderAll();
-        })
-        .catch(function() { renderAll(); });
+    .then(function(b) {
+      if (b && b.ok) {
+        newsData = b.news || [];
+        eventsData = b.events || [];
+        announcementsData = b.announcements || [];
+        residentsData = b.residents || [];
+        marketData = b.market || [];
+        simchotData = b.simchot || [];
+        gemachimData = b.gemachim || [];
+        tickerData = b.ticker || [];
+      }
+      renderAll();
     })
     .catch(function() { renderAll(); });
 }
