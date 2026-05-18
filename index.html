@@ -3165,6 +3165,10 @@ function publishToGitHub() {
 
 // ===== RENDER =====
 function renderNews() {
+  if (!newsData.length) {
+    document.getElementById('newsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light)"><i class="bi bi-newspaper" style="font-size:3rem;opacity:.3"></i><p style="margin-top:12px">אין חדשות להצגה כרגע</p></div>';
+    return;
+  }
   document.getElementById('newsGrid').innerHTML = newsData.map(function(n, i) {
     var safeTitle = escHtml(n.title || '');
     var safeDesc = escHtml(n.desc || '');
