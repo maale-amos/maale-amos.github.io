@@ -3688,7 +3688,7 @@ function addNews() {
   var fileInput = document.getElementById('newsFileInput');
   if (imgUrl === 'uploaded' && fileInput.dataset.dataUrl) imgUrl = fileInput.dataset.dataUrl;
   if (!imgUrl) imgUrl = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80';
-  var item = { id: _newItemId(), title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl };
+  var item = { id: _newItemId(), title: t, desc: d, date: now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear(), cat: document.getElementById('newsCat').value || 'עדכונים', img: imgUrl, created_at: now.toISOString() };
   newsData.unshift(item);
   setData('news', newsData); refreshAdminLists(); renderAll();
   document.getElementById('newsTitle').value = ''; document.getElementById('newsDesc').value = '';
