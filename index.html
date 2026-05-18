@@ -3443,12 +3443,17 @@ function adminLogin() {
 
 function refreshAdminDashboard() {
   var stats = document.getElementById('adminStatsLine');
+  var pendingCount = (getData('registered_users', []) || []).filter(function(u){ return u.status === 'pending'; }).length;
+  var pendingHtml = pendingCount > 0
+    ? ' &nbsp; · &nbsp; <a href="#" onclick="event.preventDefault(); showPendingRegistrations()" style="color:#fbbf24;font-weight:700"><i class="bi bi-person-exclamation"></i> ' + pendingCount + ' ממתינות לאישור</a>'
+    : '';
   if (stats) {
     stats.innerHTML =
       '<i class="bi bi-newspaper"></i> ' + newsData.length + ' חדשות &nbsp; · &nbsp;' +
       '<i class="bi bi-calendar3"></i> ' + eventsData.length + ' אירועים &nbsp; · &nbsp;' +
       '<i class="bi bi-shop"></i> ' + marketData.length + ' מודעות &nbsp; · &nbsp;' +
-      '<i class="bi bi-person-vcard"></i> ' + residentsData.length + ' תושבים';
+      '<i class="bi bi-person-vcard"></i> ' + residentsData.length + ' תושבים' +
+      pendingHtml;
   }
   // Check sync
   var dot = document.getElementById('adminSyncDot');
