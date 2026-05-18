@@ -3677,7 +3677,16 @@ openAdmin = function() {
   var tokenField = document.getElementById('settingGhToken');
   if (tokenField && getGhToken()) tokenField.value = getGhToken();
   var backendField = document.getElementById('settingBackendUrl');
-  if (backendField && getBackendUrl()) backendField.value = getBackendUrl();
+  if (backendField) backendField.value = getBackendUrl();  // pre-fill even default
+  // Ping backend in background to surface a status
+  if (getBackendUrl()) {
+    fetch(getBackendUrl() + '?action=maale_health&t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d && d.ok) showToast('✓ סנכרון לשייטס פעיל');
+      })
+      .catch(function() { /* silent */ });
+  }
 };
 
 function renderAll() {
