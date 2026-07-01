@@ -103,16 +103,12 @@ body {
   padding: 6px 0;
 }
 .logo-circle {
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(26,92,58,0.3);
+  width: 60px; height: 60px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   display: flex; align-items: center; justify-content: center;
 }
-.logo-circle img { width: 100%; height: 100%; object-fit: cover; }
-.logo-circle .fallback-logo { color: #fff; font-size: 0.9rem; font-weight: 800; }
+.logo-circle img { width: 100%; height: 100%; object-fit: contain; }
+.logo-circle .fallback-logo { color: var(--primary); font-size: 0.9rem; font-weight: 800; }
 .brand-text { line-height: 1.2; }
 .brand-text .title { font-weight: 800; font-size: 1.15rem; color: var(--primary-dark); }
 .brand-text .subtitle { font-size: 0.72rem; color: var(--text-light); font-weight: 400; letter-spacing: 1px; }
@@ -1446,7 +1442,7 @@ body.dark .phone-item { background: #16213e; }
     <div class="d-flex align-items-center justify-content-between">
       <a href="#" class="navbar-brand-area text-decoration-none">
         <div class="logo-circle">
-          <img src="images/logo.jpg" alt="לוגו מעלה עמוס" onerror="this.src='images/logo.png';this.onerror=function(){this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'}">
+          <img src="images/logo_transparent.png" alt="לוגו מעלה עמוס" onerror="this.src='images/logo.jpg';this.onerror=function(){this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'}">
         </div>
         <div class="brand-text">
           <div class="title">מעלה עמוס</div>
@@ -1484,6 +1480,7 @@ body.dark .phone-item { background: #16213e; }
         <li>
           <a href="#news">חדשות <i class="bi bi-chevron-down" aria-hidden="true"></i></a>
           <div class="dropdown-mega">
+            <a href="#featured-poster"><i class="bi bi-book-half" aria-hidden="true"></i> זמני לימודים תשפ"ז</a>
             <a href="#announcements"><i class="bi bi-megaphone" aria-hidden="true"></i> הודעות המזכירות</a>
             <a href="#news"><i class="bi bi-newspaper" aria-hidden="true"></i> חדשות</a>
             <a href="#simchot"><i class="bi bi-emoji-smile" aria-hidden="true"></i> שמחות</a>
@@ -1585,6 +1582,24 @@ body.dark .phone-item { background: #16213e; }
 </div>
 
 <!-- ===== ANNOUNCEMENTS — הודעות המזכירות ===== -->
+<section class="section" id="featured-poster" aria-labelledby="featuredPosterTitle" style="padding-top:32px;padding-bottom:32px">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2 id="featuredPosterTitle"><i class="bi bi-book-half" aria-hidden="true"></i> תלמוד תורה — זמני הלימודים תשפ"ז</h2>
+      <div class="section-line"></div>
+      <p>לוח זמני הלימודים לשנת הלימודים הבעלט — לוח יומי מלא</p>
+    </div>
+    <div class="fade-up" style="max-width:720px;margin:0 auto;background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);overflow:hidden">
+      <a href="images/zmanei_limudim_5787.png" target="_blank" rel="noopener" aria-label="פתח את פוסטר זמני הלימודים בגודל מלא">
+        <img src="images/zmanei_limudim_5787.png" alt="לוח זמני הלימודים תלמוד תורה מעלה עמוס תשפ&quot;ז" style="width:100%;height:auto;display:block">
+      </a>
+      <div style="padding:16px 20px;text-align:center;background:var(--sand);font-size:0.9rem;color:var(--text-light)">
+        <i class="bi bi-download"></i> לחצו על הפוסטר להורדה / הדפסה
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section" id="announcements" aria-labelledby="announcementsTitle">
   <div class="container">
     <div class="section-header fade-up">
