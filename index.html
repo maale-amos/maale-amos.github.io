@@ -23,6 +23,11 @@
 <meta property="og:description" content="אתר רשמי של הישוב מעלה עמוס - חדשות, אירועים, שירותים וקהילה">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="he_IL">
+<meta property="og:image" content="https://maale-amos.github.io/maale-amos/images/logo.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="מעלה עמוס - אתר הישוב הקהילתי">
+<meta name="twitter:description" content="חדשות, אירועים, שירותים וקהילה במעלה עמוס">
+<meta name="twitter:image" content="https://maale-amos.github.io/maale-amos/images/logo.jpg">
 <style>
 :root {
   --primary: #1a5c3a;
@@ -1609,7 +1614,7 @@ body.dark .phone-item { background: #16213e; }
     </div>
     <div class="announcements-list fade-up" id="announcementsList"></div>
     <div class="text-center mt-4 fade-up">
-      <button class="tab-btn" onclick="showToast('ארכיון הודעות המזכירות יתווסף בעז\'\'ה')" aria-label="הצג הודעות נוספות מהארכיון">
+      <button class="tab-btn" onclick="showArchiveModal('announcements')" aria-label="הצג הודעות נוספות מהארכיון">
         <i class="bi bi-archive" aria-hidden="true"></i> ארכיון הודעות
       </button>
     </div>
@@ -1626,7 +1631,7 @@ body.dark .phone-item { background: #16213e; }
     </div>
     <div class="news-grid fade-up" id="newsGrid"></div>
     <div class="text-center mt-4 fade-up">
-      <button class="tab-btn" onclick="showToast('בעז\'\'ה ארכיון החדשות יתווסף בקרוב')" aria-label="הצג עוד חדשות">
+      <button class="tab-btn" onclick="showArchiveModal('news')" aria-label="הצג עוד חדשות">
         <i class="bi bi-arrow-down" aria-hidden="true"></i> הצג עוד חדשות
       </button>
     </div>
@@ -1678,8 +1683,8 @@ body.dark .phone-item { background: #16213e; }
       <div class="gallery-item"><img loading="lazy" decoding="async" src="images/zimmer_maale_amos.jpg" alt="צימר אירוח במעלה עמוס"><div class="gallery-caption">צימר במעלה עמוס</div></div>
       <div class="gallery-item"><img loading="lazy" decoding="async" src="images/ptihat_kayitz.png" alt="הפנינג פתיחת קיץ"><div class="gallery-caption">הפנינג פתיחת קיץ</div></div>
       <div class="gallery-item"><img loading="lazy" decoding="async" src="images/toshvei_maale_amos.jpg" alt="תושבי מעלה עמוס בארגון חסד"><div class="gallery-caption">ארגון החסד - תושבי מעלה עמוס</div></div>
-      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/kolel/2.jpg" alt="לימוד תורה בכולל" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">לימוד תורה בכולל</div></div>
-      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/charity/2.jpg" alt="חלוקת מזון לנזקקים" onerror="this.parentElement.style.display='none'"><div class="gallery-caption">חלוקת מזון לנזקקים</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/kolel/2.jpg" alt="לימוד תורה בכולל" onerror="this.onerror=null;this.src='images/kolel_1.jpg'"><div class="gallery-caption">לימוד תורה בכולל</div></div>
+      <div class="gallery-item"><img loading="lazy" decoding="async" src="https://maaleamos.co.il/pictures/charity/2.jpg" alt="חלוקת מזון לנזקקים" onerror="this.onerror=null;this.src='images/charity_1.jpg'"><div class="gallery-caption">חלוקת מזון לנזקקים</div></div>
       <div class="gallery-item"><img loading="lazy" decoding="async" src="images/zimmer_maale_amos_2.jpg" alt="צימר עם מרפסת ונוף"><div class="gallery-caption">צימר - מרפסת עם נוף</div></div>
     </div>
   </div>
@@ -2567,6 +2572,9 @@ body.dark .phone-item { background: #16213e; }
           <button class="admin-tab" onclick="switchAdminTab('ticker',this)"><i class="bi bi-megaphone"></i> טיקר</button>
           <button class="admin-tab" onclick="switchAdminTab('announcements',this)"><i class="bi bi-megaphone-fill"></i> הודעות המזכירות</button>
           <button class="admin-tab" onclick="switchAdminTab('residents',this)"><i class="bi bi-person-vcard"></i> תושבים</button>
+          <button class="admin-tab" onclick="switchAdminTab('analytics',this)"><i class="bi bi-graph-up-arrow"></i> אנליטיקה</button>
+          <button class="admin-tab" onclick="switchAdminTab('users',this)"><i class="bi bi-people"></i> משתמשים</button>
+          <button class="admin-tab" onclick="switchAdminTab('audit',this)"><i class="bi bi-clipboard-check"></i> יומן</button>
           <button class="admin-tab" onclick="switchAdminTab('settings',this)"><i class="bi bi-gear"></i> הגדרות</button>
         </div>
 
@@ -2862,6 +2870,83 @@ body.dark .phone-item { background: #16213e; }
           <ul class="admin-item-list" id="adminTickerList"></ul>
         </div>
 
+        <!-- v2: ANALYTICS ADMIN -->
+        <div class="admin-section" id="admin-analytics">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h4 style="margin:0"><i class="bi bi-graph-up-arrow"></i> אנליטיקה — מה קורה באתר</h4>
+            <div style="display:flex;gap:8px">
+              <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadAnalytics()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+              <button class="btn-admin btn-admin-sm" style="background:#6c757d;color:#fff" onclick="downloadAnalyticsCsv()"><i class="bi bi-download"></i> יצוא CSV</button>
+            </div>
+          </div>
+          <div id="analyticsSource" style="font-size:0.8rem;color:var(--text-light);margin-bottom:12px"></div>
+          <div id="analyticsCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
+            <div style="background:#f8f9fa;border-radius:10px;padding:16px" id="analyticsTimelineBox">
+              <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-calendar3"></i> ציר זמן — 14 יום</h6>
+              <canvas id="analyticsTimelineChart" height="140"></canvas>
+            </div>
+            <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+              <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-clock-history"></i> שעות שיא</h6>
+              <canvas id="analyticsHourChart" height="140"></canvas>
+            </div>
+            <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+              <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-signpost-split"></i> סקציות פופולריות</h6>
+              <div id="analyticsSections" style="max-height:220px;overflow:auto"></div>
+            </div>
+            <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+              <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-lightning"></i> פעולות מובילות</h6>
+              <div id="analyticsEventTypes"></div>
+            </div>
+            <div style="background:#f8f9fa;border-radius:10px;padding:16px;grid-column:1 / -1">
+              <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-activity"></i> אירועים אחרונים (40)</h6>
+              <div id="analyticsRecent" style="max-height:280px;overflow:auto;font-size:0.85rem"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v2: USERS ADMIN -->
+        <div class="admin-section" id="admin-users">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h4 style="margin:0"><i class="bi bi-people"></i> ניהול משתמשים</h4>
+            <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadUsers()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+          </div>
+          <div style="background:#fef3c7;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;border:1px solid #fcd34d">
+            <i class="bi bi-info-circle-fill" style="color:#b45309"></i>
+            <b>איך זה עובד:</b> משתמשים שאתה יוצר כאן יכולים להתחבר לאתר עם אימייל + סיסמה. יש 3 תפקידים: <b>admin</b> (גישה מלאה), <b>editor</b> (עורך תכנים), <b>resident</b> (רק אזור תושבים).
+          </div>
+          <h5 style="font-weight:700;margin-bottom:10px">הוסף משתמש חדש</h5>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px">
+            <div class="admin-form-group" style="margin:0"><label>שם מלא</label><input id="uNew_name" placeholder="שם"></div>
+            <div class="admin-form-group" style="margin:0"><label>אימייל</label><input id="uNew_email" type="email" placeholder="user@example.com"></div>
+            <div class="admin-form-group" style="margin:0"><label>סיסמה</label><input id="uNew_password" type="password" placeholder="6+ תווים"></div>
+            <div class="admin-form-group" style="margin:0"><label>תפקיד</label>
+              <select id="uNew_role">
+                <option value="resident">תושב</option>
+                <option value="editor">עורך</option>
+                <option value="admin">מנהל</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-admin btn-admin-primary" onclick="createUser()"><i class="bi bi-person-plus"></i> צור משתמש</button>
+          <hr style="margin:20px 0">
+          <h5 style="font-weight:700;margin-bottom:10px">משתמשים קיימים</h5>
+          <div id="usersList" style="max-height:400px;overflow:auto"></div>
+        </div>
+
+        <!-- v2: AUDIT LOG ADMIN -->
+        <div class="admin-section" id="admin-audit">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h4 style="margin:0"><i class="bi bi-clipboard-check"></i> יומן פעולות מנהל</h4>
+            <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadAudit()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+          </div>
+          <div style="background:#dbeafe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;border:1px solid #93c5fd">
+            <i class="bi bi-shield-lock-fill" style="color:#1e40af"></i>
+            כל פעולת מנהל (התחברות, יצירת משתמש, מחיקה, שינוי הרשאות) מתועדת כאן עם חותמת זמן ומקור.
+          </div>
+          <div id="auditList" style="font-size:0.85rem"></div>
+        </div>
+
         <!-- SETTINGS ADMIN -->
         <div class="admin-section" id="admin-settings">
           <h4 style="margin-bottom:16px">הגדרות כלליות</h4>
@@ -3072,6 +3157,132 @@ function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || DEFAU
 // only sends this from the admin panel after the local admin code is verified,
 // so it isn't exposed to anonymous visitors.
 var BACKEND_ADMIN_TOKEN = 'MAALE_AGENT_2026';
+
+// ===== v2: Analytics tracker =====
+// Emits pageview + section-view + key-click beacons to the backend track endpoint.
+// Also mirrors events to localStorage so admin dashboard has data even if backend
+// hasn't been redeployed yet.
+var MA_ANALYTICS_KEY = 'ma_analytics_local';
+var MA_SID_KEY = 'ma_sid';
+function maGetSid() {
+  var sid = sessionStorage.getItem(MA_SID_KEY);
+  if (!sid) {
+    sid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    sessionStorage.setItem(MA_SID_KEY, sid);
+  }
+  return sid;
+}
+function maGetUid() {
+  try {
+    var g = window.residentGoogleUser;
+    if (g && g.email) return g.email;
+    var stored = localStorage.getItem('ma_current_user');
+    if (stored) return JSON.parse(stored).email || '';
+  } catch (e) {}
+  return '';
+}
+function maLocalAppend(evt) {
+  try {
+    var arr = JSON.parse(localStorage.getItem(MA_ANALYTICS_KEY) || '[]');
+    arr.push(evt);
+    if (arr.length > 500) arr = arr.slice(-500);
+    localStorage.setItem(MA_ANALYTICS_KEY, JSON.stringify(arr));
+  } catch (e) {}
+}
+function maLocalSummary() {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(MA_ANALYTICS_KEY) || '[]'); } catch (e) {}
+  var now = Date.now(), dayMs = 24 * 3600 * 1000;
+  var pv24 = 0, pv7 = 0, pv30 = 0;
+  var pathCounts = {}, sectionCounts = {}, hourCounts = new Array(24).fill(0), dayCounts = {}, eventTypes = {};
+  var sidsToday = {}, sidsWeek = {};
+  arr.forEach(function(r) {
+    var t = new Date(r.ts).getTime(); if (isNaN(t)) return;
+    var e = r.event || 'pageview';
+    eventTypes[e] = (eventTypes[e] || 0) + 1;
+    if (e === 'pageview') {
+      if (t > now - 30 * dayMs) pv30++;
+      if (t > now - 7 * dayMs) pv7++;
+      if (t > now - dayMs) pv24++;
+      pathCounts[r.path || '/'] = (pathCounts[r.path || '/'] || 0) + 1;
+      if (r.section) sectionCounts[r.section] = (sectionCounts[r.section] || 0) + 1;
+      hourCounts[new Date(t).getHours()]++;
+      var d = new Date(t).toISOString().slice(0, 10);
+      dayCounts[d] = (dayCounts[d] || 0) + 1;
+      if (r.sid) {
+        if (t > now - dayMs) sidsToday[r.sid] = 1;
+        if (t > now - 7 * dayMs) sidsWeek[r.sid] = 1;
+      }
+    }
+  });
+  var top = function(o) { return Object.keys(o).map(function(k) { return { k: k, count: o[k] }; }).sort(function(a, b) { return b.count - a.count; }).slice(0, 10); };
+  return {
+    pageviews_24h: pv24, pageviews_7d: pv7, pageviews_30d: pv30,
+    unique_sessions_24h: Object.keys(sidsToday).length,
+    unique_sessions_7d: Object.keys(sidsWeek).length,
+    top_paths: top(pathCounts).map(function(x) { return { path: x.k, count: x.count }; }),
+    top_sections: top(sectionCounts).map(function(x) { return { section: x.k, count: x.count }; }),
+    hourly_distribution: hourCounts,
+    timeline_14d: Object.keys(dayCounts).sort().slice(-14).map(function(d) { return { day: d, count: dayCounts[d] }; }),
+    event_types: eventTypes,
+    recent: arr.slice(-40).reverse(),
+    total_events: arr.length,
+    source: 'local',
+  };
+}
+function maTrack(event, extra) {
+  var payload = {
+    ts: new Date().toISOString(),
+    event: event || 'pageview',
+    path: location.pathname + location.hash,
+    section: (extra && extra.section) || '',
+    referrer: document.referrer || '',
+    ua: (navigator.userAgent || '').slice(0, 200),
+    sid: maGetSid(),
+    uid: maGetUid(),
+    meta: (extra && extra.meta) ? JSON.stringify(extra.meta) : '',
+  };
+  maLocalAppend(payload);
+  // Best-effort backend post — silently ignored if endpoint absent.
+  try {
+    var body = new URLSearchParams();
+    body.set('action', 'maale_track');
+    Object.keys(payload).forEach(function(k) { body.set(k, payload[k]); });
+    fetch(getBackendUrl(), { method: 'POST', body: body, keepalive: true }).catch(function() {});
+  } catch (e) {}
+}
+// Fire pageview on load
+window.addEventListener('load', function() { setTimeout(function() { maTrack('pageview'); }, 300); });
+// Fire section-view on scroll (only once per section per session)
+var _maSeenSections = {};
+function maObserveSections() {
+  var sections = document.querySelectorAll('section[id], [data-track-section]');
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(en) {
+      if (!en.isIntersecting) return;
+      var id = en.target.id || en.target.getAttribute('data-track-section');
+      if (!id || _maSeenSections[id]) return;
+      _maSeenSections[id] = 1;
+      maTrack('section_view', { section: id });
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(function(s) { io.observe(s); });
+}
+window.addEventListener('load', function() { setTimeout(maObserveSections, 800); });
+// Click tracking on key CTAs
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('a[href^="tel:"], a[href^="mailto:"], a[href^="https://wa.me"], .banner-card, .service-card, [data-track]');
+  if (!el) return;
+  var label = el.getAttribute('data-track') || el.getAttribute('aria-label') || (el.textContent || '').trim().slice(0, 40);
+  var kind = el.href && el.href.startsWith('tel:') ? 'tel_click' :
+             el.href && el.href.startsWith('mailto:') ? 'email_click' :
+             el.href && el.href.startsWith('https://wa.me') ? 'whatsapp_click' :
+             el.classList.contains('banner-card') ? 'banner_click' :
+             el.classList.contains('service-card') ? 'service_click' :
+             'cta_click';
+  maTrack(kind, { section: label });
+});
 
 // Write one row to the backend. tab/op/data per admin_row contract.
 // Returns a Promise. Safe to call without backend URL — resolves to {ok:false, error:'no_backend'}.
@@ -3294,6 +3505,60 @@ function renderAnnouncements() {
       '<div class="announcement-actions">' + ctaHtml + shareHtml + '</div>' +
     '</article>';
   }).join('');
+}
+
+// ===== ARCHIVE MODAL =====
+function showArchiveModal(type) {
+  var titles = { news: 'ארכיון החדשות', announcements: 'ארכיון הודעות המזכירות' };
+  var items = type === 'news' ? newsData : announcementsData;
+  if (!items || !items.length) {
+    showToast('אין פריטים בארכיון עדיין');
+    return;
+  }
+  // Sort by date/created_at descending
+  var sorted = items.slice().sort(function(a, b) {
+    var da = new Date(a.created_at || a.date || 0).getTime();
+    var db = new Date(b.created_at || b.date || 0).getTime();
+    return db - da;
+  });
+  var html = '';
+  if (type === 'news') {
+    html = sorted.map(function(n) {
+      return '<article class="archive-item" onclick="closeArchiveModal();openNewsArticle(' + newsData.indexOf(n) + ')" style="cursor:pointer;padding:16px;border-bottom:1px solid #eee;display:flex;gap:16px;align-items:start">' +
+        (n.img ? '<div style="width:80px;height:80px;flex-shrink:0;border-radius:8px;background-image:url(\'' + (n.img||'').replace(/\'/g,"%27") + '\');background-size:cover;background-position:center"></div>' : '') +
+        '<div style="flex:1"><div style="font-size:.8rem;color:var(--text-light);margin-bottom:4px"><i class="bi bi-calendar3"></i> ' + escHtml(n.date||'') + ' · ' + escHtml(n.cat||'') + '</div>' +
+        '<h4 style="margin:0 0 6px;color:var(--primary)">' + escHtml(n.title||'') + '</h4>' +
+        '<p style="margin:0;color:var(--text-light);font-size:.9rem">' + escHtml((n.desc||'').substring(0,120)) + '</p></div></article>';
+    }).join('');
+  } else {
+    html = sorted.map(function(a) {
+      return '<article class="archive-item" style="padding:16px;border-bottom:1px solid #eee">' +
+        '<div style="font-size:.8rem;color:var(--text-light);margin-bottom:4px"><i class="bi ' + (a.icon||'bi-megaphone') + '"></i> ' + escHtml(a.typeLabel||'הודעה') + ' · ' + escHtml(a.date||'') + '</div>' +
+        '<h4 style="margin:0 0 6px;color:var(--primary)">' + escHtml(a.title||'') + '</h4>' +
+        '<p style="margin:0">' + escHtml(a.body||'') + '</p>' +
+        (a.ctaLink ? '<a href="' + a.ctaLink + '" style="display:inline-block;margin-top:8px;color:var(--primary);text-decoration:none;font-weight:600">' + escHtml(a.cta||'למידע נוסף') + ' <i class="bi bi-arrow-left"></i></a>' : '') +
+        '</article>';
+    }).join('');
+  }
+  var modal = document.getElementById('archiveModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'archiveModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = function(e) { if (e.target === modal) closeArchiveModal(); };
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+    '<div style="padding:20px;border-bottom:2px solid var(--primary);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1"><h3 style="margin:0;color:var(--primary)"><i class="bi bi-archive"></i> ' + titles[type] + ' (' + sorted.length + ')</h3>' +
+    '<button onclick="closeArchiveModal()" style="background:none;border:none;font-size:2rem;cursor:pointer;color:var(--text-light);line-height:1">&times;</button></div>' +
+    '<div style="padding:8px 0">' + html + '</div></div>';
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArchiveModal() {
+  var modal = document.getElementById('archiveModal');
+  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
 }
 
 function shareAnnouncement(title, body) {
@@ -3559,6 +3824,189 @@ function switchAdminTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('admin-' + tab).classList.add('active');
   refreshAdminLists();
+  // v2 lazy loaders
+  if (tab === 'analytics') loadAnalytics();
+  if (tab === 'users') loadUsers();
+  if (tab === 'audit') loadAudit();
+}
+
+// ===== v2: analytics dashboard =====
+function loadAnalytics() {
+  var srcEl = document.getElementById('analyticsSource');
+  srcEl.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_analytics_summary');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) {
+        renderAnalytics(res.summary, 'שרת (Google Sheets)');
+      } else {
+        renderAnalytics(maLocalSummary(), 'מקומי בדפדפן (השרת עוד לא פרוס — יוסף צריך למחוק גרסאות ישנות ב-Apps Script editor)');
+      }
+    })
+    .catch(function() { renderAnalytics(maLocalSummary(), 'מקומי בדפדפן (השרת לא זמין)'); });
+}
+function renderAnalytics(s, srcNote) {
+  document.getElementById('analyticsSource').innerHTML = '<i class="bi bi-database"></i> מקור: ' + srcNote + ' &nbsp;·&nbsp; סה"כ אירועים: ' + s.total_events;
+  var card = function(icon, label, num, color) {
+    return '<div style="background:linear-gradient(135deg,' + color + ',#fff);border-radius:10px;padding:14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.04)"><div style="color:var(--text-light);font-size:0.75rem"><i class="bi bi-' + icon + '"></i> ' + label + '</div><div style="font-weight:800;font-size:1.6rem;color:var(--primary-dark)">' + num + '</div></div>';
+  };
+  document.getElementById('analyticsCards').innerHTML =
+    card('eye-fill', 'ביקורים ב-24ש\'', s.pageviews_24h, '#e8f5e9') +
+    card('calendar-week', 'ביקורים 7 ימים', s.pageviews_7d, '#e0f2fe') +
+    card('calendar-month', 'ביקורים 30 יום', s.pageviews_30d, '#fef3c7') +
+    card('person-fill', 'משתמשים ייחודיים 24ש\'', s.unique_sessions_24h, '#f3e8ff') +
+    card('people-fill', 'משתמשים ייחודיים 7 ימים', s.unique_sessions_7d, '#fce7f3');
+  // Timeline (mini sparkline via SVG — no Chart.js dep needed)
+  var tl = s.timeline_14d || [];
+  var max = Math.max.apply(null, tl.map(function(d) { return d.count; })) || 1;
+  var w = 300, h = 130, bw = tl.length ? (w - 20) / tl.length : 0;
+  var svg = '<svg width="100%" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet" style="display:block">';
+  tl.forEach(function(d, i) {
+    var bh = (d.count / max) * (h - 30);
+    var x = 10 + i * bw, y = h - 20 - bh;
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + (bw - 2) + '" height="' + bh + '" fill="var(--primary)" opacity="0.85"><title>' + d.day + ': ' + d.count + '</title></rect>';
+    if (i % 3 === 0) svg += '<text x="' + (x + bw / 2) + '" y="' + (h - 6) + '" font-size="8" fill="#6c757d" text-anchor="middle">' + d.day.slice(5) + '</text>';
+  });
+  svg += '</svg>';
+  document.getElementById('analyticsTimelineChart').outerHTML = '<div>' + svg + '</div>';
+  // Hourly
+  var hrs = s.hourly_distribution || [];
+  var maxH = Math.max.apply(null, hrs) || 1;
+  var svgH = '<svg width="100%" viewBox="0 0 300 130" preserveAspectRatio="xMidYMid meet" style="display:block">';
+  hrs.forEach(function(c, i) {
+    var bh = (c / maxH) * 90;
+    var x = 10 + i * ((300 - 20) / 24), y = 110 - bh;
+    svgH += '<rect x="' + x + '" y="' + y + '" width="' + ((300 - 20) / 24 - 1) + '" height="' + bh + '" fill="var(--accent)" opacity="0.85"><title>שעה ' + i + ': ' + c + '</title></rect>';
+    if (i % 3 === 0) svgH += '<text x="' + (x + ((300 - 20) / 24) / 2) + '" y="125" font-size="8" fill="#6c757d" text-anchor="middle">' + i + '</text>';
+  });
+  svgH += '</svg>';
+  document.getElementById('analyticsHourChart').outerHTML = '<div>' + svgH + '</div>';
+  // Top sections
+  document.getElementById('analyticsSections').innerHTML = (s.top_sections || []).map(function(x) {
+    var mx = s.top_sections[0].count || 1;
+    return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:0.85rem"><span>' + x.section + '</span><span style="font-weight:700">' + x.count + '</span></div><div style="background:#e5e7eb;height:6px;border-radius:3px;overflow:hidden"><div style="background:var(--primary);height:100%;width:' + (x.count / mx * 100) + '%"></div></div></div>';
+  }).join('') || '<div style="color:var(--text-light)">אין נתונים עדיין</div>';
+  // Event types
+  document.getElementById('analyticsEventTypes').innerHTML = Object.keys(s.event_types || {}).map(function(k) {
+    var n = s.event_types[k];
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb"><span><i class="bi bi-arrow-right-short"></i> ' + k + '</span><span style="font-weight:700">' + n + '</span></div>';
+  }).join('') || '<div style="color:var(--text-light)">אין נתונים עדיין</div>';
+  // Recent events
+  document.getElementById('analyticsRecent').innerHTML = (s.recent || []).map(function(r) {
+    var t = new Date(r.ts).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit' });
+    return '<div style="padding:6px;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:100px 90px 1fr 60px;gap:8px;align-items:center"><span style="color:var(--text-light);font-size:0.75rem">' + t + '</span><span style="font-weight:600;color:var(--primary-dark)">' + r.event + '</span><span style="color:#374151">' + (r.section || r.path || '') + '</span><span style="color:var(--text-light);font-size:0.7rem;font-family:monospace">' + (r.sid || '').slice(0, 8) + '</span></div>';
+  }).join('') || '<div style="color:var(--text-light);padding:20px;text-align:center">אין אירועים עדיין. גלול באתר או פתח דפים חדשים כדי לייצר נתונים.</div>';
+}
+function downloadAnalyticsCsv() {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(MA_ANALYTICS_KEY) || '[]'); } catch (e) {}
+  var rows = [['ts', 'event', 'path', 'section', 'sid', 'uid']];
+  arr.forEach(function(r) { rows.push([r.ts, r.event, r.path, r.section, r.sid, r.uid]); });
+  var csv = rows.map(function(r) { return r.map(function(v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'maale-analytics-' + Date.now() + '.csv'; a.click();
+}
+
+// ===== v2: user management =====
+function loadUsers() {
+  var el = document.getElementById('usersList');
+  el.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_list');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) renderUsers(res.users || []);
+      else el.innerHTML = '<div style="padding:20px;background:#fee;border:1px solid #fcc;border-radius:8px;color:#c00"><b>השרת עוד לא פרוס.</b> יש לפתוח את <a href="https://script.google.com/d/1Dby8H-Jp86gCbZ6-pzSK8s5LSsVOsrkFT5tVOZirNT6gHHvqZ_JJx09P/edit" target="_blank">Apps Script editor</a>, למחוק כמה גרסאות ישנות (File → Manage versions), ואז לרוץ deploy מ־Terminal.</div>';
+    })
+    .catch(function(e) { el.innerHTML = '<div style="color:#c00">שגיאה: ' + e + '</div>'; });
+}
+function renderUsers(users) {
+  var el = document.getElementById('usersList');
+  if (!users.length) { el.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:20px">אין משתמשים עדיין. צור אחד למעלה.</div>'; return; }
+  el.innerHTML = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f3f4f6"><th style="text-align:right;padding:8px">שם</th><th style="text-align:right;padding:8px">אימייל</th><th style="text-align:right;padding:8px">תפקיד</th><th style="text-align:right;padding:8px">סטטוס</th><th style="text-align:right;padding:8px">כניסה אחרונה</th><th style="text-align:right;padding:8px">פעולות</th></tr></thead><tbody>' +
+    users.map(function(u) {
+      var last = u.last_login ? new Date(u.last_login).toLocaleDateString('he-IL') : '—';
+      return '<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:8px">' + (u.name || '') + '</td><td style="padding:8px;font-family:monospace;font-size:0.8rem">' + (u.email || '') + '</td><td style="padding:8px"><span style="background:#dbeafe;padding:2px 8px;border-radius:10px;font-size:0.75rem">' + (u.role || '') + '</span></td><td style="padding:8px">' + (u.status || 'active') + '</td><td style="padding:8px;font-size:0.8rem">' + last + '</td><td style="padding:8px"><button class="btn-admin btn-admin-sm" style="background:#0891b2;color:#fff" onclick="editUser(\'' + u.id + '\',\'' + (u.name || '').replace(/\'/g, '') + '\',\'' + (u.role || '') + '\')"><i class="bi bi-pencil"></i></button> <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="deleteUser(\'' + u.id + '\')"><i class="bi bi-trash"></i></button></td></tr>';
+    }).join('') +
+    '</tbody></table>';
+}
+function createUser() {
+  var name = document.getElementById('uNew_name').value.trim();
+  var email = document.getElementById('uNew_email').value.trim().toLowerCase();
+  var password = document.getElementById('uNew_password').value;
+  var role = document.getElementById('uNew_role').value;
+  if (!name || !email || !password) { showToast('שם + אימייל + סיסמה חובה'); return; }
+  if (password.length < 6) { showToast('סיסמה חייבת להיות 6 תווים לפחות'); return; }
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_create');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('name', name); body.set('email', email); body.set('password', password); body.set('role', role);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) {
+        showToast('✅ משתמש נוסף');
+        document.getElementById('uNew_name').value = '';
+        document.getElementById('uNew_email').value = '';
+        document.getElementById('uNew_password').value = '';
+        loadUsers();
+      } else { showToast('שגיאה: ' + (res && res.error || 'לא ידוע')); }
+    });
+}
+function editUser(id, curName, curRole) {
+  var name = prompt('שם חדש:', curName);
+  if (name === null) return;
+  var role = prompt('תפקיד (admin/editor/resident):', curRole);
+  if (role === null) return;
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_update');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('id', id); body.set('name', name); body.set('role', role);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) { showToast(res && res.ok ? '✅ עודכן' : 'שגיאה'); loadUsers(); });
+}
+function deleteUser(id) {
+  if (!confirm('למחוק את המשתמש?')) return;
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_delete');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('id', id);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) { showToast(res && res.ok ? '✅ נמחק' : 'שגיאה'); loadUsers(); });
+}
+
+// ===== v2: audit log =====
+function loadAudit() {
+  var el = document.getElementById('auditList');
+  el.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_audit_list');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('limit', '200');
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) renderAudit(res.entries || []);
+      else el.innerHTML = '<div style="padding:20px;background:#fee;border:1px solid #fcc;border-radius:8px;color:#c00">השרת עוד לא פרוס. יש לפתוח את <a href="https://script.google.com/d/1Dby8H-Jp86gCbZ6-pzSK8s5LSsVOsrkFT5tVOZirNT6gHHvqZ_JJx09P/edit" target="_blank">Apps Script editor</a> ולמחוק כמה גרסאות ישנות.</div>';
+    })
+    .catch(function(e) { el.innerHTML = '<div style="color:#c00">שגיאה: ' + e + '</div>'; });
+}
+function renderAudit(entries) {
+  var el = document.getElementById('auditList');
+  if (!entries.length) { el.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:20px">היומן ריק</div>'; return; }
+  el.innerHTML = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f3f4f6"><th style="text-align:right;padding:8px">מתי</th><th style="text-align:right;padding:8px">פעולה</th><th style="text-align:right;padding:8px">אימייל</th><th style="text-align:right;padding:8px">פרטים</th></tr></thead><tbody>' +
+    entries.map(function(e) {
+      var t = new Date(e.ts).toLocaleString('he-IL');
+      var badge = e.action.indexOf('fail') >= 0 ? 'background:#fee2e2;color:#991b1b' : e.action.indexOf('login') >= 0 ? 'background:#dcfce7;color:#166534' : 'background:#dbeafe;color:#1e40af';
+      return '<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px;font-size:0.8rem">' + t + '</td><td style="padding:6px"><span style="padding:2px 8px;border-radius:10px;font-size:0.75rem;' + badge + '">' + e.action + '</span></td><td style="padding:6px;font-family:monospace;font-size:0.75rem">' + (e.email || '') + '</td><td style="padding:6px;font-size:0.8rem;color:#6b7280">' + (e.meta || '') + '</td></tr>';
+    }).join('') + '</tbody></table>';
 }
 
 function refreshAdminLists() {
