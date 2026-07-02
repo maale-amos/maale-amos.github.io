@@ -2159,7 +2159,7 @@ body.dark .phone-item { background: #16213e; }
           <div id="shabbatEnd" style="font-size:1.5rem;font-weight:900;color:var(--primary)"></div>
         </div>
       </div>
-      <p style="font-size:0.78rem;color:var(--text-light);margin-top:12px"><i class="bi bi-geo-alt"></i> זמנים לפי מעלה עמוס (קו רוחב 31.59)</p>
+      <p style="font-size:0.78rem;color:var(--text-light);margin-top:12px"><i class="bi bi-geo-alt"></i> זמנים מחושבים אוטומטית מ־Hebcal לפי מיקום הישוב (מתעדכן כל שבוע)</p>
     </div>
   </div>
 </section>
@@ -2447,6 +2447,7 @@ body.dark .phone-item { background: #16213e; }
           <button class="btn-admin" style="background:#7c3aed;color:#fff" onclick="portalOpenAdminTab('announcements')"><i class="bi bi-megaphone-fill"></i> הודעות</button>
           <button class="btn-admin" style="background:#dc2626;color:#fff" onclick="portalOpenAdminTab('bulletins')"><i class="bi bi-fire"></i> מבזקים חמים</button>
           <button class="btn-admin" style="background:#c2410c;color:#fff" onclick="portalOpenAdminTab('featured')"><i class="bi bi-star-fill"></i> באנרים/פוסטרים</button>
+          <button class="btn-admin" style="background:#6c757d;color:#fff" onclick="portalOpenAdminTab('settings')"><i class="bi bi-gear-fill"></i> הגדרות</button>
         </div>
         <div id="portalAdminEmbed" style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#f9fafb"></div>
       </div>
@@ -2635,7 +2636,7 @@ body.dark .phone-item { background: #16213e; }
           <div class="logo-circle"><img src="images/logo_official.jpg" alt="" onerror="this.parentElement.innerHTML='<span class=fallback-logo>מ&quot;ע</span>'"></div>
           <div><div style="font-weight:800;font-size:1.2rem;color:#fff">מעלה עמוס</div><div style="font-size:0.8rem;opacity:0.7">תורה · קהילה · ישוב הדעת</div></div>
         </div>
-        <p style="font-size:0.9rem;opacity:0.8;line-height:1.8">ישוב קהילתי-דתי בגוש עציון, הר חברון. קהילה חמה ותוססת.</p>
+        <p style="font-size:0.9rem;opacity:0.8;line-height:1.8">ישוב חרדי-ישיבישי בגוש עציון, הר חברון. תורתם אומנותם — קהילה חמה ותוססת.</p>
       </div>
       <div class="col-lg-2 col-6">
         <h5>ניווט</h5>
@@ -2662,7 +2663,7 @@ body.dark .phone-item { background: #16213e; }
           <li><i class="bi bi-geo-alt-fill"></i> מעלה עמוס, ד.נ. צפון יהודה 90966</li>
           <li><i class="bi bi-telephone-fill"></i> 02-9931767</li>
           <li><i class="bi bi-envelope-fill"></i> office@maaleamos.org.il</li>
-          <li><i class="bi bi-person-fill"></i> מזכיר: איתן סעג</li>
+          <li><i class="bi bi-person-fill"></i> מזכיר: יוסף שניידר</li>
           <li><i class="bi bi-clock-fill"></i> א'-ה' 08:00-16:00</li>
         </ul>
       </div>
@@ -3379,23 +3380,43 @@ function ghWriteJson(name, data, commitMsg) {
     .catch(function(e) { return { ok: false, error: String(e) }; });
 }
 
-// Save a collection to BOTH GitHub (primary) and Sheets (backup).
-// Returns Promise resolved once both attempts complete (backup never blocks primary).
+// Save a collection to GitHub (primary) + also update aggregated all.json
+// + also backup to Sheets. Returns Promise resolved when GH writes complete.
+// v3.5: CRITICAL FIX — was only writing data/{name}.json, but loadGlobalData
+// reads from data/all.json first, so changes never appeared after refresh.
+// Now we write both files (individual + aggregated) sequentially.
 function saveCollection(name, arr) {
-  var ghP = ghWriteJson(name + '.json', arr, 'data: ' + name + ' updated');
-  // Also update aggregated all.json (best-effort, sequential to preserve SHA)
-  return ghP.then(function(ghRes) {
-    // Backup: mirror to Sheets. Fire-and-forget — do NOT block.
-    try {
-      var body = new URLSearchParams();
-      body.set('action', 'maale_backup_collection');
-      body.set('token', BACKEND_ADMIN_TOKEN);
-      body.set('collection', name);
-      body.set('data', JSON.stringify(arr));
-      fetch(getBackendUrl(), { method: 'POST', body: body, keepalive: true }).catch(function() {});
-    } catch (e) {}
-    return ghRes;
-  });
+  return ghWriteJson(name + '.json', arr, 'data: ' + name + ' updated')
+    .then(function(res) {
+      if (!res || !res.ok) return res;
+      // Build fresh all.json from current in-memory state (with this collection replaced)
+      var aggregate = {
+        news: name === 'news' ? arr : (newsData || []),
+        events: name === 'events' ? arr : (eventsData || []),
+        announcements: name === 'announcements' ? arr : (announcementsData || []),
+        residents: name === 'residents' ? arr : (residentsData || []),
+        market: name === 'market' ? arr : (marketData || []),
+        simchot: name === 'simchot' ? arr : (simchotData || []),
+        gemachim: name === 'gemachim' ? arr : (gemachimData || []),
+        ticker: name === 'ticker' ? arr : (tickerData || []),
+        featured: name === 'featured' ? arr : (featuredData || []),
+        bulletins: name === 'bulletins' ? arr : (bulletinsData || []),
+        _generated: new Date().toISOString(),
+        _note: 'Managed via portal CMS. Do not edit manually.',
+      };
+      return ghWriteJson('all.json', aggregate, 'data: all.json aggregate refresh').then(function(aggRes) {
+        // Backup to Sheets (fire-and-forget, non-blocking)
+        try {
+          var body = new URLSearchParams();
+          body.set('action', 'maale_backup_collection');
+          body.set('token', BACKEND_ADMIN_TOKEN);
+          body.set('collection', name);
+          body.set('data', JSON.stringify(arr));
+          fetch(getBackendUrl(), { method: 'POST', body: body, keepalive: true }).catch(function() {});
+        } catch (e) {}
+        return { ok: true, sha: res.sha, aggSha: aggRes && aggRes.sha };
+      });
+    });
 }
 
 // ===== v3: Session-based auth (email/password OR Google) =====
@@ -5664,6 +5685,77 @@ function portalOpenAdminTab(tab) {
   if (tab === 'announcements') el.innerHTML = _portalAnnouncementsForm();
   if (tab === 'bulletins') el.innerHTML = _portalBulletinsForm();
   if (tab === 'featured') el.innerHTML = _portalFeaturedForm();
+  if (tab === 'settings') el.innerHTML = _portalSettingsForm();
+}
+// v3.5: Restored SETTINGS tab in portal (Emmanuel: "הגדרות נעלמו")
+function _portalSettingsForm() {
+  var currToken = getGhToken();
+  var tokenMask = currToken ? currToken.slice(0, 4) + '...' + currToken.slice(-4) : '(לא מוגדר)';
+  var currBackend = getBackendUrl();
+  return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-gear-fill"></i> הגדרות</h5>' +
+    '<div style="background:#dbeafe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;border:1px solid #93c5fd">' +
+      '<i class="bi bi-info-circle-fill" style="color:#1e40af"></i> ' +
+      'שינוי כאן משפיע על הפעולות שלך בפאנל. כדי לפרסם/למחוק תוכן, חייבים GitHub token תקין.' +
+    '</div>' +
+    '<div class="admin-form-group"><label><i class="bi bi-github"></i> GitHub Token (חובה לניהול תוכן)</label>' +
+      '<input type="password" id="setPortalGhToken" placeholder="' + escapeHtml(currToken || 'ghp_...') + '" value="">' +
+      '<p style="font-size:0.78rem;color:var(--text-light);margin-top:6px">' +
+        (currToken ? '✅ טוקן קיים: <code>' + escapeHtml(tokenMask) + '</code> — הזן חדש רק אם תרצה להחליף.' :
+          '⚠ אין טוקן! צור אחד ב־<a href="https://github.com/settings/tokens/new?scopes=repo&description=maale-amos-cms" target="_blank">github.com/settings/tokens/new</a> (סמן repo).') +
+      '</p>' +
+    '</div>' +
+    '<div class="admin-form-group"><label><i class="bi bi-database"></i> Backend URL (Google Apps Script)</label>' +
+      '<input id="setPortalBackend" placeholder="' + escapeHtml(currBackend) + '" value="">' +
+      '<p style="font-size:0.78rem;color:var(--text-light);margin-top:6px">כתובת ה־web app של Sheets. השאר ריק כדי לא לשנות.</p>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">' +
+      '<button class="btn-admin btn-admin-primary" onclick="portalSaveSettings()"><i class="bi bi-save"></i> שמור</button>' +
+      '<button class="btn-admin" style="background:#0891b2;color:#fff" onclick="portalTestConnection()"><i class="bi bi-check-circle"></i> בדוק חיבור</button>' +
+      '<button class="btn-admin btn-admin-danger" onclick="if(confirm(\'למחוק את הטוקן?\'))(localStorage.removeItem(\'ma_gh_token\'),portalOpenAdminTab(\'settings\'),showToast(\'טוקן הוסר\'))"><i class="bi bi-trash"></i> מחק טוקן</button>' +
+    '</div>' +
+    '<hr><h6 style="font-weight:700;margin-top:16px"><i class="bi bi-shield-lock"></i> אבטחה + סטטיסטיקות</h6>' +
+    '<ul style="font-size:0.85rem;line-height:1.8;color:var(--text)">' +
+      '<li>גרסה: <b>v3.5</b></li>' +
+      '<li>DB ראשי: <b>GitHub</b> (data/*.json) — גיבוי אוטומטי ל־Sheets</li>' +
+      '<li>אימות: email/password (SHA-256 + salt) + Google Sign-In</li>' +
+      '<li>Session: 30 יום עד יציאה אוטומטית</li>' +
+      '<li>Rate limit: 5 ניסיונות login כושלים ב־15 דק\'</li>' +
+      '<li>CSP + Referrer-Policy + XSS protection: פעילים</li>' +
+    '</ul>';
+}
+function portalSaveSettings() {
+  var tok = document.getElementById('setPortalGhToken').value.trim();
+  var backend = document.getElementById('setPortalBackend').value.trim();
+  var changed = [];
+  if (tok) {
+    if (!/^(gh[pous]_|github_pat_)/.test(tok) && !confirm('הטוקן לא בפורמט הצפוי. לשמור?')) return;
+    localStorage.setItem(GH_TOKEN_KEY, tok); changed.push('טוקן');
+  }
+  if (backend) {
+    localStorage.setItem(BACKEND_URL_KEY, backend); changed.push('backend URL');
+  }
+  showToast(changed.length ? '✅ נשמר: ' + changed.join(', ') : 'לא בוצע שינוי');
+  portalOpenAdminTab('settings');
+}
+function portalTestConnection() {
+  showToast('בודק חיבור...');
+  fetch(getBackendUrl() + '?action=maale_health')
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) showToast('✅ שרת מגיב · ' + (res.version || res.service));
+      else showToast('❌ שרת לא מגיב תקין');
+    })
+    .catch(function(e) { showToast('❌ שגיאה: ' + e); });
+  // Also test GH token
+  var tok = getGhToken();
+  if (tok) {
+    fetch('https://api.github.com/repos/maale-amos/maale-amos.github.io', { headers: { Authorization: 'token ' + tok } })
+      .then(function(r) {
+        setTimeout(function() {
+          showToast(r.ok ? '✅ טוקן GitHub תקין' : '❌ טוקן GitHub לא תקין (' + r.status + ')');
+        }, 1500);
+      });
+  }
 }
 // v3.2: HOT BULLETINS admin form
 function _portalBulletinsForm() {
