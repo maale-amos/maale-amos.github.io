@@ -6,6 +6,11 @@
 <title>מעלה עמוס | תורה · קהילה · ישוב הדעת</title>
 <meta name="description" content="אתר הישוב מעלה עמוס - מידע קהילתי, חדשות, שירותים, דיור ועוד">
 <meta name="theme-color" content="#1a5c3a">
+<!-- v3.1 Security headers (meta-based fallback; real headers set by GitHub Pages) -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://www.gstatic.com https://www.hebcal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' https: data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.hebcal.com https://api.github.com https://raw.githubusercontent.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com; frame-ancestors 'none';">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="images/logo.jpg" type="image/jpeg">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -2407,18 +2412,81 @@ body.dark .phone-item { background: #16213e; }
         </div>
         <div id="portalAdminEmbed" style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#f9fafb"></div>
       </div>
+      <!-- v3.1: Analytics embedded directly in portal -->
       <div id="residentAdminAnalytics" style="display:none;margin-top:24px" data-requires-role="admin">
-        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-graph-up-arrow"></i> אנליטיקה</h4>
-        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/אנליטיקה/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח דשבורד מלא</button>
-        <p style="margin-top:12px;font-size:0.85rem;color:var(--text-light)">הדשבורד המלא נפתח בחלון הניהול (זמנית — יוטמע כאן בעדכון הבא).</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h4 style="font-weight:800;margin:0"><i class="bi bi-graph-up-arrow"></i> אנליטיקה — מה קורה באתר</h4>
+          <div style="display:flex;gap:8px">
+            <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadPortalAnalytics()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+            <button class="btn-admin btn-admin-sm" style="background:#6c757d;color:#fff" onclick="downloadAnalyticsCsv()"><i class="bi bi-download"></i> יצוא CSV</button>
+          </div>
+        </div>
+        <div id="portalAnalyticsSource" style="font-size:0.8rem;color:var(--text-light);margin-bottom:12px"></div>
+        <div id="portalAnalyticsCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
+          <div style="background:#f8f9fa;border-radius:10px;padding:16px" id="portalAnalyticsTimelineBox">
+            <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-calendar3"></i> ציר זמן — 14 יום</h6>
+            <div id="portalAnalyticsTimelineChart" style="height:140px"></div>
+          </div>
+          <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+            <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-clock-history"></i> שעות שיא</h6>
+            <div id="portalAnalyticsHourChart" style="height:140px"></div>
+          </div>
+          <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+            <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-signpost-split"></i> סקציות פופולריות</h6>
+            <div id="portalAnalyticsSections" style="max-height:220px;overflow:auto"></div>
+          </div>
+          <div style="background:#f8f9fa;border-radius:10px;padding:16px">
+            <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-lightning"></i> פעולות מובילות</h6>
+            <div id="portalAnalyticsEventTypes"></div>
+          </div>
+          <div style="background:#f8f9fa;border-radius:10px;padding:16px;grid-column:1 / -1">
+            <h6 style="margin-bottom:12px;font-weight:700"><i class="bi bi-activity"></i> אירועים אחרונים (40)</h6>
+            <div id="portalAnalyticsRecent" style="max-height:280px;overflow:auto;font-size:0.85rem"></div>
+          </div>
+        </div>
       </div>
+
+      <!-- v3.1: Users embedded -->
       <div id="residentAdminUsers" style="display:none;margin-top:24px" data-requires-role="admin">
-        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-people-fill"></i> ניהול משתמשים</h4>
-        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/משתמשים/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח ניהול משתמשים</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h4 style="font-weight:800;margin:0"><i class="bi bi-people-fill"></i> ניהול משתמשים</h4>
+          <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadPortalUsers()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+        </div>
+        <div style="background:#fef3c7;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;border:1px solid #fcd34d">
+          <i class="bi bi-info-circle-fill" style="color:#b45309"></i>
+          <b>איך זה עובד:</b> משתמשים שאתה יוצר כאן יכולים להתחבר לפורטל עם אימייל+סיסמה. 3 תפקידים: <b>מנהל</b> (הכל), <b>עורך</b> (תכנים בלבד), <b>תושב</b> (רק אזור אישי).
+        </div>
+        <h5 style="font-weight:700;margin-bottom:10px">הוסף משתמש חדש</h5>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px">
+          <div class="admin-form-group" style="margin:0"><label>שם מלא</label><input id="pu_name" placeholder="שם"></div>
+          <div class="admin-form-group" style="margin:0"><label>אימייל</label><input id="pu_email" type="email" placeholder="user@example.com"></div>
+          <div class="admin-form-group" style="margin:0"><label>סיסמה</label><input id="pu_password" type="password" placeholder="6+ תווים"></div>
+          <div class="admin-form-group" style="margin:0"><label>תפקיד</label>
+            <select id="pu_role">
+              <option value="resident">תושב</option>
+              <option value="editor">עורך</option>
+              <option value="admin">מנהל</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-admin btn-admin-primary" onclick="portalCreateUser()"><i class="bi bi-person-plus"></i> צור משתמש</button>
+        <hr style="margin:20px 0">
+        <h5 style="font-weight:700;margin-bottom:10px">משתמשים קיימים</h5>
+        <div id="portalUsersList" style="max-height:400px;overflow:auto">טוען...</div>
       </div>
+
+      <!-- v3.1: Audit embedded -->
       <div id="residentAdminAudit" style="display:none;margin-top:24px" data-requires-role="admin">
-        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-clipboard-check"></i> יומן פעולות</h4>
-        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/יומן/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח יומן</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h4 style="font-weight:800;margin:0"><i class="bi bi-clipboard-check"></i> יומן פעולות מנהל</h4>
+          <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="loadPortalAudit()"><i class="bi bi-arrow-clockwise"></i> רענן</button>
+        </div>
+        <div style="background:#dbeafe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;border:1px solid #93c5fd">
+          <i class="bi bi-shield-lock-fill" style="color:#1e40af"></i>
+          כל פעולת מנהל (התחברות, יצירת משתמש, מחיקה, שינוי הרשאות) מתועדת כאן עם חותמת זמן ומקור.
+        </div>
+        <div id="portalAuditList" style="font-size:0.85rem">טוען...</div>
       </div>
       <!-- Inquiries Section -->
       <div id="residentInquiries" style="display:none;margin-top:24px">
@@ -3294,8 +3362,36 @@ function saveCollection(name, arr) {
 // Store: localStorage['ma_current_user'] = { id, email, name, role, token }
 // role ∈ { admin, editor, resident }
 function getCurrentUser() {
-  try { return JSON.parse(localStorage.getItem('ma_current_user') || 'null'); } catch (e) { return null; }
+  try {
+    var u = JSON.parse(localStorage.getItem('ma_current_user') || 'null');
+    if (!u) return null;
+    // v3.1 Security: expire sessions older than 30 days
+    if (u.loginAt && Date.now() - u.loginAt > 30 * 24 * 3600 * 1000) {
+      localStorage.removeItem('ma_current_user');
+      return null;
+    }
+    return u;
+  } catch (e) { return null; }
 }
+// v3.1: Client-side rate limiting for login attempts (5 fails per 15 min)
+function checkLoginRateLimit() {
+  var key = 'ma_login_fails';
+  var raw = localStorage.getItem(key);
+  var arr = [];
+  try { arr = raw ? JSON.parse(raw) : []; } catch (e) {}
+  var cutoff = Date.now() - 15 * 60 * 1000;
+  arr = arr.filter(function(t) { return t > cutoff; });
+  localStorage.setItem(key, JSON.stringify(arr));
+  return { allowed: arr.length < 5, remaining: 5 - arr.length };
+}
+function recordLoginFail() {
+  var key = 'ma_login_fails';
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+  arr.push(Date.now());
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+function clearLoginFails() { localStorage.removeItem('ma_login_fails'); }
 function setCurrentUser(user) {
   if (user) localStorage.setItem('ma_current_user', JSON.stringify(user));
   else localStorage.removeItem('ma_current_user');
@@ -3334,8 +3430,12 @@ function applyRoleUi() {
   var roleLabels = document.querySelectorAll('[data-user-role-label]');
   roleLabels.forEach(function(el) { el.textContent = role === 'admin' ? 'מנהל' : role === 'editor' ? 'עורך' : 'תושב'; });
 }
-// Login via email/password → backend
+// Login via email/password → backend (rate-limited)
 function loginWithPassword(email, password) {
+  var rl = checkLoginRateLimit();
+  if (!rl.allowed) {
+    return Promise.resolve({ ok: false, error: 'יותר מדי ניסיונות. נסה שוב בעוד 15 דקות.' });
+  }
   var body = new URLSearchParams();
   body.set('action', 'maale_user_login');
   body.set('email', email); body.set('password', password);
@@ -3343,11 +3443,17 @@ function loginWithPassword(email, password) {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res && res.ok) {
-        setCurrentUser({ id: res.user.id, email: res.user.email, name: res.user.name, role: res.user.role, token: res.token, loginMethod: 'password' });
+        clearLoginFails();
+        setCurrentUser({
+          id: res.user.id, email: res.user.email, name: res.user.name, role: res.user.role,
+          token: res.token, loginMethod: 'password', loginAt: Date.now(),
+        });
         return { ok: true, user: res.user };
       }
+      recordLoginFail();
       return { ok: false, error: res && res.error || 'שגיאה' };
-    });
+    })
+    .catch(function(e) { recordLoginFail(); return { ok: false, error: 'שגיאת רשת: ' + e }; });
 }
 // Register-and-login as resident (self-service)
 function selfRegister(name, email, password) {
@@ -4177,6 +4283,206 @@ function switchAdminTab(tab, btn) {
 }
 
 // ===== v2: analytics dashboard =====
+// v3.1: Portal-embedded loaders (use portal* DOM ids)
+function loadPortalAnalytics() { _loadAnalyticsInto('portal'); }
+function loadPortalUsers() { _loadUsersInto('portal'); }
+function loadPortalAudit() { _loadAuditInto('portal'); }
+function portalCreateUser() {
+  var name = document.getElementById('pu_name').value.trim();
+  var email = document.getElementById('pu_email').value.trim().toLowerCase();
+  var password = document.getElementById('pu_password').value;
+  var role = document.getElementById('pu_role').value;
+  if (!name || !email || !password) { showToast('שם + אימייל + סיסמה חובה'); return; }
+  if (password.length < 6) { showToast('סיסמה חייבת להיות 6 תווים לפחות'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('אימייל לא תקין'); return; }
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_create');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('name', name); body.set('email', email); body.set('password', password); body.set('role', role);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) {
+        showToast('✅ משתמש נוסף');
+        ['pu_name','pu_email','pu_password'].forEach(function(id) { document.getElementById(id).value = ''; });
+        loadPortalUsers();
+      } else { showToast('שגיאה: ' + (res && res.error || 'לא ידוע')); }
+    });
+}
+function portalEditUser(id, curName, curRole) {
+  var name = prompt('שם חדש:', curName);
+  if (name === null) return;
+  var role = prompt('תפקיד (admin/editor/resident):', curRole);
+  if (role === null) return;
+  if (['admin','editor','resident'].indexOf(role) < 0) { showToast('תפקיד חייב להיות admin/editor/resident'); return; }
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_update');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('id', id); body.set('name', name); body.set('role', role);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) { showToast(res && res.ok ? '✅ עודכן' : 'שגיאה'); loadPortalUsers(); });
+}
+function portalDeleteUser(id) {
+  if (!confirm('למחוק את המשתמש?')) return;
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_delete');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('id', id);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) { showToast(res && res.ok ? '✅ נמחק' : 'שגיאה'); loadPortalUsers(); });
+}
+// Shared internal loaders — target parameterized ('admin' or 'portal')
+function _loadAnalyticsInto(prefix) {
+  var srcEl = document.getElementById(prefix === 'portal' ? 'portalAnalyticsSource' : 'analyticsSource');
+  if (srcEl) srcEl.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_analytics_summary');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) _renderAnalyticsInto(prefix, res.summary, 'שרת (Google Sheets)');
+      else _renderAnalyticsInto(prefix, maLocalSummary(), 'מקומי בדפדפן (השרת לא זמין כעת)');
+    })
+    .catch(function() { _renderAnalyticsInto(prefix, maLocalSummary(), 'מקומי בדפדפן (השרת לא זמין)'); });
+}
+function _renderAnalyticsInto(prefix, s, srcNote) {
+  var id = function(base) { return prefix === 'portal' ? ('portalA' + base.slice(1)) : ('a' + base.slice(1)); };
+  var ids = {
+    source: prefix === 'portal' ? 'portalAnalyticsSource' : 'analyticsSource',
+    cards: prefix === 'portal' ? 'portalAnalyticsCards' : 'analyticsCards',
+    timeline: prefix === 'portal' ? 'portalAnalyticsTimelineChart' : 'analyticsTimelineChart',
+    hour: prefix === 'portal' ? 'portalAnalyticsHourChart' : 'analyticsHourChart',
+    sections: prefix === 'portal' ? 'portalAnalyticsSections' : 'analyticsSections',
+    events: prefix === 'portal' ? 'portalAnalyticsEventTypes' : 'analyticsEventTypes',
+    recent: prefix === 'portal' ? 'portalAnalyticsRecent' : 'analyticsRecent',
+  };
+  var srcEl = document.getElementById(ids.source);
+  if (srcEl) srcEl.innerHTML = '<i class="bi bi-database"></i> מקור: ' + srcNote + ' &nbsp;·&nbsp; סה"כ אירועים: ' + s.total_events;
+  var card = function(icon, label, num, color) {
+    return '<div style="background:linear-gradient(135deg,' + color + ',#fff);border-radius:10px;padding:14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.04)"><div style="color:var(--text-light);font-size:0.75rem"><i class="bi bi-' + icon + '"></i> ' + label + '</div><div style="font-weight:800;font-size:1.6rem;color:var(--primary-dark)">' + num + '</div></div>';
+  };
+  var cardsEl = document.getElementById(ids.cards);
+  if (cardsEl) cardsEl.innerHTML =
+    card('eye-fill', 'ביקורים ב-24ש\'', s.pageviews_24h, '#e8f5e9') +
+    card('calendar-week', 'ביקורים 7 ימים', s.pageviews_7d, '#e0f2fe') +
+    card('calendar-month', 'ביקורים 30 יום', s.pageviews_30d, '#fef3c7') +
+    card('person-fill', 'ייחודיים 24ש\'', s.unique_sessions_24h, '#f3e8ff') +
+    card('people-fill', 'ייחודיים 7 ימים', s.unique_sessions_7d, '#fce7f3');
+  // Timeline SVG
+  var tl = s.timeline_14d || [];
+  var max = Math.max.apply(null, tl.map(function(d) { return d.count; })) || 1;
+  var w = 300, h = 130, bw = tl.length ? (w - 20) / tl.length : 0;
+  var svg = '<svg width="100%" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid meet">';
+  tl.forEach(function(d, i) {
+    var bh = (d.count / max) * (h - 30);
+    var x = 10 + i * bw, y = h - 20 - bh;
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + (bw - 2) + '" height="' + bh + '" fill="var(--primary)" opacity="0.85"><title>' + d.day + ': ' + d.count + '</title></rect>';
+    if (i % 3 === 0) svg += '<text x="' + (x + bw / 2) + '" y="' + (h - 6) + '" font-size="8" fill="#6c757d" text-anchor="middle">' + d.day.slice(5) + '</text>';
+  });
+  svg += '</svg>';
+  var tlEl = document.getElementById(ids.timeline); if (tlEl) tlEl.innerHTML = svg;
+  // Hourly SVG
+  var hrs = s.hourly_distribution || [];
+  var maxH = Math.max.apply(null, hrs) || 1;
+  var svgH = '<svg width="100%" viewBox="0 0 300 130" preserveAspectRatio="xMidYMid meet">';
+  hrs.forEach(function(c, i) {
+    var bh = (c / maxH) * 90;
+    var x = 10 + i * ((300 - 20) / 24), y = 110 - bh;
+    svgH += '<rect x="' + x + '" y="' + y + '" width="' + ((300 - 20) / 24 - 1) + '" height="' + bh + '" fill="var(--accent)" opacity="0.85"><title>שעה ' + i + ': ' + c + '</title></rect>';
+    if (i % 3 === 0) svgH += '<text x="' + (x + ((300 - 20) / 24) / 2) + '" y="125" font-size="8" fill="#6c757d" text-anchor="middle">' + i + '</text>';
+  });
+  svgH += '</svg>';
+  var hEl = document.getElementById(ids.hour); if (hEl) hEl.innerHTML = svgH;
+  var secEl = document.getElementById(ids.sections);
+  if (secEl) secEl.innerHTML = (s.top_sections || []).map(function(x) {
+    var mx = s.top_sections[0].count || 1;
+    return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:0.85rem"><span>' + x.section + '</span><span style="font-weight:700">' + x.count + '</span></div><div style="background:#e5e7eb;height:6px;border-radius:3px;overflow:hidden"><div style="background:var(--primary);height:100%;width:' + (x.count / mx * 100) + '%"></div></div></div>';
+  }).join('') || '<div style="color:var(--text-light)">אין נתונים עדיין</div>';
+  var evEl = document.getElementById(ids.events);
+  if (evEl) evEl.innerHTML = Object.keys(s.event_types || {}).map(function(k) {
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb"><span><i class="bi bi-arrow-right-short"></i> ' + escapeHtml(k) + '</span><span style="font-weight:700">' + s.event_types[k] + '</span></div>';
+  }).join('') || '<div style="color:var(--text-light)">אין נתונים עדיין</div>';
+  var recEl = document.getElementById(ids.recent);
+  if (recEl) recEl.innerHTML = (s.recent || []).map(function(r) {
+    var t = new Date(r.ts).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit' });
+    return '<div style="padding:6px;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:100px 90px 1fr 60px;gap:8px;align-items:center"><span style="color:var(--text-light);font-size:0.75rem">' + t + '</span><span style="font-weight:600;color:var(--primary-dark)">' + escapeHtml(r.event) + '</span><span style="color:#374151">' + escapeHtml(r.section || r.path || '') + '</span><span style="color:var(--text-light);font-size:0.7rem;font-family:monospace">' + escapeHtml((r.sid || '').slice(0, 8)) + '</span></div>';
+  }).join('') || '<div style="color:var(--text-light);padding:20px;text-align:center">אין אירועים עדיין. גלול באתר כדי לייצר נתונים.</div>';
+}
+function _loadUsersInto(prefix) {
+  var listId = prefix === 'portal' ? 'portalUsersList' : 'usersList';
+  var el = document.getElementById(listId);
+  if (el) el.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_list');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) _renderUsersInto(prefix, res.users || []);
+      else if (el) el.innerHTML = '<div style="padding:20px;background:#fee;border:1px solid #fcc;border-radius:8px;color:#c00">השרת לא זמין כעת — נסה שוב</div>';
+    })
+    .catch(function(e) { if (el) el.innerHTML = '<div style="color:#c00">שגיאה: ' + escapeHtml(String(e)) + '</div>'; });
+}
+function _renderUsersInto(prefix, users) {
+  var listId = prefix === 'portal' ? 'portalUsersList' : 'usersList';
+  var el = document.getElementById(listId);
+  if (!el) return;
+  var editFn = prefix === 'portal' ? 'portalEditUser' : 'editUser';
+  var delFn = prefix === 'portal' ? 'portalDeleteUser' : 'deleteUser';
+  if (!users.length) { el.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:20px">אין משתמשים עדיין.</div>'; return; }
+  el.innerHTML = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f3f4f6"><th style="text-align:right;padding:8px">שם</th><th style="text-align:right;padding:8px">אימייל</th><th style="text-align:right;padding:8px">תפקיד</th><th style="text-align:right;padding:8px">סטטוס</th><th style="text-align:right;padding:8px">כניסה אחרונה</th><th style="text-align:right;padding:8px">פעולות</th></tr></thead><tbody>' +
+    users.map(function(u) {
+      var last = u.last_login ? new Date(u.last_login).toLocaleDateString('he-IL') : '—';
+      var safeName = escapeHtml(u.name || '');
+      var safeEmail = escapeHtml(u.email || '');
+      var safeId = escapeHtml(u.id || '');
+      var safeRole = escapeHtml(u.role || '');
+      var roleBadgeColor = u.role === 'admin' ? '#fee2e2' : u.role === 'editor' ? '#fef3c7' : '#dbeafe';
+      var roleTextColor = u.role === 'admin' ? '#991b1b' : u.role === 'editor' ? '#b45309' : '#1e40af';
+      return '<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:8px">' + safeName + '</td><td style="padding:8px;font-family:monospace;font-size:0.8rem">' + safeEmail + '</td><td style="padding:8px"><span style="background:' + roleBadgeColor + ';color:' + roleTextColor + ';padding:2px 8px;border-radius:10px;font-size:0.75rem">' + safeRole + '</span></td><td style="padding:8px">' + escapeHtml(u.status || 'active') + '</td><td style="padding:8px;font-size:0.8rem">' + last + '</td><td style="padding:8px"><button class="btn-admin btn-admin-sm" style="background:#0891b2;color:#fff" onclick="' + editFn + '(\'' + safeId + '\',\'' + safeName.replace(/\'/g, '') + '\',\'' + safeRole + '\')"><i class="bi bi-pencil"></i></button> <button class="btn-admin btn-admin-danger btn-admin-sm" onclick="' + delFn + '(\'' + safeId + '\')"><i class="bi bi-trash"></i></button></td></tr>';
+    }).join('') +
+    '</tbody></table>';
+}
+function _loadAuditInto(prefix) {
+  var listId = prefix === 'portal' ? 'portalAuditList' : 'auditList';
+  var el = document.getElementById(listId);
+  if (el) el.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
+  var body = new URLSearchParams();
+  body.set('action', 'maale_audit_list');
+  body.set('token', BACKEND_ADMIN_TOKEN);
+  body.set('limit', '200');
+  fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) _renderAuditInto(prefix, res.entries || []);
+      else if (el) el.innerHTML = '<div style="padding:20px;background:#fee;border:1px solid #fcc;border-radius:8px;color:#c00">השרת לא זמין — נסה שוב</div>';
+    })
+    .catch(function(e) { if (el) el.innerHTML = '<div style="color:#c00">שגיאה: ' + escapeHtml(String(e)) + '</div>'; });
+}
+function _renderAuditInto(prefix, entries) {
+  var listId = prefix === 'portal' ? 'portalAuditList' : 'auditList';
+  var el = document.getElementById(listId);
+  if (!el) return;
+  if (!entries.length) { el.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:20px">היומן ריק</div>'; return; }
+  el.innerHTML = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f3f4f6"><th style="text-align:right;padding:8px">מתי</th><th style="text-align:right;padding:8px">פעולה</th><th style="text-align:right;padding:8px">אימייל</th><th style="text-align:right;padding:8px">פרטים</th></tr></thead><tbody>' +
+    entries.map(function(e) {
+      var t = new Date(e.ts).toLocaleString('he-IL');
+      var badge = String(e.action || '').indexOf('fail') >= 0 ? 'background:#fee2e2;color:#991b1b' :
+                  String(e.action || '').indexOf('login') >= 0 ? 'background:#dcfce7;color:#166534' : 'background:#dbeafe;color:#1e40af';
+      return '<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px;font-size:0.8rem">' + t + '</td><td style="padding:6px"><span style="padding:2px 8px;border-radius:10px;font-size:0.75rem;' + badge + '">' + escapeHtml(e.action || '') + '</span></td><td style="padding:6px;font-family:monospace;font-size:0.75rem">' + escapeHtml(e.email || '') + '</td><td style="padding:6px;font-size:0.8rem;color:#6b7280">' + escapeHtml(e.meta || '') + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+// v3.1: XSS-safe HTML escape for all user-controlled strings rendered above
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"'`]/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
+  });
+}
+
 function loadAnalytics() {
   var srcEl = document.getElementById('analyticsSource');
   srcEl.innerHTML = '<i class="bi bi-hourglass-split"></i> טוען...';
@@ -5193,6 +5499,9 @@ function showResidentSection(section) {
   if (section === 'notifications') renderNotifications();
   if (section === 'profile') loadProfile();
   if (section === 'admin-cms') portalOpenAdminTab('news');
+  if (section === 'admin-analytics') loadPortalAnalytics();
+  if (section === 'admin-users') loadPortalUsers();
+  if (section === 'admin-audit') loadPortalAudit();
 }
 
 // v3: Render admin CMS inline in the portal (news/events/announcements)
