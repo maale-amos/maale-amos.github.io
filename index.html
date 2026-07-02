@@ -12,7 +12,7 @@
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com https://www.gstatic.com https://www.hebcal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' https: data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.hebcal.com https://api.github.com https://raw.githubusercontent.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com;">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="images/logo.jpg" type="image/jpeg">
+<link rel="icon" href="images/logo_official.jpg" type="image/jpeg">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,11 +28,11 @@
 <meta property="og:description" content="אתר רשמי של הישוב מעלה עמוס - חדשות, אירועים, שירותים וקהילה">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="he_IL">
-<meta property="og:image" content="https://maale-amos.github.io/maale-amos/images/logo.jpg">
+<meta property="og:image" content="https://maale-amos.github.io/maale-amos/images/logo_official.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="מעלה עמוס - אתר הישוב הקהילתי">
 <meta name="twitter:description" content="חדשות, אירועים, שירותים וקהילה במעלה עמוס">
-<meta name="twitter:image" content="https://maale-amos.github.io/maale-amos/images/logo.jpg">
+<meta name="twitter:image" content="https://maale-amos.github.io/maale-amos/images/logo_official.jpg">
 <style>
 :root {
   --primary: #1a5c3a;
@@ -168,6 +168,12 @@ body {
   background-position: center; opacity: 0; transition: opacity 1.5s ease;
 }
 .hero-slide.active { opacity: 1; }
+.hero-video { pointer-events: none; }
+/* v3.4: On slow connections / prefers-reduced-motion, hide video, show poster */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+  #heroFallbackSlides { display: block !important; }
+}
 .hero-overlay {
   position: absolute; inset: 0; z-index: 1;
   background: linear-gradient(135deg, rgba(15,61,38,0.75) 0%, rgba(26,92,58,0.55) 50%, rgba(200,150,12,0.25) 100%);
@@ -1452,7 +1458,7 @@ body.dark .phone-item { background: #16213e; }
     <div class="d-flex align-items-center justify-content-between">
       <a href="#" class="navbar-brand-area text-decoration-none">
         <div class="logo-circle">
-          <img src="images/logo_transparent.png" alt="לוגו מעלה עמוס" onerror="this.src='images/logo.jpg';this.onerror=function(){this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'}">
+          <img src="images/logo_official.jpg" alt="לוגו מעלה עמוס" onerror="this.src='images/logo_transparent.png';this.onerror=function(){this.style.display='none';this.parentElement.innerHTML='<span class=fallback-logo>&#1502;&quot;&#1506;</span>'}">
         </div>
         <div class="brand-text">
           <div class="title">מעלה עמוס</div>
@@ -1520,11 +1526,15 @@ body.dark .phone-item { background: #16213e; }
 
 <!-- ===== HERO ===== -->
 <section class="hero" id="home" aria-label="ברוכים הבאים למעלה עמוס">
-  <!-- Hero: real photos (Wikimedia Commons — real drone + real Ma'ale Amos + real Gush Etzion) -->
-  <div class="hero-slides">
-    <div class="hero-slide active" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/1280px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/5/5c/Ma%27ale_Amos.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Gush_Etzion_vinyard.jpg/1280px-Gush_Etzion_vinyard.jpg')"></div>
+  <!-- Hero: real drone footage of Maale Amos (from Yosef's WhatsApp videos, 2026-06-30) -->
+  <video class="hero-video" autoplay muted loop playsinline preload="metadata"
+         poster="images/hero_drone_poster.jpg"
+         style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0">
+    <source src="images/hero_drone.mp4" type="video/mp4">
+  </video>
+  <!-- Fallback image slideshow if video fails / not preferred -->
+  <div class="hero-slides" id="heroFallbackSlides" style="display:none">
+    <div class="hero-slide active" style="background-image:url('images/hero_drone_poster.jpg')"></div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
@@ -2623,7 +2633,7 @@ body.dark .phone-item { background: #16213e; }
     <div class="row g-4">
       <div class="col-lg-4">
         <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="logo-circle"><img src="images/logo.jpg" alt="" onerror="this.parentElement.innerHTML='<span class=fallback-logo>מ&quot;ע</span>'"></div>
+          <div class="logo-circle"><img src="images/logo_official.jpg" alt="" onerror="this.parentElement.innerHTML='<span class=fallback-logo>מ&quot;ע</span>'"></div>
           <div><div style="font-weight:800;font-size:1.2rem;color:#fff">מעלה עמוס</div><div style="font-size:0.8rem;opacity:0.7">תורה · קהילה · ישוב הדעת</div></div>
         </div>
         <p style="font-size:0.9rem;opacity:0.8;line-height:1.8">ישוב קהילתי-דתי בגוש עציון, הר חברון. קהילה חמה ותוססת.</p>
@@ -3590,6 +3600,31 @@ function maTrack(event, extra) {
 }
 // Fire pageview on load
 window.addEventListener('load', function() { setTimeout(function() { maTrack('pageview'); }, 300); });
+
+// v3.4: Hero video graceful fallback
+(function() {
+  var vid = document.querySelector('.hero-video');
+  var fallback = document.getElementById('heroFallbackSlides');
+  if (!vid || !fallback) return;
+  // Detect Save-Data / slow 2g connections → skip video
+  var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (c && (c.saveData || /2g/i.test(c.effectiveType || ''))) {
+    vid.style.display = 'none';
+    fallback.style.display = 'block';
+    return;
+  }
+  vid.addEventListener('error', function() {
+    vid.style.display = 'none';
+    fallback.style.display = 'block';
+  });
+  vid.addEventListener('stalled', function() {
+    if (vid.readyState < 3) {
+      setTimeout(function() {
+        if (vid.readyState < 3) { vid.style.display = 'none'; fallback.style.display = 'block'; }
+      }, 5000);
+    }
+  });
+})();
 // Fire section-view on scroll (only once per section per session)
 var _maSeenSections = {};
 function maObserveSections() {
