@@ -1520,11 +1520,11 @@ body.dark .phone-item { background: #16213e; }
 
 <!-- ===== HERO ===== -->
 <section class="hero" id="home" aria-label="ברוכים הבאים למעלה עמוס">
+  <!-- Hero: real photos (Wikimedia Commons — real drone + real Ma'ale Amos + real Gush Etzion) -->
   <div class="hero-slides">
-    <div class="hero-slide active" style="background-image:url('images/hero_landscape.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('images/hero_library.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('images/hero_04.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('images/hero_05.jpg')"></div>
+    <div class="hero-slide active" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/1280px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/5/5c/Ma%27ale_Amos.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Gush_Etzion_vinyard.jpg/1280px-Gush_Etzion_vinyard.jpg')"></div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
@@ -5696,6 +5696,24 @@ function portalHandleFeatImage(input) {
   reader.readAsDataURL(file);
   showToast('תמונה תיטען עם הפרסום...');
 }
+// v3.3: All portal writers now save-first-then-mutate + handle no-token
+function _portalWrite(collection, arr, next, msgOk, renderFn) {
+  if (!getGhToken()) { promptForGhToken(); return Promise.resolve({ ok: false, error: 'no_token' }); }
+  showToast('שומר...');
+  return saveCollection(collection, next).then(function(res) {
+    if (res && res.ok) {
+      // Replace source-of-truth atomically
+      arr.length = 0; next.forEach(function(x) { arr.push(x); });
+      showToast(msgOk);
+      if (renderFn) renderFn();
+      portalOpenAdminTab(collection);
+      return res;
+    }
+    showToast('❌ ' + (res && (res.error || res.hint) || 'שגיאה בשמירה'));
+    if (res && res.error === 'no_token') promptForGhToken();
+    return res;
+  });
+}
 function portalAddBulletin() {
   var item = {
     id: 'bull_' + Date.now().toString(36),
@@ -5710,14 +5728,8 @@ function portalAddBulletin() {
   var exp = document.getElementById('portalBullExpires').value;
   if (exp) item.expires = new Date(exp).toISOString();
   if (!item.title) { showToast('חובה למלא כותרת'); return; }
-  bulletinsData.unshift(item);
-  saveCollection('bulletins', bulletinsData).then(function(res) {
-    if (res.ok) {
-      showToast('🔥 מבזק פורסם');
-      renderHotBulletins();
-      portalOpenAdminTab('bulletins');
-    } else { showToast('❌ ' + (res.error || res.hint || 'שגיאה')); }
-  });
+  var next = [item].concat(bulletinsData);
+  _portalWrite('bulletins', bulletinsData, next, '🔥 מבזק פורסם', renderHotBulletins);
 }
 function portalEditBulletin(id) {
   var b = bulletinsData.find(function(x) { return x.id === id; });
@@ -5726,11 +5738,10 @@ function portalEditBulletin(id) {
   if (newTitle === null) return;
   var newBody = prompt('גוף חדש:', b.body);
   if (newBody === null) return;
-  b.title = newTitle; b.body = newBody; b.updated_at = new Date().toISOString();
-  saveCollection('bulletins', bulletinsData).then(function(res) {
-    if (res.ok) { showToast('✅ עודכן'); renderHotBulletins(); portalOpenAdminTab('bulletins'); }
-    else { showToast('❌ שגיאה'); }
+  var next = bulletinsData.map(function(x) {
+    return x.id === id ? Object.assign({}, x, { title: newTitle, body: newBody, updated_at: new Date().toISOString() }) : x;
   });
+  _portalWrite('bulletins', bulletinsData, next, '✅ עודכן', renderHotBulletins);
 }
 function portalAddFeatured() {
   var item = {
@@ -5742,14 +5753,8 @@ function portalAddFeatured() {
     created_at: new Date().toISOString(),
   };
   if (!item.title && !item.img) { showToast('חובה למלא כותרת או תמונה'); return; }
-  featuredData.unshift(item);
-  saveCollection('featured', featuredData).then(function(res) {
-    if (res.ok) {
-      showToast('⭐ באנר פורסם');
-      renderFeatured();
-      portalOpenAdminTab('featured');
-    } else { showToast('❌ ' + (res.error || 'שגיאה')); }
-  });
+  var next = [item].concat(featuredData);
+  _portalWrite('featured', featuredData, next, '⭐ באנר פורסם', renderFeatured);
 }
 function portalEditFeatured(id) {
   var f = featuredData.find(function(x) { return x.id === id; });
@@ -5758,11 +5763,10 @@ function portalEditFeatured(id) {
   if (newTitle === null) return;
   var newSubtitle = prompt('תת-כותרת חדשה:', f.subtitle || '');
   if (newSubtitle === null) return;
-  f.title = newTitle; f.subtitle = newSubtitle; f.updated_at = new Date().toISOString();
-  saveCollection('featured', featuredData).then(function(res) {
-    if (res.ok) { showToast('✅ עודכן'); renderFeatured(); portalOpenAdminTab('featured'); }
-    else { showToast('❌ שגיאה'); }
+  var next = featuredData.map(function(x) {
+    return x.id === id ? Object.assign({}, x, { title: newTitle, subtitle: newSubtitle, updated_at: new Date().toISOString() }) : x;
   });
+  _portalWrite('featured', featuredData, next, '✅ עודכן', renderFeatured);
 }
 function _portalNewsForm() {
   return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-newspaper"></i> כתבה חדשה</h5>' +
@@ -5816,11 +5820,7 @@ function portalAddNews() {
     created_at: new Date().toISOString(),
   };
   if (!item.title) { showToast('חובה למלא כותרת'); return; }
-  newsData.unshift(item);
-  saveCollection('news', newsData).then(function(res) {
-    if (res.ok) { showToast('✅ כתבה פורסמה + שמורה ב־GitHub'); portalOpenAdminTab('news'); renderNews(); }
-    else { showToast('❌ שמירה נכשלה: ' + (res.error || res.hint || 'לא ידוע')); }
-  });
+  _portalWrite('news', newsData, [item].concat(newsData), '✅ כתבה פורסמה', renderNews);
 }
 function portalAddEvent() {
   var item = {
@@ -5833,11 +5833,7 @@ function portalAddEvent() {
     desc: document.getElementById('portalEventDesc').value.trim(),
   };
   if (!item.title) { showToast('חובה למלא כותרת'); return; }
-  eventsData.unshift(item);
-  saveCollection('events', eventsData).then(function(res) {
-    if (res.ok) { showToast('✅ אירוע פורסם'); portalOpenAdminTab('events'); renderEvents(); }
-    else { showToast('❌ ' + (res.error || 'שמירה נכשלה')); }
-  });
+  _portalWrite('events', eventsData, [item].concat(eventsData), '✅ אירוע פורסם', renderEvents);
 }
 function portalAddAnnouncement() {
   var item = {
@@ -5848,28 +5844,57 @@ function portalAddAnnouncement() {
     date: document.getElementById('portalAnnDate').value.trim() || new Date().toLocaleDateString('he-IL'),
   };
   if (!item.title || !item.body) { showToast('חובה למלא כותרת וגוף'); return; }
-  announcementsData.unshift(item);
-  saveCollection('announcements', announcementsData).then(function(res) {
-    if (res.ok) { showToast('✅ הודעה פורסמה'); renderAnnouncements(); }
-    else { showToast('❌ ' + (res.error || 'שמירה נכשלה')); }
-  });
+  _portalWrite('announcements', announcementsData, [item].concat(announcementsData), '✅ הודעה פורסמה', renderAnnouncements);
 }
+// v3.3: Save-first-then-mutate. Was: mutated local array before verifying GH
+// write succeeded — deletions "worked" in the UI but item reappeared after
+// refresh. Now the array is only modified if the GitHub write returns ok.
 function portalDelete(collection, i) {
   if (!confirm('למחוק פריט זה?')) return;
+  if (!getGhToken()) { promptForGhToken(); return; }
   var arrs = { news: newsData, events: eventsData, announcements: announcementsData, bulletins: bulletinsData, featured: featuredData };
   var arr = arrs[collection];
   if (!arr) return;
-  arr.splice(i, 1);
-  saveCollection(collection, arr).then(function(res) {
-    if (res.ok) {
-      showToast('✅ נמחק'); portalOpenAdminTab(collection);
-      if (collection === 'news') renderNews();
-      if (collection === 'events') renderEvents();
-      if (collection === 'announcements') renderAnnouncements();
-      if (collection === 'bulletins') renderHotBulletins();
-      if (collection === 'featured') renderFeatured();
-    } else { showToast('❌ ' + (res.error || 'מחיקה נכשלה')); }
+  // Build the proposed-new array WITHOUT touching the source-of-truth yet
+  var next = arr.slice();
+  next.splice(i, 1);
+  showToast('שומר...');
+  saveCollection(collection, next).then(function(res) {
+    if (res && res.ok) {
+      // Only NOW mutate the in-memory array
+      arr.splice(i, 1);
+      showToast('✅ נמחק ונשמר');
+      portalOpenAdminTab(collection);
+      var renderers = {
+        news: renderNews, events: renderEvents, announcements: renderAnnouncements,
+        bulletins: renderHotBulletins, featured: renderFeatured,
+      };
+      if (renderers[collection]) renderers[collection]();
+    } else {
+      showToast('❌ מחיקה נכשלה: ' + (res && (res.error || res.hint) || 'לא ידוע'));
+      if (res && res.error === 'no_token') promptForGhToken();
+    }
   });
+}
+// v3.3: Interactive GH token prompt (was silent failure)
+function promptForGhToken() {
+  var current = getGhToken();
+  var msg = 'לניהול תוכן צריך GitHub token (רק פעם אחת).\n\n' +
+    '1. לך ל־ https://github.com/settings/tokens/new\n' +
+    '2. תן שם: "maale-amos-cms"\n' +
+    '3. סמן: repo (Full control)\n' +
+    '4. תוקף: 90 יום או "No expiration"\n' +
+    '5. לחץ Generate token → העתק\n\n' +
+    'הדבק כאן:';
+  var tok = prompt(msg, current);
+  if (tok === null) return;
+  tok = tok.trim();
+  if (!tok) { localStorage.removeItem(GH_TOKEN_KEY); showToast('טוקן נמחק'); return; }
+  if (!/^(gh[pous]_|github_pat_)/.test(tok)) {
+    if (!confirm('הטוקן לא בפורמט הצפוי (מתחיל ב־ghp_ / github_pat_). לשמור בכל זאת?')) return;
+  }
+  localStorage.setItem(GH_TOKEN_KEY, tok);
+  showToast('✅ טוקן נשמר');
 }
 
 // ===== INQUIRY SYSTEM =====
