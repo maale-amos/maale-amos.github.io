@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maale-amos.github.io/maale-amos/sitemap.xml

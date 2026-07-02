@@ -1526,15 +1526,13 @@ body.dark .phone-item { background: #16213e; }
 
 <!-- ===== HERO ===== -->
 <section class="hero" id="home" aria-label="ברוכים הבאים למעלה עמוס">
-  <!-- Hero: real drone footage of Maale Amos (from Yosef's WhatsApp videos, 2026-06-30) -->
-  <video class="hero-video" autoplay muted loop playsinline preload="metadata"
-         poster="images/hero_drone_poster.jpg"
-         style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0">
-    <source src="images/hero_drone.mp4" type="video/mp4">
-  </video>
-  <!-- Fallback image slideshow if video fails / not preferred -->
-  <div class="hero-slides" id="heroFallbackSlides" style="display:none">
-    <div class="hero-slide active" style="background-image:url('images/hero_drone_poster.jpg')"></div>
+  <!-- Hero: real drone photos of Maale Amos (frames from Yosef's WhatsApp videos, 2026-06-30). -->
+  <!-- MP4 hero was blocked by NetFree at Content-Type level, so we cycle stills instead. -->
+  <div class="hero-slides">
+    <div class="hero-slide active" style="background-image:url('images/drone_view_1.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/drone_view_2.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/drone_view_3.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/drone_view_4.jpg')"></div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
