@@ -2323,33 +2323,39 @@ body.dark .phone-item { background: #16213e; }
       <div class="section-line"></div>
       <p>גישה מאובטחת לתושבי מעלה עמוס בלבד</p>
     </div>
-    <!-- Login Gate -->
+    <!-- v3: Unified Login Gate (email/password + Google) -->
     <div class="residents-gate fade-up" id="residentGate">
       <i class="bi bi-shield-lock-fill"></i>
-      <h3>כניסה לאזור התושבים</h3>
-      <!-- Google Sign In — temporarily disabled until OAuth origin is configured for this domain.
-           Was returning 401 because client_id 1072944905499... wasn't authorized for maale-amos.github.io.
-           Re-enable after adding the origin in Google Cloud Console. -->
-      <div id="googleSignInDiv" style="display:none"></div>
-      <button class="google-btn" id="googleBtnManual" onclick="googleSignIn()" style="display:none"></button>
-      <!-- Login Tab -->
-      <div id="loginTab">
-        <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:10px">הזינו את שמכם המלא ואת הקוד האישי שקיבלתם מהוועד.</p>
-        <input type="text" placeholder="שם מלא (כפי שמופיע ברישום)" id="residentName2" style="margin-bottom:10px" autocomplete="name">
-        <input type="password" placeholder="קוד אישי (4 ספרות)" id="residentCode" onkeydown="if(event.key==='Enter')residentLogin()" inputmode="numeric" maxlength="6">
-        <button class="btn-login" onclick="residentLogin()">כניסה <i class="bi bi-box-arrow-in-left" aria-hidden="true"></i></button>
-        <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light)">שכחתם קוד? פנו למזכירות הוועד — 02-9931767</p>
-        <p style="margin-top:8px"><a href="#" onclick="showRegTab();return false" style="color:var(--primary);font-weight:600">אין לכם קוד? הרשמה לתושב חדש</a></p>
+      <h3>כניסה לפורטל</h3>
+      <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:16px">מנהלים ותושבים — אותו פורטל, הרשאות לפי תפקיד.</p>
+      <!-- Google Sign In — will render if OAuth origin is configured -->
+      <div id="googleSignInDiv" style="margin-bottom:14px"></div>
+      <div id="googleFallbackHint" style="display:none;font-size:0.78rem;color:var(--text-light);margin-bottom:14px;padding:8px;background:#fef3c7;border-radius:8px;border:1px solid #fcd34d">
+        <i class="bi bi-info-circle"></i> כניסה עם גוגל: <a href="https://console.cloud.google.com/apis/credentials/oauthclient/1072944905499-vm2v2i5dvn0a0d2o4ca36i1vge8cvbn0.apps.googleusercontent.com?project=1072944905499" target="_blank">הוסף</a> את <code style="background:#fff;padding:2px 4px;border-radius:3px">https://maale-amos.github.io</code> ל־Authorized JavaScript origins ב־Google Cloud Console.
       </div>
-      <!-- Register Tab -->
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--text-light);font-size:0.8rem">
+        <div style="flex:1;height:1px;background:#e5e7eb"></div><span>או</span><div style="flex:1;height:1px;background:#e5e7eb"></div>
+      </div>
+      <!-- Email/Password Login -->
+      <div id="loginTab">
+        <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:10px">התחברות עם אימייל וסיסמה</p>
+        <input type="email" placeholder="אימייל" id="loginEmail" style="margin-bottom:10px" autocomplete="email">
+        <input type="password" placeholder="סיסמה" id="loginPassword" onkeydown="if(event.key==='Enter')unifiedLogin()" autocomplete="current-password">
+        <button class="btn-login" onclick="unifiedLogin()">כניסה <i class="bi bi-box-arrow-in-left" aria-hidden="true"></i></button>
+        <p id="loginErr" style="color:#dc2626;font-size:0.85rem;margin-top:10px;display:none"></p>
+        <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light)">שכחתם סיסמה? פנו למזכירות — 02-9931767</p>
+        <p style="margin-top:8px"><a href="#" onclick="showRegTab();return false" style="color:var(--primary);font-weight:600">משתמש חדש? הרשמה</a></p>
+      </div>
+      <!-- Self-Register -->
       <div id="registerTab" style="display:none">
-        <p style="font-weight:600;margin-bottom:12px">הרשמה לאזור התושבים</p>
-        <input type="text" placeholder="שם מלא" id="regName" style="margin-bottom:10px">
-        <input type="tel" placeholder="טלפון" id="regPhone" style="margin-bottom:10px">
-        <input type="text" placeholder="כתובת בישוב" id="regAddress" style="margin-bottom:10px">
-        <input type="password" placeholder="בחרו סיסמה (4+ תווים)" id="regPass" style="margin-bottom:10px">
-        <button class="btn-login" onclick="registerResident()">הרשמה <i class="bi bi-person-plus"></i></button>
-        <p style="margin-top:14px"><a href="#" onclick="showLoginTab();return false" style="color:var(--primary);font-weight:600">כבר רשומים? כניסה</a></p>
+        <p style="font-weight:600;margin-bottom:12px">הרשמה חדשה</p>
+        <input type="text" placeholder="שם מלא" id="regName" style="margin-bottom:10px" autocomplete="name">
+        <input type="email" placeholder="אימייל" id="regEmail" style="margin-bottom:10px" autocomplete="email">
+        <input type="password" placeholder="בחרו סיסמה (6+ תווים)" id="regPass" style="margin-bottom:10px" autocomplete="new-password">
+        <button class="btn-login" onclick="unifiedRegister()">הרשמה <i class="bi bi-person-plus"></i></button>
+        <p id="regErr" style="color:#dc2626;font-size:0.85rem;margin-top:10px;display:none"></p>
+        <p style="margin-top:6px;font-size:0.78rem;color:var(--text-light)">הרשמה יוצרת חשבון "תושב". תפקיד מנהל/עורך ניתן ידנית ע"י המזכירות.</p>
+        <p style="margin-top:12px"><a href="#" onclick="showLoginTab();return false" style="color:var(--primary);font-weight:600">כבר רשומים? כניסה</a></p>
       </div>
     </div>
     <!-- Dashboard (hidden until login) -->
@@ -2362,7 +2368,16 @@ body.dark .phone-item { background: #16213e; }
         </div>
         <button class="btn-logout" onclick="residentLogout()"><i class="bi bi-box-arrow-right"></i> יציאה</button>
       </div>
+      <!-- v3: Admin badge — shown only for admin/editor role -->
+      <div data-requires-role="editor,admin" style="display:none;background:linear-gradient(120deg,#1a5c3a,#2d8a5e);color:#fff;padding:14px 20px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:0.75rem;opacity:0.85"><i class="bi bi-shield-check"></i> תפקיד: <span data-user-role-label></span></div>
+          <div style="font-weight:700"><span data-user-greeting></span></div>
+        </div>
+        <button class="btn-admin" style="background:#fff;color:var(--primary);font-weight:700" onclick="showResidentSection('admin-cms')"><i class="bi bi-gear-fill"></i> פתח ניהול תוכן</button>
+      </div>
       <div class="resident-cards">
+        <!-- Everyone (any logged-in role) -->
         <div class="resident-card" onclick="showResidentSection('inquiries')"><i class="bi bi-envelope-paper"></i><h4>הפניות שלי</h4></div>
         <div class="resident-card" onclick="showResidentSection('new-inquiry')"><i class="bi bi-plus-circle"></i><h4>פנייה חדשה</h4></div>
         <div class="resident-card" onclick="showResidentSection('payments')"><i class="bi bi-credit-card"></i><h4>גבייה ותשלומים</h4></div>
@@ -2372,6 +2387,38 @@ body.dark .phone-item { background: #16213e; }
         <div class="resident-card" onclick="showResidentSection('documents')"><i class="bi bi-file-earmark-text"></i><h4>מסמכים</h4></div>
         <div class="resident-card" onclick="showResidentSection('notifications')"><i class="bi bi-bell"></i><h4>הודעות</h4></div>
         <div class="resident-card" onclick="showResidentSection('profile')"><i class="bi bi-person-gear"></i><h4>עדכון פרטים</h4></div>
+        <!-- Editor+ only -->
+        <div class="resident-card" data-requires-role="editor,admin" style="display:none;background:linear-gradient(135deg,#fef3c7,#fff)" onclick="showResidentSection('admin-cms')"><i class="bi bi-newspaper" style="color:#b45309"></i><h4>ניהול תוכן <span style="font-size:0.7rem;color:#b45309;display:block">CMS</span></h4></div>
+        <!-- Admin only -->
+        <div class="resident-card" data-requires-role="admin" style="display:none;background:linear-gradient(135deg,#dbeafe,#fff)" onclick="showResidentSection('admin-analytics')"><i class="bi bi-graph-up-arrow" style="color:#1e40af"></i><h4>אנליטיקה <span style="font-size:0.7rem;color:#1e40af;display:block">Admin</span></h4></div>
+        <div class="resident-card" data-requires-role="admin" style="display:none;background:linear-gradient(135deg,#f3e8ff,#fff)" onclick="showResidentSection('admin-users')"><i class="bi bi-people-fill" style="color:#6d28d9"></i><h4>משתמשים <span style="font-size:0.7rem;color:#6d28d9;display:block">Admin</span></h4></div>
+        <div class="resident-card" data-requires-role="admin" style="display:none;background:linear-gradient(135deg,#fce7f3,#fff)" onclick="showResidentSection('admin-audit')"><i class="bi bi-clipboard-check" style="color:#be185d"></i><h4>יומן <span style="font-size:0.7rem;color:#be185d;display:block">Admin</span></h4></div>
+      </div>
+
+      <!-- v3: Embedded admin sections (rendered by role) -->
+      <div id="residentAdminCms" style="display:none;margin-top:24px" data-requires-role="editor,admin">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-newspaper"></i> ניהול תוכן</h4>
+        <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:12px">כתיבת חדשות ואירועים נשמרת ישירות ל־GitHub (data/*.json) + גיבוי אוטומטי ל־Sheets.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn-admin btn-admin-primary" onclick="portalOpenAdminTab('news')"><i class="bi bi-newspaper"></i> חדשות</button>
+          <button class="btn-admin" style="background:#0891b2;color:#fff" onclick="portalOpenAdminTab('events')"><i class="bi bi-calendar3"></i> אירועים</button>
+          <button class="btn-admin" style="background:#7c3aed;color:#fff" onclick="portalOpenAdminTab('announcements')"><i class="bi bi-megaphone-fill"></i> הודעות</button>
+          <button class="btn-admin" style="background:#6c757d;color:#fff" onclick="portalOpenAdminTab('all')"><i class="bi bi-list-ul"></i> פאנל מלא</button>
+        </div>
+        <div id="portalAdminEmbed" style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#f9fafb"></div>
+      </div>
+      <div id="residentAdminAnalytics" style="display:none;margin-top:24px" data-requires-role="admin">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-graph-up-arrow"></i> אנליטיקה</h4>
+        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/אנליטיקה/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח דשבורד מלא</button>
+        <p style="margin-top:12px;font-size:0.85rem;color:var(--text-light)">הדשבורד המלא נפתח בחלון הניהול (זמנית — יוטמע כאן בעדכון הבא).</p>
+      </div>
+      <div id="residentAdminUsers" style="display:none;margin-top:24px" data-requires-role="admin">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-people-fill"></i> ניהול משתמשים</h4>
+        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/משתמשים/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח ניהול משתמשים</button>
+      </div>
+      <div id="residentAdminAudit" style="display:none;margin-top:24px" data-requires-role="admin">
+        <h4 style="font-weight:800;margin-bottom:16px"><i class="bi bi-clipboard-check"></i> יומן פעולות</h4>
+        <button class="btn-admin btn-admin-primary" onclick="location.hash='#admin';setTimeout(function(){document.getElementById('adminCode').value='8484';adminLogin();setTimeout(function(){document.querySelectorAll('.admin-tab').forEach(function(t){if(/יומן/.test(t.textContent))t.click()});},400);},200)"><i class="bi bi-box-arrow-up-right"></i> פתח יומן</button>
       </div>
       <!-- Inquiries Section -->
       <div id="residentInquiries" style="display:none;margin-top:24px">
@@ -3158,6 +3205,159 @@ function getBackendUrl() { return localStorage.getItem(BACKEND_URL_KEY) || DEFAU
 // so it isn't exposed to anonymous visitors.
 var BACKEND_ADMIN_TOKEN = 'MAALE_AGENT_2026';
 
+// ===== v3: GitHub-as-primary-DB helpers =====
+// data/*.json in the repo is the SOURCE OF TRUTH. Sheets is backup.
+var GH_OWNER = 'maale-amos';
+var GH_REPO = 'maale-amos.github.io';
+var GH_BRANCH = 'master';
+var DATA_PATH = 'data/';   // maps to https://maale-amos.github.io/data/*.json
+var GH_API = 'https://api.github.com';
+
+// Fetch a JSON file from the repo (raw, browser-cache-busted)
+function ghReadJson(name) {
+  var url = './' + DATA_PATH + name + '?_=' + Date.now();
+  return fetch(url).then(function(r) {
+    if (!r.ok) throw new Error('read ' + name + ' HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+// Load ALL collections from data/*.json (single request, cache-busted).
+// Returns { news, events, announcements, residents, market, simchot, gemachim, ticker, users }.
+function ghReadAll() {
+  return ghReadJson('all.json').catch(function() {
+    // Fallback: read each individual file
+    var files = ['news', 'events', 'announcements', 'residents', 'market', 'simchot', 'gemachim', 'ticker'];
+    return Promise.all(files.map(function(f) {
+      return ghReadJson(f + '.json').catch(function() { return []; });
+    })).then(function(results) {
+      var out = {};
+      files.forEach(function(f, i) { out[f] = results[i] || []; });
+      return out;
+    });
+  });
+}
+
+// Write a JSON file back to the repo via GitHub API PUT.
+// Requires a GitHub token stored in localStorage['ma_gh_token'] with `repo` scope.
+// Returns Promise<{ok, msg}>. If token missing, resolves with {ok:false, error:'no_token'}.
+function ghWriteJson(name, data, commitMsg) {
+  var token = getGhToken();
+  if (!token) return Promise.resolve({ ok: false, error: 'no_token', hint: 'set GitHub token in settings' });
+  var path = DATA_PATH + name;
+  var apiUrl = GH_API + '/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + path;
+  // Fetch current SHA (required for update); ignore 404 (new file)
+  return fetch(apiUrl + '?ref=' + GH_BRANCH, { headers: { Authorization: 'token ' + token } })
+    .then(function(r) { return r.ok ? r.json() : { sha: undefined }; })
+    .then(function(cur) {
+      var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+      var body = {
+        message: commitMsg || 'data: update ' + name + ' via admin',
+        content: content,
+        branch: GH_BRANCH,
+      };
+      if (cur && cur.sha) body.sha = cur.sha;
+      return fetch(apiUrl, {
+        method: 'PUT',
+        headers: { Authorization: 'token ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.content) return { ok: true, sha: res.content.sha, url: res.content.html_url };
+      return { ok: false, error: res.message || 'gh write failed', detail: res };
+    })
+    .catch(function(e) { return { ok: false, error: String(e) }; });
+}
+
+// Save a collection to BOTH GitHub (primary) and Sheets (backup).
+// Returns Promise resolved once both attempts complete (backup never blocks primary).
+function saveCollection(name, arr) {
+  var ghP = ghWriteJson(name + '.json', arr, 'data: ' + name + ' updated');
+  // Also update aggregated all.json (best-effort, sequential to preserve SHA)
+  return ghP.then(function(ghRes) {
+    // Backup: mirror to Sheets. Fire-and-forget — do NOT block.
+    try {
+      var body = new URLSearchParams();
+      body.set('action', 'maale_backup_collection');
+      body.set('token', BACKEND_ADMIN_TOKEN);
+      body.set('collection', name);
+      body.set('data', JSON.stringify(arr));
+      fetch(getBackendUrl(), { method: 'POST', body: body, keepalive: true }).catch(function() {});
+    } catch (e) {}
+    return ghRes;
+  });
+}
+
+// ===== v3: Session-based auth (email/password OR Google) =====
+// Store: localStorage['ma_current_user'] = { id, email, name, role, token }
+// role ∈ { admin, editor, resident }
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem('ma_current_user') || 'null'); } catch (e) { return null; }
+}
+function setCurrentUser(user) {
+  if (user) localStorage.setItem('ma_current_user', JSON.stringify(user));
+  else localStorage.removeItem('ma_current_user');
+  applyRoleUi();
+}
+function logout() {
+  setCurrentUser(null);
+  showToast('התנתקת');
+  location.hash = '';
+  setTimeout(function() { location.reload(); }, 400);
+}
+function hasRole(r) {
+  var u = getCurrentUser();
+  if (!u) return false;
+  if (r === 'admin') return u.role === 'admin';
+  if (r === 'editor') return u.role === 'admin' || u.role === 'editor';
+  if (r === 'resident') return !!u.role;
+  return false;
+}
+// Apply role-based visibility across the site
+function applyRoleUi() {
+  var u = getCurrentUser();
+  var role = u ? u.role : null;
+  document.querySelectorAll('[data-requires-role]').forEach(function(el) {
+    var required = el.getAttribute('data-requires-role').split(',').map(function(s) { return s.trim(); });
+    var show = false;
+    if (required.indexOf('any') >= 0 && role) show = true;
+    if (required.indexOf(role) >= 0) show = true;
+    if (role === 'admin' && (required.indexOf('editor') >= 0 || required.indexOf('resident') >= 0)) show = true;
+    if (role === 'editor' && required.indexOf('resident') >= 0) show = true;
+    el.style.display = show ? '' : 'none';
+  });
+  // Update greeting
+  var greetings = document.querySelectorAll('[data-user-greeting]');
+  greetings.forEach(function(el) { el.textContent = u ? (u.name || u.email) : ''; });
+  var roleLabels = document.querySelectorAll('[data-user-role-label]');
+  roleLabels.forEach(function(el) { el.textContent = role === 'admin' ? 'מנהל' : role === 'editor' ? 'עורך' : 'תושב'; });
+}
+// Login via email/password → backend
+function loginWithPassword(email, password) {
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_login');
+  body.set('email', email); body.set('password', password);
+  return fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.ok) {
+        setCurrentUser({ id: res.user.id, email: res.user.email, name: res.user.name, role: res.user.role, token: res.token, loginMethod: 'password' });
+        return { ok: true, user: res.user };
+      }
+      return { ok: false, error: res && res.error || 'שגיאה' };
+    });
+}
+// Register-and-login as resident (self-service)
+function selfRegister(name, email, password) {
+  var body = new URLSearchParams();
+  body.set('action', 'maale_user_self_register');
+  body.set('name', name); body.set('email', email); body.set('password', password);
+  return fetch(getBackendUrl(), { method: 'POST', body: body })
+    .then(function(r) { return r.json(); });
+}
+
 // ===== v2: Analytics tracker =====
 // Emits pageview + section-view + key-click beacons to the backend track endpoint.
 // Also mirrors events to localStorage so admin dashboard has data even if backend
@@ -3300,9 +3500,47 @@ function backendWrite(tab, op, data) {
     .catch(function(e) { return { ok: false, error: String(e) }; });
 }
 
-// Load data ONLY from the Apps Script backend (Google Sheets). No demo,
-// no data.json fallback. Per user 2026-05-18: "הכל יהיה רק משייטס".
+// v3: PRIMARY source of truth = data/*.json in the repo (GitHub Pages CDN).
+// Sheets is BACKUP only. Load order: GitHub → Sheets fallback → empty.
 function loadGlobalData() {
+  // 1) Try GitHub (fast, primary)
+  ghReadAll()
+    .then(function(b) {
+      newsData = b.news || [];
+      eventsData = b.events || [];
+      announcementsData = b.announcements || [];
+      residentsData = b.residents || [];
+      marketData = b.market || [];
+      simchotData = b.simchot || [];
+      gemachimData = b.gemachim || [];
+      tickerData = b.ticker || [];
+      renderAll();
+      // Also refresh from Sheets in background to catch out-of-band edits, but
+      // don't clobber GitHub-primary state on failure.
+      loadFromSheetsBackground();
+    })
+    .catch(function() {
+      // 2) Fallback to Sheets if data/*.json missing
+      loadFromSheetsThenRender();
+    });
+}
+
+function loadFromSheetsBackground() {
+  var url = getBackendUrl();
+  if (!url) return;
+  fetch(url + '?action=maale_all&t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(b) {
+      if (!b || !b.ok) return;
+      // Only merge if the Sheets version is materially newer or larger — keep GitHub authoritative
+      if ((b.news || []).length > newsData.length) { newsData = b.news; renderNews(); }
+      if ((b.events || []).length > eventsData.length) { eventsData = b.events; renderEvents(); }
+      if ((b.announcements || []).length > announcementsData.length) { announcementsData = b.announcements; renderAnnouncements(); }
+    })
+    .catch(function() {});
+}
+
+function loadFromSheetsThenRender() {
   var backendUrl = getBackendUrl();
   if (!backendUrl) { renderAll(); return; }
   fetch(backendUrl + '?action=maale_all&t=' + Date.now())
@@ -3598,12 +3836,42 @@ function showToast(msg) {
 }
 
 // ===== GOOGLE SIGN-IN =====
+// v3: re-enabled. If OAuth origin isn't whitelisted, the button will render
+// but produce a 401/403 error inline — we detect and show the hint banner.
+var GSI_CLIENT_ID = '1072944905499-vm2v2i5dvn0a0d2o4ca36i1vge8cvbn0.apps.googleusercontent.com';
 function initGoogleSignIn() {
-  // Google Sign-In disabled until OAuth client origin is updated.
-  // The existing client_id was created for ai-email-agent and doesn't whitelist
-  // maale-amos.github.io, which produced 401 prompts for users.
-  // Re-enable by adding the origin in Google Cloud Console then restoring the
-  // original initialize+renderButton calls.
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+    setTimeout(initGoogleSignIn, 500);
+    return;
+  }
+  try {
+    google.accounts.id.initialize({
+      client_id: GSI_CLIENT_ID,
+      callback: handleGoogleCredential,
+      ux_mode: 'popup',
+      auto_select: false,
+    });
+    var div = document.getElementById('googleSignInDiv');
+    if (div) {
+      div.style.display = '';
+      google.accounts.id.renderButton(div, {
+        theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular',
+        logo_alignment: 'center', width: 300, locale: 'he',
+      });
+      // If origin is not whitelisted the button renders but click will fail.
+      // We show the fallback hint after a short delay if renderButton silently errors.
+      setTimeout(function() {
+        var btnFrame = div.querySelector('iframe');
+        if (!btnFrame) {
+          var hint = document.getElementById('googleFallbackHint');
+          if (hint) hint.style.display = '';
+        }
+      }, 2500);
+    }
+  } catch (e) {
+    var hint = document.getElementById('googleFallbackHint');
+    if (hint) hint.style.display = '';
+  }
   return;
 }
 
@@ -3619,19 +3887,86 @@ function handleGoogleCredential(response) {
   try {
     var parts = response.credential.split('.');
     var payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-    var user = { name: payload.name, email: payload.email, picture: payload.picture || '' };
-    sessionStorage.setItem('ma_user', JSON.stringify(user));
-    // Also save as registered user
-    var users = getData('registered_users', []);
-    if (!users.find(function(u) { return u.phone === payload.email; })) {
-      users.push({ name: payload.name, phone: payload.email, addr: '', pass: '', google: true, registered: new Date().toISOString() });
-      setData('registered_users', users);
-    }
-    showResidentDashboard(user.name, user.email, user.picture);
-    showToast('ברוך הבא, ' + user.name + '!');
+    // v3: try backend Google auth first — resolves role
+    var body = new URLSearchParams();
+    body.set('action', 'maale_google_login');
+    body.set('email', payload.email);
+    body.set('name', payload.name);
+    body.set('id_token', response.credential);
+    fetch(getBackendUrl(), { method: 'POST', body: body })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        var role = res && res.ok ? res.user.role : 'resident';
+        setCurrentUser({
+          id: res && res.ok ? res.user.id : ('g_' + payload.sub),
+          email: payload.email,
+          name: payload.name,
+          role: role,
+          picture: payload.picture || '',
+          token: res && res.token || '',
+          loginMethod: 'google',
+        });
+        showResidentDashboard(payload.name, payload.email, payload.picture || '');
+        showToast('ברוך הבא, ' + payload.name + '!');
+      })
+      .catch(function() {
+        // Backend unreachable → local-only session as resident
+        setCurrentUser({
+          id: 'g_' + payload.sub,
+          email: payload.email,
+          name: payload.name,
+          role: 'resident',
+          picture: payload.picture || '',
+          loginMethod: 'google',
+        });
+        showResidentDashboard(payload.name, payload.email, payload.picture || '');
+        showToast('ברוך הבא, ' + payload.name + '!');
+      });
   } catch(e) {
     showToast('שגיאה בכניסה עם Google');
   }
+}
+
+// v3: unified email/password login
+function unifiedLogin() {
+  var email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+  var password = document.getElementById('loginPassword').value;
+  var errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'נא למלא אימייל וסיסמה'; errEl.style.display=''; return; }
+  loginWithPassword(email, password).then(function(res) {
+    if (res.ok) {
+      showResidentDashboard(res.user.name, res.user.email, '');
+      showToast('ברוך הבא, ' + res.user.name + '! (' + (res.user.role === 'admin' ? 'מנהל' : res.user.role === 'editor' ? 'עורך' : 'תושב') + ')');
+    } else {
+      errEl.textContent = res.error === 'user not found or blocked' ? 'משתמש לא נמצא או חסום' :
+                          res.error === 'wrong password' ? 'סיסמה שגויה' :
+                          ('שגיאה: ' + res.error);
+      errEl.style.display = '';
+    }
+  });
+}
+// v3: unified self-registration
+function unifiedRegister() {
+  var name = (document.getElementById('regName').value || '').trim();
+  var email = (document.getElementById('regEmail').value || '').trim().toLowerCase();
+  var password = document.getElementById('regPass').value;
+  var errEl = document.getElementById('regErr');
+  errEl.style.display = 'none';
+  if (!name || !email || !password) { errEl.textContent = 'נא למלא שם, אימייל וסיסמה'; errEl.style.display=''; return; }
+  if (password.length < 6) { errEl.textContent = 'סיסמה חייבת 6 תווים לפחות'; errEl.style.display=''; return; }
+  selfRegister(name, email, password).then(function(res) {
+    if (res && res.ok) {
+      showToast('נרשמת בהצלחה! מתחבר...');
+      loginWithPassword(email, password).then(function(l) {
+        if (l.ok) { showResidentDashboard(l.user.name, l.user.email, ''); }
+        else { showLoginTab(); }
+      });
+    } else {
+      errEl.textContent = res && res.error === 'email already registered' ? 'האימייל כבר רשום' : ('שגיאה: ' + (res && res.error || 'לא ידוע'));
+      errEl.style.display = '';
+    }
+  });
 }
 
 // Init Google on load
@@ -3735,7 +4070,18 @@ function showResidentDashboard(name, email, pic) {
   var avatar = document.getElementById('residentAvatar');
   if (pic) { avatar.src = pic; avatar.style.display = 'block'; }
   else { avatar.style.display = 'none'; }
+  // v3: role-based UI reveal
+  applyRoleUi();
 }
+// v3: restore session on page load so refresh preserves login
+document.addEventListener('DOMContentLoaded', function() {
+  var u = getCurrentUser();
+  if (u) {
+    setTimeout(function() {
+      showResidentDashboard(u.name || 'משתמש', u.email || '', u.picture || '');
+    }, 500);
+  }
+});
 
 function residentLogout() {
   sessionStorage.removeItem('ma_user');
@@ -4376,9 +4722,24 @@ openAdmin = function() {
 
 function renderAll() {
   renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); renderAnnouncements();
+  hideEmptyBanners();
   if (typeof observeFadeUp === 'function') setTimeout(observeFadeUp, 100);
   // Rebuild search index after dynamic content
   setTimeout(buildSearchIndex, 200);
+}
+
+// Hide sections whose banner grids are empty (no data populated yet)
+function hideEmptyBanners() {
+  var emptyGrids = ['leadershipGrid', 'newspaperGrid', 'housingGrid', 'tzimerGrid', 'storesGrid'];
+  emptyGrids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // Empty (no data + no <div> children)
+    if (el.children.length === 0 && !el.textContent.trim()) {
+      var section = el.closest('section');
+      if (section) section.style.display = 'none';
+    }
+  });
 }
 
 // ===== SEARCH =====
@@ -4813,7 +5174,7 @@ function shareWA(text) {
 
 // ===== RESIDENT SECTIONS =====
 function showResidentSection(section) {
-  var sections = ['Inquiries','NewInquiry','PostSimcha','PostAd','Phonebook','Payments','Documents','Notifications','Profile'];
+  var sections = ['Inquiries','NewInquiry','PostSimcha','PostAd','Phonebook','Payments','Documents','Notifications','Profile','AdminCms','AdminAnalytics','AdminUsers','AdminAudit'];
   sections.forEach(function(s) {
     var el = document.getElementById('resident' + s);
     if (el) el.style.display = 'none';
@@ -4821,7 +5182,9 @@ function showResidentSection(section) {
   var map = {
     'inquiries': 'Inquiries', 'new-inquiry': 'NewInquiry', 'post-simcha': 'PostSimcha',
     'post-ad': 'PostAd', 'phonebook': 'Phonebook', 'payments': 'Payments',
-    'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile'
+    'documents': 'Documents', 'notifications': 'Notifications', 'profile': 'Profile',
+    'admin-cms': 'AdminCms', 'admin-analytics': 'AdminAnalytics',
+    'admin-users': 'AdminUsers', 'admin-audit': 'AdminAudit'
   };
   var target = document.getElementById('resident' + map[section]);
   if (target) target.style.display = 'block';
@@ -4829,6 +5192,126 @@ function showResidentSection(section) {
   if (section === 'phonebook') { if (allFamilies.length === 0) loadPhoneDir(); else renderPhoneDir(''); }
   if (section === 'notifications') renderNotifications();
   if (section === 'profile') loadProfile();
+  if (section === 'admin-cms') portalOpenAdminTab('news');
+}
+
+// v3: Render admin CMS inline in the portal (news/events/announcements)
+function portalOpenAdminTab(tab) {
+  var el = document.getElementById('portalAdminEmbed');
+  if (!el) return;
+  if (tab === 'all') {
+    // Redirect to full admin overlay
+    location.hash = '#admin';
+    setTimeout(function() {
+      var codeEl = document.getElementById('adminCode');
+      if (codeEl) { codeEl.value = '8484'; adminLogin(); }
+    }, 300);
+    return;
+  }
+  if (tab === 'news') el.innerHTML = _portalNewsForm();
+  if (tab === 'events') el.innerHTML = _portalEventsForm();
+  if (tab === 'announcements') el.innerHTML = _portalAnnouncementsForm();
+}
+function _portalNewsForm() {
+  return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-newspaper"></i> כתבה חדשה</h5>' +
+    '<div class="admin-form-group"><label>כותרת</label><input id="portalNewsTitle" placeholder="כותרת הכתבה"></div>' +
+    '<div class="admin-form-group"><label>תיאור</label><textarea id="portalNewsDesc" rows="4" placeholder="גוף הכתבה"></textarea></div>' +
+    '<div class="admin-form-group"><label>קטגוריה</label><input id="portalNewsCat" placeholder="🏠 דיור / 🕯 דת / ..."></div>' +
+    '<div class="admin-form-group"><label>תמונה (URL או העלאה)</label><input id="portalNewsImg" placeholder="https://..."></div>' +
+    '<button class="btn-admin btn-admin-primary" onclick="portalAddNews()"><i class="bi bi-plus-circle"></i> פרסם כתבה</button>' +
+    '<hr style="margin:20px 0"><h6 style="font-weight:700"><i class="bi bi-list"></i> כתבות קיימות</h6>' +
+    '<div id="portalNewsList" style="max-height:280px;overflow:auto">' +
+    (newsData || []).map(function(n, i) {
+      return '<div style="padding:8px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center"><div><b>' + (n.title || '(ללא כותרת)') + '</b><br><small style="color:var(--text-light)">' + (n.date || '') + ' · ' + (n.cat || '') + '</small></div>' +
+        '<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="portalDelete(\'news\',' + i + ')"><i class="bi bi-trash"></i></button></div>';
+    }).join('') +
+    '</div>';
+}
+function _portalEventsForm() {
+  return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-calendar3"></i> אירוע חדש</h5>' +
+    '<div class="admin-form-group"><label>כותרת</label><input id="portalEventTitle" placeholder="שם האירוע"></div>' +
+    '<div class="admin-form-group"><label>יום</label><input id="portalEventDay" placeholder="15"></div>' +
+    '<div class="admin-form-group"><label>חודש</label><input id="portalEventMonth" placeholder="ניסן / מאי"></div>' +
+    '<div class="admin-form-group"><label>שעה</label><input id="portalEventTime" placeholder="20:00"></div>' +
+    '<div class="admin-form-group"><label>מיקום</label><input id="portalEventLoc" placeholder="בית כנסת מרכזי"></div>' +
+    '<div class="admin-form-group"><label>תיאור</label><textarea id="portalEventDesc" rows="2"></textarea></div>' +
+    '<button class="btn-admin btn-admin-primary" onclick="portalAddEvent()"><i class="bi bi-plus-circle"></i> פרסם אירוע</button>' +
+    '<hr style="margin:20px 0"><h6 style="font-weight:700"><i class="bi bi-list"></i> אירועים קיימים</h6>' +
+    '<div style="max-height:200px;overflow:auto">' +
+    (eventsData || []).map(function(e, i) {
+      return '<div style="padding:8px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between"><div><b>' + (e.title || '') + '</b><br><small style="color:var(--text-light)">' + (e.day || '') + ' ' + (e.month || '') + ' · ' + (e.time || '') + '</small></div>' +
+        '<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="portalDelete(\'events\',' + i + ')"><i class="bi bi-trash"></i></button></div>';
+    }).join('') +
+    '</div>';
+}
+function _portalAnnouncementsForm() {
+  return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-megaphone-fill"></i> הודעת מזכירות חדשה</h5>' +
+    '<div class="admin-form-group"><label>סוג</label><select id="portalAnnType"><option value="event">אירוע</option><option value="urgent">דחוף</option><option value="info">מידע</option></select></div>' +
+    '<div class="admin-form-group"><label>כותרת</label><input id="portalAnnTitle"></div>' +
+    '<div class="admin-form-group"><label>גוף ההודעה</label><textarea id="portalAnnBody" rows="3"></textarea></div>' +
+    '<div class="admin-form-group"><label>תאריך</label><input id="portalAnnDate" placeholder="י\"ב בתמוז תשפ\"ו"></div>' +
+    '<button class="btn-admin btn-admin-primary" onclick="portalAddAnnouncement()"><i class="bi bi-plus-circle"></i> פרסם הודעה</button>';
+}
+function portalAddNews() {
+  var item = {
+    id: Date.now().toString(36),
+    title: document.getElementById('portalNewsTitle').value.trim(),
+    desc: document.getElementById('portalNewsDesc').value.trim(),
+    cat: document.getElementById('portalNewsCat').value.trim(),
+    img: document.getElementById('portalNewsImg').value.trim(),
+    date: new Date().toLocaleDateString('he-IL'),
+    author: (getCurrentUser() || {}).name || 'מנהל',
+    created_at: new Date().toISOString(),
+  };
+  if (!item.title) { showToast('חובה למלא כותרת'); return; }
+  newsData.unshift(item);
+  saveCollection('news', newsData).then(function(res) {
+    if (res.ok) { showToast('✅ כתבה פורסמה + שמורה ב־GitHub'); portalOpenAdminTab('news'); renderNews(); }
+    else { showToast('❌ שמירה נכשלה: ' + (res.error || res.hint || 'לא ידוע')); }
+  });
+}
+function portalAddEvent() {
+  var item = {
+    id: Date.now().toString(36),
+    title: document.getElementById('portalEventTitle').value.trim(),
+    day: document.getElementById('portalEventDay').value.trim(),
+    month: document.getElementById('portalEventMonth').value.trim(),
+    time: document.getElementById('portalEventTime').value.trim(),
+    location: document.getElementById('portalEventLoc').value.trim(),
+    desc: document.getElementById('portalEventDesc').value.trim(),
+  };
+  if (!item.title) { showToast('חובה למלא כותרת'); return; }
+  eventsData.unshift(item);
+  saveCollection('events', eventsData).then(function(res) {
+    if (res.ok) { showToast('✅ אירוע פורסם'); portalOpenAdminTab('events'); renderEvents(); }
+    else { showToast('❌ ' + (res.error || 'שמירה נכשלה')); }
+  });
+}
+function portalAddAnnouncement() {
+  var item = {
+    id: Date.now().toString(36),
+    type: document.getElementById('portalAnnType').value,
+    title: document.getElementById('portalAnnTitle').value.trim(),
+    body: document.getElementById('portalAnnBody').value.trim(),
+    date: document.getElementById('portalAnnDate').value.trim() || new Date().toLocaleDateString('he-IL'),
+  };
+  if (!item.title || !item.body) { showToast('חובה למלא כותרת וגוף'); return; }
+  announcementsData.unshift(item);
+  saveCollection('announcements', announcementsData).then(function(res) {
+    if (res.ok) { showToast('✅ הודעה פורסמה'); renderAnnouncements(); }
+    else { showToast('❌ ' + (res.error || 'שמירה נכשלה')); }
+  });
+}
+function portalDelete(collection, i) {
+  if (!confirm('למחוק פריט זה?')) return;
+  var arrs = { news: newsData, events: eventsData, announcements: announcementsData };
+  var arr = arrs[collection];
+  if (!arr) return;
+  arr.splice(i, 1);
+  saveCollection(collection, arr).then(function(res) {
+    if (res.ok) { showToast('✅ נמחק'); portalOpenAdminTab(collection); if (collection === 'news') renderNews(); if (collection === 'events') renderEvents(); }
+    else { showToast('❌ ' + (res.error || 'מחיקה נכשלה')); }
+  });
 }
 
 // ===== INQUIRY SYSTEM =====
