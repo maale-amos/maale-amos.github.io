@@ -1521,9 +1521,10 @@ body.dark .phone-item { background: #16213e; }
 <!-- ===== HERO ===== -->
 <section class="hero" id="home" aria-label="ברוכים הבאים למעלה עמוס">
   <div class="hero-slides">
-    <div class="hero-slide active" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg/1280px-Photo_6554053_DJI_453_jpg_4082353_0_2020111315058_photo_original.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/5/5c/Ma%27ale_Amos.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Gush_Etzion_vinyard.jpg/1280px-Gush_Etzion_vinyard.jpg')"></div>
+    <div class="hero-slide active" style="background-image:url('images/hero_landscape.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/hero_library.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/hero_04.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('images/hero_05.jpg')"></div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-particles" id="heroParticles"></div>
@@ -1590,23 +1591,52 @@ body.dark .phone-item { background: #16213e; }
 </div>
 
 <!-- ===== ANNOUNCEMENTS — הודעות המזכירות ===== -->
-<section class="section" id="featured-poster" aria-labelledby="featuredPosterTitle" style="padding-top:32px;padding-bottom:32px">
+<!-- v3.2: HOT BULLETINS — prominent card grid, admin-managed (data/bulletins.json) -->
+<section class="section" id="hot-bulletins" aria-labelledby="hotBulletinsTitle" style="padding-top:28px;padding-bottom:8px;background:linear-gradient(180deg,#fff4e6 0%,transparent 100%)">
   <div class="container">
-    <div class="section-header fade-up">
-      <h2 id="featuredPosterTitle"><i class="bi bi-book-half" aria-hidden="true"></i> תלמוד תורה — זמני הלימודים תשפ"ז</h2>
-      <div class="section-line"></div>
-      <p>לוח זמני הלימודים לשנת הלימודים הבעלט — לוח יומי מלא</p>
+    <div class="section-header fade-up" style="margin-bottom:20px">
+      <h2 id="hotBulletinsTitle" style="color:#c2410c"><span style="display:inline-block;background:#dc2626;color:#fff;padding:2px 12px;border-radius:20px;font-size:0.7em;vertical-align:middle;margin-left:10px;animation:pulse 2s infinite">🔴 חם</span>מבזקים חמים מהישוב</h2>
+      <div class="section-line" style="background:linear-gradient(90deg,#dc2626,#f59e0b)"></div>
     </div>
-    <div class="fade-up" style="max-width:720px;margin:0 auto;background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);overflow:hidden">
-      <a href="images/zmanei_limudim_5787.png" target="_blank" rel="noopener" aria-label="פתח את פוסטר זמני הלימודים בגודל מלא">
-        <img src="images/zmanei_limudim_5787.png" alt="לוח זמני הלימודים תלמוד תורה מעלה עמוס תשפ&quot;ז" style="width:100%;height:auto;display:block">
-      </a>
-      <div style="padding:16px 20px;text-align:center;background:var(--sand);font-size:0.9rem;color:var(--text-light)">
-        <i class="bi bi-download"></i> לחצו על הפוסטר להורדה / הדפסה
-      </div>
-    </div>
+    <div id="hotBulletinsGrid" class="fade-up" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+    <div id="hotBulletinsEmpty" style="display:none;text-align:center;padding:20px;color:var(--text-light);font-style:italic">אין מבזקים כרגע — יופיעו כאן ברגע שהמזכירות תוסיף</div>
   </div>
 </section>
+
+<!-- v3.2: FEATURED (posters/announcements) — admin-managed (data/featured.json) -->
+<section class="section" id="featured" aria-labelledby="featuredTitle" style="padding-top:24px;padding-bottom:24px">
+  <div class="container">
+    <div id="featuredItems" class="fade-up"></div>
+  </div>
+</section>
+
+<style>
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.hot-bulletin-card {
+  background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 4px 16px rgba(220,38,38,.08);
+  border: 2px solid transparent; transition: var(--transition); cursor: pointer; position: relative;
+  border-inline-start: 4px solid #dc2626;
+}
+.hot-bulletin-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(220,38,38,.18); border-color: #fca5a5; }
+.hot-bulletin-card.urgent { border-inline-start-color: #dc2626; background: linear-gradient(135deg,#fef2f2,#fff); }
+.hot-bulletin-card.info { border-inline-start-color: #0891b2; background: linear-gradient(135deg,#ecfeff,#fff); }
+.hot-bulletin-card.event { border-inline-start-color: #16a34a; background: linear-gradient(135deg,#f0fdf4,#fff); }
+.hot-bulletin-card .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-bottom: 8px; }
+.hot-bulletin-card .badge.urgent { background: #dc2626; color: #fff; }
+.hot-bulletin-card .badge.info { background: #0891b2; color: #fff; }
+.hot-bulletin-card .badge.event { background: #16a34a; color: #fff; }
+.hot-bulletin-card h4 { font-weight: 800; font-size: 1.05rem; margin: 4px 0 8px; color: var(--primary-dark); line-height: 1.4; }
+.hot-bulletin-card p { font-size: 0.9rem; color: var(--text); line-height: 1.5; margin: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.hot-bulletin-card .ts { font-size: 0.72rem; color: var(--text-light); margin-top: 10px; }
+.featured-item {
+  max-width: 720px; margin: 0 auto 24px; background: #fff; border-radius: var(--radius);
+  box-shadow: var(--card-shadow); overflow: hidden; border: 1px solid rgba(0,0,0,.05);
+}
+.featured-item .featured-hero { display: block; width: 100%; height: auto; }
+.featured-item .featured-body { padding: 16px 22px; text-align: center; background: var(--sand); }
+.featured-item .featured-title { font-weight: 800; font-size: 1.1rem; margin: 0 0 4px; color: var(--primary-dark); }
+.featured-item .featured-subtitle { font-size: 0.88rem; color: var(--text-light); margin: 0; }
+</style>
 
 <section class="section" id="announcements" aria-labelledby="announcementsTitle">
   <div class="container">
@@ -2406,7 +2436,8 @@ body.dark .phone-item { background: #16213e; }
           <button class="btn-admin btn-admin-primary" onclick="portalOpenAdminTab('news')"><i class="bi bi-newspaper"></i> חדשות</button>
           <button class="btn-admin" style="background:#0891b2;color:#fff" onclick="portalOpenAdminTab('events')"><i class="bi bi-calendar3"></i> אירועים</button>
           <button class="btn-admin" style="background:#7c3aed;color:#fff" onclick="portalOpenAdminTab('announcements')"><i class="bi bi-megaphone-fill"></i> הודעות</button>
-          <button class="btn-admin" style="background:#6c757d;color:#fff" onclick="portalOpenAdminTab('all')"><i class="bi bi-list-ul"></i> פאנל מלא</button>
+          <button class="btn-admin" style="background:#dc2626;color:#fff" onclick="portalOpenAdminTab('bulletins')"><i class="bi bi-fire"></i> מבזקים חמים</button>
+          <button class="btn-admin" style="background:#c2410c;color:#fff" onclick="portalOpenAdminTab('featured')"><i class="bi bi-star-fill"></i> באנרים/פוסטרים</button>
         </div>
         <div id="portalAdminEmbed" style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#f9fafb"></div>
       </div>
@@ -3252,6 +3283,8 @@ var marketData = [];
 var simchotData = [];
 var gemachimData = [];
 var tickerData = [];
+var featuredData = [];   // v3.2: managed posters (data/featured.json)
+var bulletinsData = [];  // v3.2: hot bulletins (data/bulletins.json)
 var residentsData = getData('residents', []);
 var ADMIN_CODE_KEY = 'ma_admin_code';
 var DEFAULT_ADMIN_CODE = '8484';
@@ -3293,7 +3326,7 @@ function ghReadJson(name) {
 function ghReadAll() {
   return ghReadJson('all.json').catch(function() {
     // Fallback: read each individual file
-    var files = ['news', 'events', 'announcements', 'residents', 'market', 'simchot', 'gemachim', 'ticker'];
+    var files = ['news', 'events', 'announcements', 'residents', 'market', 'simchot', 'gemachim', 'ticker', 'featured', 'bulletins'];
     return Promise.all(files.map(function(f) {
       return ghReadJson(f + '.json').catch(function() { return []; });
     })).then(function(results) {
@@ -3618,6 +3651,8 @@ function loadGlobalData() {
       simchotData = b.simchot || [];
       gemachimData = b.gemachim || [];
       tickerData = b.ticker || [];
+      featuredData = b.featured || [];
+      bulletinsData = b.bulletins || [];
       renderAll();
       // Also refresh from Sheets in background to catch out-of-band edits, but
       // don't clobber GitHub-primary state on failure.
@@ -5026,10 +5061,85 @@ openAdmin = function() {
 
 function renderAll() {
   renderNews(); renderEvents(); renderMarket(); renderSimchot(); renderGemachim(); renderTicker(); renderAnnouncements();
+  renderHotBulletins(); renderFeatured();
   hideEmptyBanners();
   if (typeof observeFadeUp === 'function') setTimeout(observeFadeUp, 100);
-  // Rebuild search index after dynamic content
   setTimeout(buildSearchIndex, 200);
+}
+
+// v3.2: Hot bulletins renderer — professional card grid, NOT a scroll ticker
+function renderHotBulletins() {
+  var grid = document.getElementById('hotBulletinsGrid');
+  var empty = document.getElementById('hotBulletinsEmpty');
+  var section = document.getElementById('hot-bulletins');
+  if (!grid) return;
+  var items = (bulletinsData || []).filter(function(b) {
+    if (!b.expires) return true;
+    return new Date(b.expires).getTime() > Date.now();
+  }).sort(function(a, b) { return (b.priority || 0) - (a.priority || 0); });
+  if (items.length === 0) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    if (section && !hasRole('admin') && !hasRole('editor')) section.style.display = 'none';
+    return;
+  }
+  if (section) section.style.display = '';
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = items.map(function(b) {
+    var type = b.type || 'info';
+    var typeLabel = type === 'urgent' ? '🔴 דחוף' : type === 'event' ? '📅 אירוע' : type === 'info' ? 'ℹ️ מידע' : type;
+    var ts = b.created_at ? _relativeTime(b.created_at) : '';
+    return '<div class="hot-bulletin-card ' + escapeHtml(type) + '" onclick="openBulletin(\'' + escapeHtml(b.id) + '\')">' +
+      '<span class="badge ' + escapeHtml(type) + '">' + typeLabel + '</span>' +
+      '<h4>' + escapeHtml(b.title || '') + '</h4>' +
+      '<p>' + escapeHtml(b.body || '') + '</p>' +
+      (ts ? '<div class="ts"><i class="bi bi-clock"></i> ' + ts + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+function _relativeTime(iso) {
+  var d = new Date(iso).getTime(); if (isNaN(d)) return '';
+  var diff = Math.floor((Date.now() - d) / 1000);
+  if (diff < 60) return 'לפני רגע';
+  if (diff < 3600) return 'לפני ' + Math.floor(diff / 60) + ' דק\'';
+  if (diff < 86400) return 'לפני ' + Math.floor(diff / 3600) + ' שעות';
+  if (diff < 604800) return 'לפני ' + Math.floor(diff / 86400) + ' ימים';
+  return new Date(iso).toLocaleDateString('he-IL');
+}
+function openBulletin(id) {
+  var b = (bulletinsData || []).find(function(x) { return x.id === id; });
+  if (!b) return;
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow:auto;padding:32px;position:relative">' +
+    '<button style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:2rem;cursor:pointer;color:var(--text-light)" onclick="this.closest(\'div[style*=fixed]\').remove()">×</button>' +
+    '<span class="badge ' + escapeHtml(b.type || 'info') + '" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;color:#fff;background:' + (b.type === 'urgent' ? '#dc2626' : b.type === 'event' ? '#16a34a' : '#0891b2') + ';margin-bottom:12px">' + (b.type === 'urgent' ? '🔴 דחוף' : b.type === 'event' ? '📅 אירוע' : 'ℹ️ מידע') + '</span>' +
+    '<h3 style="font-weight:800;margin-bottom:12px;color:var(--primary-dark)">' + escapeHtml(b.title || '') + '</h3>' +
+    '<div style="line-height:1.7;color:var(--text)">' + (b.body_html || escapeHtml(b.body || '').replace(/\n/g, '<br>')) + '</div>' +
+    (b.link ? '<a href="' + escapeHtml(b.link) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:16px;background:var(--primary);color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none"><i class="bi bi-box-arrow-up-right"></i> קישור נוסף</a>' : '') +
+    '</div>';
+  document.body.appendChild(modal);
+  maTrack('bulletin_open', { section: id });
+}
+
+// v3.2: Featured items renderer (posters, hero images)
+function renderFeatured() {
+  var el = document.getElementById('featuredItems');
+  var section = document.getElementById('featured');
+  if (!el) return;
+  var items = (featuredData || []).sort(function(a, b) { return (b.priority || 0) - (a.priority || 0); });
+  if (items.length === 0) {
+    el.innerHTML = '';
+    if (section && !hasRole('admin') && !hasRole('editor')) section.style.display = 'none';
+    return;
+  }
+  if (section) section.style.display = '';
+  el.innerHTML = items.map(function(f) {
+    var title = f.title ? '<div class="featured-body"><div class="featured-title">' + escapeHtml(f.title) + '</div>' + (f.subtitle ? '<div class="featured-subtitle">' + escapeHtml(f.subtitle) + '</div>' : '') + '</div>' : '';
+    var img = f.img ? '<a href="' + escapeHtml(f.img) + '" target="_blank" rel="noopener"><img class="featured-hero" src="' + escapeHtml(f.img) + '" alt="' + escapeHtml(f.title || '') + '"></a>' : '';
+    return '<div class="featured-item">' + img + title + '</div>';
+  }).join('');
 }
 
 // Hide sections whose banner grids are empty (no data populated yet)
@@ -5518,6 +5628,141 @@ function portalOpenAdminTab(tab) {
   if (tab === 'news') el.innerHTML = _portalNewsForm();
   if (tab === 'events') el.innerHTML = _portalEventsForm();
   if (tab === 'announcements') el.innerHTML = _portalAnnouncementsForm();
+  if (tab === 'bulletins') el.innerHTML = _portalBulletinsForm();
+  if (tab === 'featured') el.innerHTML = _portalFeaturedForm();
+}
+// v3.2: HOT BULLETINS admin form
+function _portalBulletinsForm() {
+  return '<h5 style="font-weight:800;margin-bottom:12px;color:#dc2626"><i class="bi bi-fire"></i> מבזק חם חדש</h5>' +
+    '<p style="font-size:0.85rem;color:var(--text-light);margin-bottom:12px">מבזקים מופיעים בכרטיסים בולטים בראש האתר. השתמש לעדכונים דחופים / אירועים / הודעות.</p>' +
+    '<div class="admin-form-group"><label>סוג</label>' +
+      '<select id="portalBullType"><option value="urgent">🔴 דחוף</option><option value="info" selected>ℹ️ מידע</option><option value="event">📅 אירוע</option></select>' +
+    '</div>' +
+    '<div class="admin-form-group"><label>כותרת</label><input id="portalBullTitle" placeholder="למשל: פתיחת הרשמה — נותרו מקומות"></div>' +
+    '<div class="admin-form-group"><label>גוף (טקסט קצר, 2-4 שורות)</label><textarea id="portalBullBody" rows="3" placeholder="פרטים..."></textarea></div>' +
+    '<div class="admin-form-group"><label>קישור נוסף (אופציונלי)</label><input id="portalBullLink" placeholder="https://..."></div>' +
+    '<div class="admin-form-group"><label>עדיפות (מספר גבוה = מופיע ראשון)</label><input id="portalBullPriority" type="number" value="5" style="width:100px"></div>' +
+    '<div class="admin-form-group"><label>פג תוקף בתאריך (אופציונלי — יעלם אוטומטית)</label><input id="portalBullExpires" type="date"></div>' +
+    '<button class="btn-admin btn-admin-primary" onclick="portalAddBulletin()"><i class="bi bi-plus-circle"></i> פרסם מבזק</button>' +
+    '<hr style="margin:20px 0"><h6 style="font-weight:700"><i class="bi bi-list"></i> מבזקים קיימים (' + (bulletinsData || []).length + ')</h6>' +
+    '<div style="max-height:300px;overflow:auto">' +
+    (bulletinsData || []).map(function(b, i) {
+      var typeLabel = b.type === 'urgent' ? '🔴' : b.type === 'event' ? '📅' : 'ℹ️';
+      return '<div style="padding:10px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:start">' +
+        '<div style="flex:1"><b>' + typeLabel + ' ' + escapeHtml(b.title || '') + '</b><br><small style="color:var(--text-light)">' + escapeHtml((b.body || '').slice(0, 80)) + '...</small></div>' +
+        '<div style="display:flex;gap:4px">' +
+          '<button class="btn-admin btn-admin-sm" style="background:#0891b2;color:#fff" onclick="portalEditBulletin(\'' + escapeHtml(b.id) + '\')"><i class="bi bi-pencil"></i></button>' +
+          '<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="portalDelete(\'bulletins\',' + i + ')"><i class="bi bi-trash"></i></button>' +
+        '</div></div>';
+    }).join('') || '<div style="color:var(--text-light);padding:20px;text-align:center">אין מבזקים עדיין</div>' +
+    '</div>';
+}
+// v3.2: FEATURED (posters) admin form — with image upload
+function _portalFeaturedForm() {
+  return '<h5 style="font-weight:800;margin-bottom:12px;color:#c2410c"><i class="bi bi-star-fill"></i> באנר/פוסטר חדש</h5>' +
+    '<p style="font-size:0.85rem;color:var(--text-light);margin-bottom:12px">באנרים גדולים מוצגים באמצע הדף — פרסום מודעה גדולה, פוסטר, לוח זמנים וכו\'.</p>' +
+    '<div class="admin-form-group"><label>כותרת</label><input id="portalFeatTitle" placeholder="לדוגמה: זמני הלימודים תשפ״ז"></div>' +
+    '<div class="admin-form-group"><label>תת-כותרת</label><input id="portalFeatSubtitle" placeholder="תיאור קצר (אופציונלי)"></div>' +
+    '<div class="admin-form-group"><label>העלאת תמונה</label>' +
+      '<input type="file" id="portalFeatFile" accept="image/*" onchange="portalHandleFeatImage(this)">' +
+      '<div id="portalFeatPreview" style="margin-top:10px"></div>' +
+      '<input type="hidden" id="portalFeatImg">' +
+      '<p style="font-size:0.75rem;color:var(--text-light);margin-top:6px"><i class="bi bi-info-circle"></i> התמונה נשמרת בתיקיית images/ ב־GitHub (פורמט מומלץ: JPG/PNG עד 2MB).</p>' +
+    '</div>' +
+    '<div class="admin-form-group"><label>עדיפות (מספר גבוה = ראשון)</label><input id="portalFeatPriority" type="number" value="5" style="width:100px"></div>' +
+    '<button class="btn-admin btn-admin-primary" onclick="portalAddFeatured()"><i class="bi bi-plus-circle"></i> פרסם באנר</button>' +
+    '<hr style="margin:20px 0"><h6 style="font-weight:700"><i class="bi bi-list"></i> באנרים קיימים (' + (featuredData || []).length + ')</h6>' +
+    '<div style="max-height:400px;overflow:auto">' +
+    (featuredData || []).map(function(f, i) {
+      return '<div style="padding:10px;border-bottom:1px solid #e5e7eb;display:flex;gap:12px;align-items:start">' +
+        (f.img ? '<img src="' + escapeHtml(f.img) + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0">' : '<div style="width:80px;height:80px;background:#f3f4f6;border-radius:8px"></div>') +
+        '<div style="flex:1"><b>' + escapeHtml(f.title || '(ללא כותרת)') + '</b><br><small style="color:var(--text-light)">' + escapeHtml(f.subtitle || '') + '</small><br><small style="color:var(--text-light)">עדיפות: ' + (f.priority || 0) + '</small></div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px">' +
+          '<button class="btn-admin btn-admin-sm" style="background:#0891b2;color:#fff" onclick="portalEditFeatured(\'' + escapeHtml(f.id) + '\')"><i class="bi bi-pencil"></i></button>' +
+          '<button class="btn-admin btn-admin-danger btn-admin-sm" onclick="portalDelete(\'featured\',' + i + ')"><i class="bi bi-trash"></i></button>' +
+        '</div></div>';
+    }).join('') || '<div style="color:var(--text-light);padding:20px;text-align:center">אין באנרים עדיין</div>' +
+    '</div>';
+}
+function portalHandleFeatImage(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('קובץ גדול מדי (מקסימום 5MB)'); return; }
+  var preview = document.getElementById('portalFeatPreview');
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:200px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1)"><br><small style="color:var(--text-light)">' + escapeHtml(file.name) + ' · ' + (file.size / 1024).toFixed(0) + ' KB</small>';
+    document.getElementById('portalFeatImg').value = e.target.result;   // temp: use data URL
+  };
+  reader.readAsDataURL(file);
+  showToast('תמונה תיטען עם הפרסום...');
+}
+function portalAddBulletin() {
+  var item = {
+    id: 'bull_' + Date.now().toString(36),
+    type: document.getElementById('portalBullType').value,
+    title: document.getElementById('portalBullTitle').value.trim(),
+    body: document.getElementById('portalBullBody').value.trim(),
+    link: document.getElementById('portalBullLink').value.trim(),
+    priority: parseInt(document.getElementById('portalBullPriority').value, 10) || 5,
+    created_at: new Date().toISOString(),
+    author: (getCurrentUser() || {}).name || 'מנהל',
+  };
+  var exp = document.getElementById('portalBullExpires').value;
+  if (exp) item.expires = new Date(exp).toISOString();
+  if (!item.title) { showToast('חובה למלא כותרת'); return; }
+  bulletinsData.unshift(item);
+  saveCollection('bulletins', bulletinsData).then(function(res) {
+    if (res.ok) {
+      showToast('🔥 מבזק פורסם');
+      renderHotBulletins();
+      portalOpenAdminTab('bulletins');
+    } else { showToast('❌ ' + (res.error || res.hint || 'שגיאה')); }
+  });
+}
+function portalEditBulletin(id) {
+  var b = bulletinsData.find(function(x) { return x.id === id; });
+  if (!b) return;
+  var newTitle = prompt('כותרת חדשה:', b.title);
+  if (newTitle === null) return;
+  var newBody = prompt('גוף חדש:', b.body);
+  if (newBody === null) return;
+  b.title = newTitle; b.body = newBody; b.updated_at = new Date().toISOString();
+  saveCollection('bulletins', bulletinsData).then(function(res) {
+    if (res.ok) { showToast('✅ עודכן'); renderHotBulletins(); portalOpenAdminTab('bulletins'); }
+    else { showToast('❌ שגיאה'); }
+  });
+}
+function portalAddFeatured() {
+  var item = {
+    id: 'feat_' + Date.now().toString(36),
+    title: document.getElementById('portalFeatTitle').value.trim(),
+    subtitle: document.getElementById('portalFeatSubtitle').value.trim(),
+    img: document.getElementById('portalFeatImg').value,
+    priority: parseInt(document.getElementById('portalFeatPriority').value, 10) || 5,
+    created_at: new Date().toISOString(),
+  };
+  if (!item.title && !item.img) { showToast('חובה למלא כותרת או תמונה'); return; }
+  featuredData.unshift(item);
+  saveCollection('featured', featuredData).then(function(res) {
+    if (res.ok) {
+      showToast('⭐ באנר פורסם');
+      renderFeatured();
+      portalOpenAdminTab('featured');
+    } else { showToast('❌ ' + (res.error || 'שגיאה')); }
+  });
+}
+function portalEditFeatured(id) {
+  var f = featuredData.find(function(x) { return x.id === id; });
+  if (!f) return;
+  var newTitle = prompt('כותרת חדשה:', f.title || '');
+  if (newTitle === null) return;
+  var newSubtitle = prompt('תת-כותרת חדשה:', f.subtitle || '');
+  if (newSubtitle === null) return;
+  f.title = newTitle; f.subtitle = newSubtitle; f.updated_at = new Date().toISOString();
+  saveCollection('featured', featuredData).then(function(res) {
+    if (res.ok) { showToast('✅ עודכן'); renderFeatured(); portalOpenAdminTab('featured'); }
+    else { showToast('❌ שגיאה'); }
+  });
 }
 function _portalNewsForm() {
   return '<h5 style="font-weight:800;margin-bottom:12px"><i class="bi bi-newspaper"></i> כתבה חדשה</h5>' +
@@ -5611,13 +5856,19 @@ function portalAddAnnouncement() {
 }
 function portalDelete(collection, i) {
   if (!confirm('למחוק פריט זה?')) return;
-  var arrs = { news: newsData, events: eventsData, announcements: announcementsData };
+  var arrs = { news: newsData, events: eventsData, announcements: announcementsData, bulletins: bulletinsData, featured: featuredData };
   var arr = arrs[collection];
   if (!arr) return;
   arr.splice(i, 1);
   saveCollection(collection, arr).then(function(res) {
-    if (res.ok) { showToast('✅ נמחק'); portalOpenAdminTab(collection); if (collection === 'news') renderNews(); if (collection === 'events') renderEvents(); }
-    else { showToast('❌ ' + (res.error || 'מחיקה נכשלה')); }
+    if (res.ok) {
+      showToast('✅ נמחק'); portalOpenAdminTab(collection);
+      if (collection === 'news') renderNews();
+      if (collection === 'events') renderEvents();
+      if (collection === 'announcements') renderAnnouncements();
+      if (collection === 'bulletins') renderHotBulletins();
+      if (collection === 'featured') renderFeatured();
+    } else { showToast('❌ ' + (res.error || 'מחיקה נכשלה')); }
   });
 }
 
