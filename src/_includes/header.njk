@@ -1,0 +1,15 @@
+<header class="site-header" role="banner">
+  <div class="container">
+    <a href="/" class="brand" aria-label="עמוד הבית">
+      <span class="brand-name">{{ site.name }}</span>
+      <span class="brand-tag">{{ site.tagline }}</span>
+    </a>
+    <nav class="main-nav" aria-label="תפריט ראשי">
+      <ul>
+        {% for item in nav.items %}
+        <li><a href="{{ item.url }}"><i class="bi {{ item.icon }}" aria-hidden="true"></i> {{ item.label }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,17 @@
+{
+  "id": "services",
+  "title": "שירותים מהירים",
+  "subtitle": "",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#services",
+  "items": [
+    { "name": "פנייה מקוונת", "description": "שליחת פנייה למזכירות", "url": "/contact/", "icon": "bi-envelope-paper", "color": "green" },
+    { "name": "ביטחון", "description": "דיווח מפגע או חירום", "url": "/security/", "icon": "bi-shield-exclamation", "color": "red" },
+    { "name": "דיור ובנייה", "description": "פרויקטים ושכונות", "url": "/housing/", "icon": "bi-house-door", "color": "blue" },
+    { "name": "חינוך", "description": "מוסדות וגנים", "url": "/education/", "icon": "bi-mortarboard", "color": "purple" },
+    { "name": "אירועים", "description": "לוח אירועים קהילתי", "url": "/events/", "icon": "bi-calendar-event", "color": "orange" },
+    { "name": "עסקים", "description": "מודעות ושירותים", "url": "/marketplace/", "icon": "bi-shop", "color": "gold" },
+    { "name": "גמ\"חים", "description": "רשת חסד קהילתית", "url": "/gemachim/", "icon": "bi-heart", "color": "teal" },
+    { "name": "אזור תושבים", "description": "כניסה מאובטחת", "url": "/residents/", "icon": "bi-person-badge", "color": "pink" }
+  ]
+}

@@ -1,0 +1,22 @@
+---
+layout: base.njk
+title: אודות הישוב
+description: אודות ישוב מעלה עמוס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ content.about.title }}</h1>
+    <h2>{{ content.about.subtitle }}</h2>
+    {% for p in content.about.paragraphs %}
+      <p>{{ p }}</p>
+    {% endfor %}
+    <div class="stats">
+      {% for s in content.about.stats %}
+      <div class="stat" data-status="{{ s.status }}">
+        <div class="num">{{ s.num }}</div>
+        <div class="label">{{ s.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

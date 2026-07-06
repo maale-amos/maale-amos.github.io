@@ -1,0 +1,15 @@
+{
+  "id": "links",
+  "title": "קישורים שימושיים",
+  "subtitle": "",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#links",
+  "items": [
+    { "name": "מועצת גוש עציון", "description": "המועצה האזורית", "url": "https://www.gush-etzion.org.il", "icon": "bi-building", "color": "green", "external": true },
+    { "name": "קופת הקהילה", "description": "העמותה לפיתוח מעלה עמוס", "url": "https://maaleamos.co.il", "icon": "bi-heart", "color": "gold", "external": true },
+    { "name": "תחבורה ציבורית", "description": "הסעות יומיות לירושלים", "url": "/buses/", "icon": "bi-bus-front", "color": "purple" },
+    { "name": "זמני שבת", "description": "כניסת ויציאת שבת", "url": "/shabbat/", "icon": "bi-brightness-high", "color": "orange" },
+    { "name": "מידע חירום", "description": "מקלטים ציבוריים וכוננות חירום", "url": "/emergency/", "icon": "bi-shield-check", "color": "red" },
+    { "name": "לוח שמחות", "description": "מזל טוב!", "url": "/simchot/", "icon": "bi-stars", "color": "pink" }
+  ]
+}
