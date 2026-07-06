@@ -12,11 +12,26 @@ function otp6() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-async function sendOTPviaYemot(env, phone, code) {
+// Yemot SMS — for phones that accept text messages
+async function sendOTPviaSMS(env, phone, code) {
   const url = 'https://www.call2all.co.il/ym/api/RunCampaign' +
     `?token=${env.YEMOT_USER}:${env.YEMOT_PASS}` +
     `&templateId=SMSTemplate&phoneNumbers=${encodeURIComponent(phone)}` +
     `&smsText=${encodeURIComponent(`קוד גישה לאתר מעלה עמוס: ${code} (בתוקף 5 דקות)`)}`;
+  const res = await fetch(url);
+  return res.ok;
+}
+
+// Yemot voice call TTS — for kosher phones (no SMS). Yemot dials phone and
+// reads code with 3s pauses. Falls back to Israeli feminine voice.
+async function sendOTPviaVoice(env, phone, code) {
+  const digits = code.split('').join(' ');   // "123456" → "1 2 3 4 5 6" for clarity
+  const say = `קוד הגישה שלך לאתר מעלה עמוס הוא: ${digits}. אני חוזרת: ${digits}. הקוד בתוקף חמש דקות. שלום.`;
+  const url = 'https://www.call2all.co.il/ym/api/RunCampaign' +
+    `?token=${env.YEMOT_USER}:${env.YEMOT_PASS}` +
+    `&templateId=OutgoingCallTemplate&phoneNumbers=${encodeURIComponent(phone)}` +
+    `&ttsText=${encodeURIComponent(say)}` +
+    `&ttsVoice=Sivan_Neural`;
   const res = await fetch(url);
   return res.ok;
 }
@@ -42,15 +57,22 @@ export async function handleAuth(request, env, path) {
     const phone = normPhone(body.phone);
     if (!phone) return error(400, 'bad_phone', env);
 
+    // deliver: 'sms' (default) or 'voice' for kosher phones without SMS
+    const deliver = body.deliver === 'voice' ? 'voice' : 'sms';
+
     const row = await env.DB.prepare('SELECT id, active FROM residents WHERE phone = ?')
       .bind(phone).first();
     if (!row || !row.active) return error(403, 'not_registered', env);
 
     const code = otp6();
     await env.OTP.put(phone, code, { expirationTtl: Number(env.OTP_TTL_SECONDS) });
-    const sent = await sendOTPviaYemot(env, phone, code);
-    if (!sent) return error(502, 'sms_failed', env);
-    return json({ ok: true, expiresIn: Number(env.OTP_TTL_SECONDS) }, env);
+
+    const sent = deliver === 'voice'
+      ? await sendOTPviaVoice(env, phone, code)
+      : await sendOTPviaSMS(env, phone, code);
+    if (!sent) return error(502, `${deliver}_failed`, env);
+
+    return json({ ok: true, deliver, expiresIn: Number(env.OTP_TTL_SECONDS) }, env);
   }
 
   if (path === '/api/auth/verify') {
