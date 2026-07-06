@@ -159,8 +159,8 @@
     if (MODE === 'live') {
       try { const r = await api(`/api/content/${id}`); if (r.data) return r.data; } catch {}
     }
-    // 3) shipped source of truth
-    return await fetch(`/data/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
+    // 3) shipped source of truth — sections config lives under /data/sections/
+    return await fetch(`/data/sections/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
   }
 
   async function bindContentPicker() {
