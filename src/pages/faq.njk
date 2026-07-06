@@ -5,9 +5,9 @@ description: שאלות ותשובות על מעלה עמוס
 ---
 <section class="page-content">
   <div class="container">
-    <h1>{{ content.faq.title }}</h1>
+    <h1>{{ sections.faq.title }}</h1>
     <div class="faq-list">
-      {% for item in content.faq.items %}
+      {% for item in sections.faq.items %}
       <details class="faq-item">
         <summary>{{ item.q }}</summary>
         <div class="faq-answer">

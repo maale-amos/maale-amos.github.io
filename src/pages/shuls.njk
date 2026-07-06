@@ -5,10 +5,10 @@ description: בתי כנסת ומניינים במעלה עמוס
 ---
 <section class="page-content">
   <div class="container">
-    <h1>{{ content.shuls.title }}</h1>
-    <p>{{ content.shuls.subtitle }}</p>
+    <h1>{{ sections.shuls.title }}</h1>
+    <p>{{ sections.shuls.subtitle }}</p>
     <div class="cards">
-      {% for s in content.shuls.items %}
+      {% for s in sections.shuls.items %}
       <article class="shul-card" style="border-right:4px solid {{ s.borderColor }}">
         <i class="bi {{ s.icon }}" style="color:{{ s.iconColor }}" aria-hidden="true"></i>
         <h3>{{ s.name }}</h3>

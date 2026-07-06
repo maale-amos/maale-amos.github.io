@@ -5,24 +5,25 @@ description: מקלטים והנחיות חירום במעלה עמוס
 ---
 <section class="page-content">
   <div class="container">
-    <h1>{{ content.emergency.title }}</h1>
+    <h1>{{ sections.emergency.title }}</h1>
     <div class="alert-box">
       <h3>בזמן אזעקה</h3>
-      <p>היכנסו למרחב מוגן תוך {{ content.emergency.alertInstructions.enterTime }}. הישארו {{ content.emergency.alertInstructions.stayTime }}.</p>
+      <p>היכנסו למרחב מוגן תוך {{ sections.emergency.alertInstructions.enterTime }}. הישארו {{ sections.emergency.alertInstructions.stayTime }}.</p>
     </div>
     <h2>מקלטים</h2>
     <div class="shelter-grid">
-      {% for s in content.emergency.shelters %}
+      {% for s in sections.emergency.shelters %}
       <div class="shelter-card">
         <h4><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ s.name }}</h4>
-        <p>{{ s.location }}{% if s.capacity %}. קיבולת: {{ s.capacity }}{% endif %}{% if s.note %}. {{ s.note }}{% endif %}</p>
+        <p>{{ s.location }}{% if s.note %}. {{ s.note }}{% endif %}</p>
         {% if s.accessibility %}<small>{{ s.accessibility }}</small>{% endif %}
       </div>
       {% endfor %}
     </div>
+    <p><small class="verify-badge">קיבולות מקלטים — בבדיקה</small></p>
     <h2>קווי חירום</h2>
     <ul class="phone-list">
-      {% for line in content.emergency.emergencyLines %}
+      {% for line in sections.emergency.emergencyLines %}
       <li><strong>{{ line.name }}:</strong> <a href="tel:{{ line.phone }}">{{ line.phone }}</a>{% if line.note %} ({{ line.note }}){% endif %}</li>
       {% endfor %}
     </ul>
