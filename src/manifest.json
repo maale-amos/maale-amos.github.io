@@ -1,0 +1,14 @@
+{
+  "name": "מעלה עמוס",
+  "short_name": "מעלה עמוס",
+  "description": "אתר קהילתי לישוב מעלה עמוס בגוש עציון",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a5c3a",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/images/logo_official.jpg", "sizes": "192x192", "type": "image/jpeg" }
+  ]
+}

@@ -1,0 +1,220 @@
+[
+  {
+    "viewport": "desktop",
+    "page": "home",
+    "url": "http://localhost:8080",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 78,
+    "externalLinks": [
+      "tel:0299317670",
+      "https://maaleamos.co.il/",
+      "mailto:maaleiton@gmail.com",
+      "tel:106",
+      "tel:0299317670",
+      "tel:100",
+      "tel:101",
+      "tel:102",
+      "tel:104",
+      "https://moovit.com/"
+    ]
+  },
+  {
+    "viewport": "desktop",
+    "page": "about",
+    "url": "http://localhost:8080/about/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "desktop",
+    "page": "shuls",
+    "url": "http://localhost:8080/shuls/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "desktop",
+    "page": "emergency",
+    "url": "http://localhost:8080/emergency/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 45,
+    "externalLinks": [
+      "tel:106",
+      "tel:101",
+      "tel:102",
+      "tel:100",
+      "tel:104"
+    ]
+  },
+  {
+    "viewport": "desktop",
+    "page": "faq",
+    "url": "http://localhost:8080/faq/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "desktop",
+    "page": "buses",
+    "url": "http://localhost:8080/buses/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 41,
+    "externalLinks": [
+      "tel:02-9931767"
+    ]
+  },
+  {
+    "viewport": "desktop",
+    "page": "residents",
+    "url": "http://localhost:8080/residents/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "desktop",
+    "page": "accessibility",
+    "url": "http://localhost:8080/accessibility/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "desktop",
+    "page": "admin",
+    "url": "http://localhost:8080/admin/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "home",
+    "url": "http://localhost:8080",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 78,
+    "externalLinks": [
+      "tel:0299317670",
+      "https://maaleamos.co.il/",
+      "mailto:maaleiton@gmail.com",
+      "tel:106",
+      "tel:0299317670",
+      "tel:100",
+      "tel:101",
+      "tel:102",
+      "tel:104",
+      "https://moovit.com/"
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "page": "about",
+    "url": "http://localhost:8080/about/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "shuls",
+    "url": "http://localhost:8080/shuls/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "emergency",
+    "url": "http://localhost:8080/emergency/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 45,
+    "externalLinks": [
+      "tel:106",
+      "tel:101",
+      "tel:102",
+      "tel:100",
+      "tel:104"
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "page": "faq",
+    "url": "http://localhost:8080/faq/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "buses",
+    "url": "http://localhost:8080/buses/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 41,
+    "externalLinks": [
+      "tel:02-9931767"
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "page": "residents",
+    "url": "http://localhost:8080/residents/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "accessibility",
+    "url": "http://localhost:8080/accessibility/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  },
+  {
+    "viewport": "mobile",
+    "page": "admin",
+    "url": "http://localhost:8080/admin/",
+    "status": 200,
+    "errors": [],
+    "requests": [],
+    "linksCount": 40,
+    "externalLinks": []
+  }
+]
