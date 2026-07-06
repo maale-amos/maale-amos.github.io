@@ -1451,3 +1451,6 @@ main#mainContent > section:first-child:not(.hero) {
 main#mainContent > .page-content:first-child > .container > h1 {
   scroll-margin-top: 110px;
 }
+
+/* Belt-and-suspenders: prevent any tiny horizontal overflow on mobile */
+html, body { overflow-x: hidden; max-width: 100vw; }
