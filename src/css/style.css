@@ -1442,3 +1442,12 @@ body.dark .phone-item { background: #16213e; }
 /* Reveal all sections — the OLD topic-tab reveal pattern is dropped in v2.
    Every section from sections.json is meant to be visible on scroll. */
 section[data-extra="1"] { display: block !important; }
+
+/* Fix: fixed navbar covers top of sub-page main content */
+main#mainContent > .page-content:first-child,
+main#mainContent > section:first-child:not(.hero) {
+  padding-top: 120px !important;
+}
+main#mainContent > .page-content:first-child > .container > h1 {
+  scroll-margin-top: 110px;
+}
