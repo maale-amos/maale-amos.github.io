@@ -1,5 +1,66 @@
 // main.js — maale-amos public site v2.0 (Eleventy)
 // Zero fabricated defaults. All dynamic content from /data/*.json (owned by admin).
+
+// --- Global inline-handler functions (called from chrome-body onclick attrs) ---
+window.toggleMenu = function () {
+  const menu = document.getElementById('navMenu');
+  const btn  = document.querySelector('.mobile-toggle');
+  if (!menu) return;
+  const open = menu.classList.toggle('open');
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+};
+window.toggleDark = function () {
+  const on = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('ma_dark', on ? '1' : '0'); } catch (_) {}
+};
+window.changeFontSize = function (delta) {
+  const s = document.documentElement.style;
+  const cur = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const next = Math.min(24, Math.max(12, cur + delta * 2));
+  s.fontSize = next + 'px';
+  try { localStorage.setItem('ma_font_px', String(next)); } catch (_) {}
+};
+window.quickCall106 = function () { location.href = 'tel:106'; };
+window.openReportMenu = function () { location.hash = '#security'; };
+window.openContactMenu = function () { location.hash = '#contact'; };
+window.closeActionSheet = function () {
+  const o = document.getElementById('actionSheetOverlay');
+  if (o) o.classList.remove('open');
+};
+window.closeSearch = function () {
+  const sr = document.getElementById('searchResults');
+  if (sr) sr.style.display = 'none';
+};
+window.searchSite = function (q) {
+  q = (q || '').trim();
+  const sr = document.getElementById('searchResults');
+  const body = document.getElementById('searchResultsBody');
+  if (!sr || !body) return;
+  if (!q) { sr.style.display = 'none'; return; }
+  const hits = [];
+  document.querySelectorAll('main section').forEach(sec => {
+    const t = sec.textContent || '';
+    const idx = t.toLowerCase().indexOf(q.toLowerCase());
+    if (idx >= 0) {
+      const h = sec.querySelector('h1,h2,h3');
+      hits.push({ id: sec.id, title: h ? h.textContent.trim() : sec.id, snippet: t.slice(Math.max(0, idx-40), idx+80) });
+    }
+  });
+  body.innerHTML = hits.length
+    ? hits.slice(0, 20).map(h => `<a href="#${h.id}" style="display:block;padding:10px;border-bottom:1px solid #eee;text-decoration:none;color:inherit"><strong>${h.title}</strong><br><small>…${h.snippet}…</small></a>`).join('')
+    : '<p style="padding:12px">אין תוצאות</p>';
+  sr.style.display = 'block';
+};
+
+// Restore prefs on load
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    if (localStorage.getItem('ma_dark') === '1') document.documentElement.classList.add('dark');
+    const fp = localStorage.getItem('ma_font_px');
+    if (fp) document.documentElement.style.fontSize = fp + 'px';
+  } catch (_) {}
+});
+
 (function () {
   'use strict';
 

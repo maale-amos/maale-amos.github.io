@@ -1427,3 +1427,14 @@ body.dark .phone-item { background: #16213e; }
 .section.is-empty .empty-state { padding: 12px !important; }
 .empty-state { font-family: 'Heebo', sans-serif; }
 .verify-badge { display:inline-block;background:#fef3c7;color:#78350f;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600 }
+
+/* Mobile: prevent floating widgets from overlapping mobile-toggle */
+@media (max-width: 991px) {
+  .mobile-toggle { position: relative; z-index: 100; }
+  .dark-toggle, .a11y-widget {
+    top: auto !important;
+    bottom: 20px !important;
+    left: 20px !important;
+  }
+  .a11y-widget { bottom: 78px !important; }
+}
