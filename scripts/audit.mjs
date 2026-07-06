@@ -42,11 +42,23 @@ async function run() {
       const requests = [];
       const page = await ctx.newPage();
       page.on('pageerror', e => errors.push({ type: 'pageerror', msg: e.message }));
+      // Filter out NetFree-injected scripts (Yosef's ISP-level TLS interception).
+      // They're OUR site's CSP blocking them — desirable, not a bug.
+      const IGNORE_URL = /netfree\.link|netspark/i;
       page.on('console', msg => {
-        if (msg.type() === 'error') errors.push({ type: 'console', msg: msg.text() });
+        if (msg.type() !== 'error') return;
+        const t = msg.text();
+        if (IGNORE_URL.test(t)) return;
+        errors.push({ type: 'console', msg: t });
       });
-      page.on('requestfailed', r => requests.push({ url: r.url(), reason: r.failure()?.errorText }));
-      page.on('response', r => { const s = r.status(); if (s >= 400) requests.push({ url: r.url(), reason: `HTTP ${s}` }); });
+      page.on('requestfailed', r => {
+        if (IGNORE_URL.test(r.url())) return;
+        requests.push({ url: r.url(), reason: r.failure()?.errorText });
+      });
+      page.on('response', r => {
+        const u = r.url(); if (IGNORE_URL.test(u)) return;
+        const s = r.status(); if (s >= 400) requests.push({ url: u, reason: `HTTP ${s}` });
+      });
 
       let status = 0;
       try {
