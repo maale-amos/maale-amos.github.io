@@ -270,6 +270,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  async function renderStreets() {
+    const grid = $('#streetsGrid');
+    if (!grid) return;
+    const data = await fetchJSON('/data/sections/streets.json', null);
+    const items = data?.items || [];
+    if (!items.length) return empty(grid, 'טרם פורסמו רחובות');
+    grid.innerHTML = '';
+    items.forEach(s => {
+      grid.appendChild(el('div', { class: 'street-card' + (s.isNew ? ' is-new' : ''),
+        style: 'background:#fff;padding:14px;border-radius:8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)' },
+        el('i', { class: 'bi ' + (s.icon || 'bi-signpost-2'), style: 'font-size:1.4rem;color:var(--primary);display:block;margin-bottom:6px' }),
+        el('div', {}, s.name),
+        s.isNew ? el('small', { class: 'verify-badge', style: 'margin-top:4px;display:inline-block' }, 'שכונה חדשה') : null
+      ));
+    });
+  }
+
   async function renderTicker() {
     const inner = $('#tickerInner');
     if (!inner) return;
@@ -350,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderBanner('#tzimerGrid',     '/data/tzimer.json',     'טרם דווחו צימרים ומקומות אירוח'),
       renderBanner('#storesGrid',     '/data/stores.json',     'טרם דווחו חנויות ועסקים'),
       renderBanner('#housingGrid',    '/data/housing.json',    'טרם פורסמו פרויקטי דיור'),
-      renderBanner('#streetsGrid',    '/data/streets-list.json', 'טרם פורסמו רחובות')
+      renderStreets()
     ]).catch(err => console.warn('render error:', err));
 
     wireSmoothScroll();
