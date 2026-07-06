@@ -254,6 +254,22 @@ document.addEventListener('DOMContentLoaded', () => {
     )));
   }
 
+  // Generic renderer for banner-style sections (leadership/newspaper/tzimer/stores/housing)
+  async function renderBanner(sel, dataPath, emptyMsg) {
+    const grid = $(sel);
+    if (!grid) return;
+    const items = await fetchJSON(dataPath, []);
+    if (!items?.length) return empty(grid, emptyMsg);
+    grid.innerHTML = '';
+    items.forEach(it => {
+      grid.appendChild(el('div', { class: 'banner-card fade-up' },
+        el('h4', {}, it.title || it.name || ''),
+        it.subtitle ? el('p', { class: 'banner-meta' }, it.subtitle) : null,
+        el('p', {}, it.desc || it.body || '')
+      ));
+    });
+  }
+
   async function renderTicker() {
     const inner = $('#tickerInner');
     if (!inner) return;
@@ -328,7 +344,13 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all([
       renderNews(), renderAnnouncements(), renderEvents(), renderSimchot(),
       renderGemachim(), renderMarket(), renderHotBulletins(), renderFeatured(),
-      renderTicker(), renderShabbat()
+      renderTicker(), renderShabbat(),
+      renderBanner('#leadershipGrid', '/data/leadership.json', 'טרם פורסמו פרטי הנהלה'),
+      renderBanner('#newspaperGrid',  '/data/newspaper.json',  'טרם פורסמו גיליונות'),
+      renderBanner('#tzimerGrid',     '/data/tzimer.json',     'טרם דווחו צימרים ומקומות אירוח'),
+      renderBanner('#storesGrid',     '/data/stores.json',     'טרם דווחו חנויות ועסקים'),
+      renderBanner('#housingGrid',    '/data/housing.json',    'טרם פורסמו פרויקטי דיור'),
+      renderBanner('#streetsGrid',    '/data/streets-list.json', 'טרם פורסמו רחובות')
     ]).catch(err => console.warn('render error:', err));
 
     wireSmoothScroll();
