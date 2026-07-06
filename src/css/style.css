@@ -1438,3 +1438,7 @@ body.dark .phone-item { background: #16213e; }
   }
   .a11y-widget { bottom: 78px !important; }
 }
+
+/* Reveal all sections — the OLD topic-tab reveal pattern is dropped in v2.
+   Every section from sections.json is meant to be visible on scroll. */
+section[data-extra="1"] { display: block !important; }
