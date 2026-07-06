@@ -4,6 +4,7 @@ export default async function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/js");
   eleventyConfig.addPassthroughCopy({"src/robots.txt": "robots.txt"});
   eleventyConfig.addPassthroughCopy({"src/manifest.json": "manifest.json"});
+  eleventyConfig.addPassthroughCopy({"src/sw.js": "sw.js"});
   eleventyConfig.addPassthroughCopy({"data": "data"});
 
   return {
