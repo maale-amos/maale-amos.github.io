@@ -1,5 +1,37 @@
 # STATUS — משימת לילה 2026-07-06
 
+## סבב bug-sweep שני — commits `caf018a` → `8607b56` (סה"כ 14 קומיטים נוספים)
+
+**באגים שנמצאו ותוקנו בסבב הזה (mostly discovered by Playwright probes):**
+
+| # | Bug | Fix | Commit |
+|---|-----|-----|--------|
+| 8 | 20 סקציות `display:none` בדף הבית (CSS `data-extra="1"`) | `!important` reveal | `8c9f5f9` |
+| 9 | Google Maps iframe חסום ב-CSP | הוספתי `www.google.com` ל-frame-src | `caf018a` |
+| 10 | 4 תמונות Wikimedia חסומות ב-Chrome ORB | החלפתי ל-local `/images/drone_view_*` | `caf018a` + `b793a3a` |
+| 11 | קיבולות מקלטים מומצאות (200/80/150) ב-section-emergency | rewrite data-driven + באדג' "בבדיקה" | `651849e` |
+| 12 | זמני תפילה ב-shuls בלי "בבדיקה" | rewrite data-driven עם 4 באדג'ים | `4a54ea0` |
+| 13 | סטטי about (175/1592) בלי "בבדיקה" | הוספתי badges | `15a196d` |
+| 14 | 6 אטרקציות + מרחקים בלי "בבדיקה" | badge subtitle | `3c20ae7` |
+| 15 | רכז ביטחון phone + about founders בלי תיוג | בבדיקה notes | `5a626b4` |
+| 16 | 3 קישורי `#residents` שבורים | → `/residents/` | `6102f7b` |
+| 17 | Hebrew date בטיקר העליון ריק | `Intl.DateTimeFormat('he-IL-u-ca-hebrew')` | `47bfc02` |
+| 18 | טאב "all" ב-topics מת | scrollTo(0) | `e0faa92` |
+| 19 | Navbar `position:fixed` כיסה תוכן ב-sub-pages | `padding-top:120px` | `3f9a380` |
+| 20 | /about/ פייג' בלי בבדיקה badges (data-status אין CSS) | הוספתי `<small>` | `fd14cfe` |
+| 21 | Mobile home גלישה אופקית 31px | `body { overflow-x:hidden }` | `f2de05f` |
+| 22 | Admin editor לא טוען תוכן — no passthrough of _data/sections | eleventy passthrough | `affb3ca` |
+| 23 | Eleventy build fails — conflict passthrough sections.json | הסרתי כפילות | `8607b56` |
+
+**Playwright probes שבוצעו:**
+- Interaction: dropdown, search, FAB clicks, dark toggle, +A, hero quick links → כולם עובדים
+- Mobile 390px: overflow test על 9 עמודים → 9/9 clean
+- FAQ toggle → עבד (אחרי nav-padding fix)
+- Admin login LOCAL (PIN 4415) → dashboard + 5 tabs + 32 structure items + 7 theme controls
+- A11y: 0 imgs w/o alt · 0 buttons w/o label · 1 h1 · 33 headings
+
+---
+
 ## סבב bug-sweep עמוק — commits `05a5c53` → `aff0799`
 
 מעל 6 buхes נמצאו וצתוקנו בסבב אינטראקטיבי (Playwright headless):
