@@ -1,0 +1,21 @@
+{# Public residents section: clean login gate only. Full portal + admin overlays
+   moved to protected /residents/ page (see pages/residents.njk) and Phase 3 Worker. #}
+<section class="section" id="residents" aria-labelledby="residentsTitle">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2 id="residentsTitle"><i class="bi bi-shield-lock" aria-hidden="true"></i> {{ sections.residents.title }}</h2>
+      <div class="section-line"></div>
+      <p>{{ sections.residents.subtitle }}</p>
+    </div>
+
+    <div class="residents-gate fade-up">
+      <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+      <h3>כניסה לפורטל</h3>
+      <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:16px">
+        פורטל תושבים מאובטח — כניסה בהזדהות אישית מול שרת מאובטח.
+      </p>
+      <p><a class="btn btn-primary" href="/residents/">כניסה מאובטחת</a></p>
+      <p><small class="verify-badge">אזור התושבים בהקמה (Phase 3). אין נתונים אישיים בקוד המקור.</small></p>
+    </div>
+  </div>
+</section>
