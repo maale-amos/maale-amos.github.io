@@ -12,9 +12,12 @@ description: אודות ישוב מעלה עמוס
     {% endfor %}
     <div class="stats">
       {% for s in sections.about.stats %}
-      <div class="stat" data-status="{{ s.status }}">
+      <div class="stat">
         <div class="num">{{ s.num }}</div>
-        <div class="label">{{ s.label }}</div>
+        <div class="label">
+          {{ s.label }}
+          {% if s.status == "בבדיקה" %}<small class="verify-badge" style="margin-inline-start:6px">בבדיקה</small>{% endif %}
+        </div>
       </div>
       {% endfor %}
     </div>
