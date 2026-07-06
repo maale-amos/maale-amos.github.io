@@ -1,0 +1,35 @@
+<!-- Overlays + floating buttons (rendered inside <main>, siblings to sections) -->
+<div class="floating-widgets" role="group" aria-label="פעולות מהירות">
+  <button class="float-btn emergency" onclick="quickCall106()" aria-label="חייג למוקד חירום 106">
+    <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    <span class="tooltip-text">מוקד 106 — חייג</span>
+  </button>
+  <button class="float-btn report" onclick="openReportMenu()" aria-label="דיווח מפגע ביטחוני">
+    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+    <span class="tooltip-text">דיווח מפגע ביטחוני</span>
+  </button>
+  <button class="float-btn phone" onclick="openContactMenu()" aria-label="פתח אפשרויות קשר">
+    <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+    <span class="tooltip-text">צור קשר — שיחה / SMS / וואטסאפ</span>
+  </button>
+</div>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="חזרה לראש העמוד">
+  <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>
+
+<div class="action-sheet-overlay" id="actionSheetOverlay" onclick="if(event.target===this)closeActionSheet()" role="dialog" aria-modal="true" aria-label="תפריט פעולות">
+  <div class="action-sheet" id="actionSheetContent">
+    <div class="action-sheet-handle"></div>
+    <div id="actionSheetBody"></div>
+    <button class="action-sheet-cancel" onclick="closeActionSheet()">ביטול</button>
+  </div>
+</div>
+
+<div class="search-results" id="searchResults" role="region" aria-label="תוצאות חיפוש">
+  <div class="search-results-header">
+    <strong><i class="bi bi-search" aria-hidden="true"></i> תוצאות חיפוש</strong>
+    <button class="search-close-btn" onclick="closeSearch()" aria-label="סגור חיפוש"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+  <div id="searchResultsBody"></div>
+</div>
