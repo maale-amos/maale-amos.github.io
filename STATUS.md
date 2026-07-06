@@ -1,12 +1,43 @@
 # STATUS — משימת לילה 2026-07-06
 
+## סבב ניקוי — commit `c3fd6d5` (16:41 UTC)
+**סוגיה:** המבקר חשד שהאתר החי מגיש עדיין את `index.html` הישן מהשורש. בדיקה:
+- `gh api ... pages` → `build_type: "workflow"` ✅ (Pages מגיש רק את `_site` שנבנה)
+- `git ls-tree origin/master --name-only | grep -E '^index.html$|^data'` → שלושה קבצי-שורש ישנים שוכבים בגיט (לא מוגשים אבל מבלבלים)
+- `curl -s https://maale-amos.github.io/ | grep -c ...` → 0 עבור שניידר / 166 / console.cloud / 1072944905499 · 1 עבור איתן סער
+
+**פעולה:** מחקתי מ-master את `index.html`, `data.json`, `images/`, `manifest.json`, `robots.txt`, `sitemap.xml`, `sw.js`. הוספתי `src/sw.js` שהוא unregister stub — כל דפדפן שהיה לו SW ישן יעבור לגרסה חדשה בביקור הבא.
+
+**master אחרי הניקוי:**
+```
+.eleventy.js  .github  .gitignore  FACTS.md  STATUS.md
+backend  data  package.json  package-lock.json  scripts  src  worker
+```
+(אין `index.html` בשורש. `data/` נשאר — הוא הרים ל-Eleventy passthrough לתכנים דינמיים.)
+
+**אימות חוזר של האתר החי:**
+```
+$ curl -s "https://maale-amos.github.io/?v=$(date +%s%N)" > /tmp/live
+$ wc -c /tmp/live                                        # 118,100 bytes (Eleventy)
+$ grep -c 'יוסף שניידר' /tmp/live                       # 0 ✅
+$ grep -c '166' /tmp/live                                # 0 ✅
+$ grep -c 'console.cloud' /tmp/live                      # 0 ✅
+$ grep -c '1072944905499' /tmp/live                      # 0 ✅
+$ grep -c 'איתן סער' /tmp/live                          # 1 ✅
+$ grep -oE '<section id="[a-z-]+"' /tmp/live | wc -l    # 31 ✅
+```
+
+**Playwright audit חוזר על LIVE:** 18/18 ✅ (0 JS errors, 0 failed requests).
+
+---
+
 ## סיכום סופי — לפני הבוקר
 
 **מיוסף:** שלחתי אותך לישון. עבדתי אוטונומית לפי הרשימה בפרומפט הלילה.
 
 ### 🌐 האתר החי
 - **URL:** https://maale-amos.github.io/
-- **גרסה בפרודקשן:** commit `85f222e` (רץ CI ✅)
+- **גרסה בפרודקשן:** commit `c3fd6d5` (רץ CI ✅ workflow run 28807690155)
 - **CI workflow:** https://github.com/maale-amos/maale-amos.github.io/actions/runs/28791444956
 
 ### עדיפות 1 — האתר החי הועבר לגרסה החדשה ✅
