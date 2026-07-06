@@ -48,6 +48,8 @@ window.showArchiveModal = function (type) {
 window.showTopic = function (topic, btn) {
   document.querySelectorAll('.topic-tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  // 'all' is a fallback tab from the old design → scroll to top
+  if (topic === 'all') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   const target = document.getElementById(topic);
   if (!target) return;
   target.scrollIntoView({ behavior: 'smooth', block: 'start' });
