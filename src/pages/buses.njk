@@ -1,0 +1,25 @@
+---
+layout: base.njk
+title: לוח אוטובוסים
+description: קווי אוטובוס למעלה עמוס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.buses.title }}</h1>
+    <p>{{ sections.buses.subtitle }}</p>
+
+    <div class="alert-box" role="status">
+      <h3><i class="bi bi-hourglass-split" aria-hidden="true"></i> טבלת זמנים — בבדיקה</h3>
+      <p>{{ sections.buses.routesStatus }}</p>
+      <p><strong>לזמנים מדויקים ועדכוני מסלולים:</strong> אפליקציית מוביט או מוקד המועצה (טל׳ <a href="tel:{{ sections.buses.councilLine }}">{{ sections.buses.councilLine }}</a>).</p>
+    </div>
+
+    <h2>קווים ידועים</h2>
+    <ul class="phone-list">
+      {% for r in sections.buses.routes %}
+      <li><strong>קו {{ r.line }}:</strong> {{ r.route }}{% if not r.verified %} <small class="verify-badge">בבדיקה</small>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    <p><small class="verify-badge">זמני יציאה — בבדיקה. אין להסתמך על המידע לפני אימות במוביט.</small></p>
+  </div>
+</section>
