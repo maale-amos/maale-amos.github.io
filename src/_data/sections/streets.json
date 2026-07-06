@@ -1,0 +1,22 @@
+{
+  "id": "streets",
+  "title": "רחובות ושכונות",
+  "subtitle": "כל הרחובות נקראים על שם פרשני התורה",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#streets",
+  "familyCountsStatus": "בבדיקה",
+  "items": [
+    { "name": "יונתן בן עוזיאל", "icon": "bi-book" },
+    { "name": "רבנו בחיי", "icon": "bi-journal-text" },
+    { "name": "רש\"י", "icon": "bi-pencil" },
+    { "name": "רד\"ק", "icon": "bi-pen" },
+    { "name": "רמב\"ן", "icon": "bi-bookmark" },
+    { "name": "רשב\"ם", "icon": "bi-journal-richtext" },
+    { "name": "החזקוני", "icon": "bi-book-half" },
+    { "name": "אבן עזרא", "icon": "bi-feather" },
+    { "name": "אברבנאל", "icon": "bi-journal-bookmark" },
+    { "name": "מרכז הישוב", "icon": "bi-building" },
+    { "name": "סמטת אונקלוס", "icon": "bi-signpost" },
+    { "name": "קרית נוף (הרחבה)", "icon": "bi-building-add", "isNew": true }
+  ]
+}

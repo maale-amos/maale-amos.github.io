@@ -1,0 +1,21 @@
+---
+layout: base.njk
+title: שאלות נפוצות
+description: שאלות ותשובות על מעלה עמוס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.faq.title }}</h1>
+    <div class="faq-list">
+      {% for item in sections.faq.items %}
+      <details class="faq-item">
+        <summary>{{ item.q }}</summary>
+        <div class="faq-answer">
+          <p>{{ item.a }}</p>
+          {% if item.status %}<small class="verify-badge">{{ item.status }}</small>{% endif %}
+        </div>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>

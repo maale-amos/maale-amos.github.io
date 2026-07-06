@@ -1,0 +1,9 @@
+{
+  "id": "ticker",
+  "title": "טיקר עליון",
+  "verified": "2026-07-06",
+  "source": "CMS דינמי + hebcal",
+  "welcomeMessage": "ברוכים הבאים לאתר הישוב מעלה עמוס",
+  "announcementsHint": "הודעות המזכירות מתפרסמות באזור \"הודעות המזכירות\"",
+  "dynamic": true
+}

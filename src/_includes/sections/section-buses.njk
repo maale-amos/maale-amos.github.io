@@ -1,0 +1,32 @@
+{# Data-driven only. Zero hardcoded line numbers or times. Source: sections.buses. #}
+<section class="section" id="buses" aria-labelledby="busesTitle">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2 id="busesTitle"><i class="bi bi-bus-front" aria-hidden="true"></i> {{ sections.buses.title }}</h2>
+      <div class="section-line"></div>
+      <p>{{ sections.buses.subtitle }}</p>
+    </div>
+
+    <div class="alert-box fade-up" role="status">
+      <h3><i class="bi bi-hourglass-split" aria-hidden="true"></i> לוח זמנים — בבדיקה</h3>
+      <p>{{ sections.buses.routesStatus }}</p>
+      <p><strong>לזמנים מדויקים ועדכוני מסלולים:</strong>
+        אפליקציית <a href="{{ sections.buses.moovitUrl }}" rel="noopener">מוביט</a>
+        או מוקד המועצה
+        (טל׳ <a href="tel:{{ sections.buses.councilLine }}">{{ sections.buses.councilLine }}</a>).
+      </p>
+    </div>
+
+    <h3 style="margin-top:24px">קווים ידועים</h3>
+    <ul class="phone-list fade-up">
+      {%- for r in sections.buses.routes %}
+      <li>
+        <strong>קו {{ r.line }}:</strong> {{ r.route }}
+        {%- if not r.verified %} <small class="verify-badge">בבדיקה</small>{% endif %}
+      </li>
+      {%- endfor %}
+    </ul>
+    <p><small class="verify-badge">אין להסתמך על מידע לפני אימות בזמן אמת במוביט.</small></p>
+    <p><small>{{ sections.buses.note }}</small></p>
+  </div>
+</section>

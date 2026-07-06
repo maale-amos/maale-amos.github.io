@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title }} · {{ site.name }}</title>
+  <meta name="description" content="{{ description or site.description }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/main.js" defer></script>
+  <style>
+    :root {
+      --primary: {{ theme.colors.primary }};
+      --primary-dark: {{ theme.colors.primaryDark }};
+      --accent: {{ theme.colors.accent }};
+      --bg: {{ theme.colors.bg }};
+      --text: {{ theme.colors.text }};
+      --text-light: {{ theme.colors.textLight }};
+      --danger: {{ theme.colors.danger }};
+      --sand: {{ theme.colors.sand }};
+      --sky: {{ theme.colors.sky }};
+      --font-family: '{{ theme.font.family }}', sans-serif;
+      --base-size: {{ theme.font.baseSize }};
+      --radius: {{ theme.radius }};
+    }
+  </style>
+</head>
+<body>
+  {% include "header.njk" %}
+  <main>
+    {{ content | safe }}
+  </main>
+  {% include "footer.njk" %}
+</body>
+</html>

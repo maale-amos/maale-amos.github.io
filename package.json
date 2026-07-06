@@ -1,0 +1,14 @@
+{
+  "name": "maale-amos-site",
+  "version": "2.0.0",
+  "description": "אתר קהילתי מעלה עמוס - Eleventy rebuild",
+  "type": "module",
+  "scripts": {
+    "build": "npx @11ty/eleventy",
+    "start": "npx @11ty/eleventy --serve",
+    "clean": "rm -rf _site"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

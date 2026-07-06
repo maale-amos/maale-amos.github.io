@@ -1,0 +1,10 @@
+---
+layout: base.njk
+title: עמוד הבית
+description: מעלה עמוס — ישוב חרדי־קהילתי בגוש עציון. תורה, קהילה, ישוב הדעת.
+---
+{%- for s in sections.sections | sort(attribute='order') -%}
+  {%- if s.visible -%}
+    {%- include "sections/section-" + s.id + ".njk" ignore missing -%}
+  {%- endif -%}
+{%- endfor -%}

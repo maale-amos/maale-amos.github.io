@@ -1,0 +1,9 @@
+{
+  "id": "events",
+  "title": "לוח אירועים",
+  "subtitle": "אירועים קהילתיים במעלה עמוס",
+  "verified": "2026-07-06",
+  "source": "CMS דינמי",
+  "dynamic": true,
+  "emptyMessage": "אין אירועים מתוכננים"
+}

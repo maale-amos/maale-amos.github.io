@@ -1,0 +1,8 @@
+{
+  "id": "residents",
+  "title": "אזור תושבים מאובטח",
+  "subtitle": "גישה מאובטחת לתושבי מעלה עמוס בלבד",
+  "verified": "2026-07-06",
+  "source": "Backend Phase 3",
+  "note": "יידרש אימות אמיתי דרך שרת - Phase 3"
+}

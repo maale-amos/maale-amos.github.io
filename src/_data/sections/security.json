@@ -1,0 +1,15 @@
+{
+  "id": "security",
+  "title": "ביטחון",
+  "subtitle": "פרטי קשר לחירום וביטחון",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#security",
+  "items": [
+    { "name": "קו חירום", "description": "מוקד מועצה אזורית — 24/7", "phone": "106", "icon": "bi-telephone-outbound" },
+    { "name": "רכז ביטחון", "description": "פניות בנושאי ביטחון שוטף וכוננות", "phone": "02-9931767", "phoneStatus": "בבדיקה", "icon": "bi-person-badge" },
+    { "name": "משטרה", "description": "חירום ארצי", "phone": "100", "icon": "bi-shield-exclamation" },
+    { "name": "מד\"א", "description": "חירום רפואי", "phone": "101", "icon": "bi-heart-pulse" },
+    { "name": "כבאות", "description": "שריפה / חילוץ", "phone": "102", "icon": "bi-fire" },
+    { "name": "פיקוד העורף", "description": "הנחיות בזמן אזעקה", "phone": "104", "icon": "bi-broadcast" }
+  ]
+}

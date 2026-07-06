@@ -1,1 +1,9 @@
 backend/deploy.py
+node_modules/
+_site/
+_emanuel_edits/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log

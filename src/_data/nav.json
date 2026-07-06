@@ -1,0 +1,12 @@
+{
+  "items": [
+    { "label": "בית", "url": "/", "icon": "bi-house-door" },
+    { "label": "אודות", "url": "/about/", "icon": "bi-info-circle" },
+    { "label": "חינוך", "url": "/education/", "icon": "bi-mortarboard" },
+    { "label": "בתי כנסת", "url": "/shuls/", "icon": "bi-book" },
+    { "label": "חירום", "url": "/emergency/", "icon": "bi-exclamation-octagon" },
+    { "label": "אטרקציות", "url": "/attractions/", "icon": "bi-compass" },
+    { "label": "שאלות נפוצות", "url": "/faq/", "icon": "bi-question-circle" },
+    { "label": "פנייה", "url": "/contact/", "icon": "bi-envelope-paper" }
+  ]
+}

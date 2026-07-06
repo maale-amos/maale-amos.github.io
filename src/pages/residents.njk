@@ -1,0 +1,24 @@
+---
+layout: base.njk
+title: אזור תושבים
+description: אזור מאובטח לתושבי מעלה עמוס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.residents.title }}</h1>
+    <p>{{ sections.residents.subtitle }}</p>
+
+    <div class="alert-box" role="status">
+      <h3><i class="bi bi-shield-lock" aria-hidden="true"></i> כניסה מאובטחת</h3>
+      <p>אזור התושבים בהקמה. כשיושלם, הכניסה תהיה בהזדהות אישית מול שרת מאובטח.</p>
+    </div>
+
+    <form id="resident-login" method="post" action="/api/login" onsubmit="return false;">
+      <p><label>טלפון בישוב: <input type="tel" name="phone" required autocomplete="tel"></label></p>
+      <p><label>קוד גישה: <input type="password" name="code" required autocomplete="current-password"></label></p>
+      <p><button type="submit" disabled>כניסה (בהקמה)</button></p>
+    </form>
+
+    <p><small class="verify-badge">בקרוב — מוגדר בשלב הבא בפרויקט. אין נתונים אישיים מוטמעים בקוד המקור.</small></p>
+  </div>
+</section>

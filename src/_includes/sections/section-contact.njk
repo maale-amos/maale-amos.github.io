@@ -1,0 +1,29 @@
+<section class="section contact-section" id="contact">
+  <div class="container">
+    <div class="section-header fade-up">
+      <h2><i class="bi bi-envelope-paper"></i> פנייה מקוונת</h2>
+      <div class="section-line"></div>
+      <p>שלחו פנייה למזכירות הישוב ונחזור אליכם בהקדם</p>
+    </div>
+    <form class="contact-form fade-up" id="contactForm" method="POST" action="https://formsubmit.co/6742853@gmail.com">
+      <input type="hidden" name="_subject" value="פנייה חדשה מאתר מעלה עמוס">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://maale-amos.github.io/#contact">
+      <input type="hidden" name="_template" value="table">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">שם מלא</label><input type="text" name="name" class="form-control" placeholder="ישראל ישראלי" required></div>
+        <div class="col-md-6"><label class="form-label">טלפון</label><input type="tel" name="phone" class="form-control" placeholder="050-1234567" required></div>
+        <div class="col-12"><label class="form-label">דוא"ל</label><input type="email" name="email" class="form-control" placeholder="email@example.com"></div>
+        <div class="col-12"><label class="form-label">נושא</label>
+          <select name="subject" class="form-select" required>
+            <option value="">בחרו נושא...</option>
+            <option>תחזוקה ותשתיות</option><option>דיור ובנייה</option><option>ביטחון</option>
+            <option>חינוך</option><option>קהילה</option><option>גבייה</option><option>אחר</option>
+          </select>
+        </div>
+        <div class="col-12"><label class="form-label">תוכן הפנייה</label><textarea name="message" class="form-control" rows="5" placeholder="פרטו את פנייתכם..." required></textarea></div>
+        <div class="col-12"><button type="submit" class="btn-submit"><i class="bi bi-send"></i> שליחת פנייה</button></div>
+      </div>
+    </form>
+  </div>
+</section>

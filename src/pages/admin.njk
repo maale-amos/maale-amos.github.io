@@ -1,0 +1,91 @@
+---
+layout: base.njk
+title: פאנל ניהול
+description: פאנל ניהול תוכן ועיצוב
+---
+<section class="page-content" id="adminApp">
+  <div class="container">
+    <h1><i class="bi bi-shield-lock" aria-hidden="true"></i> פאנל ניהול</h1>
+
+    <div id="adminGate" style="max-width:520px;margin:24px auto">
+      <div class="alert-box" role="status">
+        <p><i class="bi bi-info-circle" aria-hidden="true"></i>
+          נדרשת הזדהות מנהל. הכניסה מוצפנת מול שרת Cloudflare Worker.</p>
+      </div>
+      <form id="adminLoginForm" onsubmit="return false" style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+        <p><label>טלפון: <input type="tel" id="adminPhone" required autocomplete="tel" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px"></label></p>
+        <p><label>אמצעי מסירת קוד:
+          <select id="adminDeliver" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px">
+            <option value="sms">SMS</option>
+            <option value="voice">שיחה קולית (לטלפון כשר)</option>
+          </select>
+        </label></p>
+        <p><button type="button" id="adminRequestBtn" class="btn btn-primary">שלח קוד</button></p>
+
+        <div id="adminCodeStep" hidden>
+          <p><label>קוד שהתקבל: <input type="text" id="adminCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;letter-spacing:6px;text-align:center;font-size:1.4rem"></label></p>
+          <p><button type="button" id="adminVerifyBtn" class="btn btn-primary">אמת ובכנס</button></p>
+        </div>
+        <p id="adminAuthMsg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div id="adminDashboard" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div><strong id="adminUser"></strong> · <span id="adminRole" class="verify-badge"></span></div>
+        <button id="adminLogout" class="btn">יציאה</button>
+      </div>
+
+      <nav class="admin-tabs" role="tablist" style="display:flex;gap:8px;flex-wrap:wrap;border-bottom:2px solid var(--sand);margin-bottom:20px">
+        <button role="tab" aria-selected="true" data-tab="content" class="tab active">תוכן סקציות</button>
+        <button role="tab" aria-selected="false" data-tab="theme" class="tab">עיצוב</button>
+        <button role="tab" aria-selected="false" data-tab="announcements" class="tab">הודעות</button>
+        <button role="tab" aria-selected="false" data-tab="events" class="tab">אירועים</button>
+        <button role="tab" aria-selected="false" data-tab="structure" class="tab">מבנה הדף</button>
+      </nav>
+
+      <div class="tab-panels">
+        <div role="tabpanel" data-panel="content">
+          <h2>עריכת תוכן סקציה</h2>
+          <label>בחרו סקציה:
+            <select id="sectionPicker" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;margin-bottom:12px">
+              {%- for s in sections.sections | sort(attribute='order') %}
+              <option value="{{ s.id }}">{{ s.title }}{% if not s.visible %} · מוסתרת{% endif %}</option>
+              {%- endfor %}
+            </select>
+          </label>
+          <p><textarea id="sectionJson" rows="18" style="width:100%;font-family:monospace;font-size:0.9rem;padding:12px;border:1px solid #ddd;border-radius:8px" placeholder="JSON של הסקציה יופיע כאן"></textarea></p>
+          <p><button id="saveContentBtn" class="btn btn-primary">שמור לשרת</button> <span id="saveMsg" role="status" aria-live="polite"></span></p>
+        </div>
+
+        <div role="tabpanel" data-panel="theme" hidden>
+          <h2>עיצוב</h2>
+          <p><small>שינוי משתני CSS גלובליים — חל על כל העמודים.</small></p>
+          <div id="themeControls" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px"></div>
+          <p><button id="saveThemeBtn" class="btn btn-primary">שמור עיצוב</button></p>
+        </div>
+
+        <div role="tabpanel" data-panel="announcements" hidden>
+          <h2>הודעות המזכירות</h2>
+          <p><em>ניהול הודעות דינמיות — יופיעו בסקציית "הודעות המזכירות" בדף הבית.</em></p>
+          <div id="announcementsList"></div>
+          <button id="newAnnouncementBtn" class="btn btn-primary">+ הודעה חדשה</button>
+        </div>
+
+        <div role="tabpanel" data-panel="events" hidden>
+          <h2>לוח אירועים</h2>
+          <div id="eventsList"></div>
+          <button id="newEventBtn" class="btn btn-primary">+ אירוע חדש</button>
+        </div>
+
+        <div role="tabpanel" data-panel="structure" hidden>
+          <h2>מבנה הדף</h2>
+          <p><small>סדר/הסתרה של סקציות. גרירה עם העכבר תעדכן את סדר <code>sections.json</code>.</small></p>
+          <ul id="structureList" style="list-style:none;padding:0"></ul>
+          <p><button id="saveStructureBtn" class="btn btn-primary">שמור מבנה</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="/js/admin.js" defer></script>

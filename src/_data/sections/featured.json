@@ -1,0 +1,8 @@
+{
+  "id": "featured",
+  "title": "מודגש עכשיו",
+  "verified": "2026-07-06",
+  "source": "CMS דינמי",
+  "dynamic": true,
+  "emptyMessage": "אין תכנים מודגשים כרגע"
+}
