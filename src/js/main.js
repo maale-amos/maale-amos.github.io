@@ -80,6 +80,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const fp = localStorage.getItem('ma_font_px');
     if (fp) document.documentElement.style.fontSize = fp + 'px';
   } catch (_) {}
+
+  // Render Hebrew date in top ticker
+  try {
+    const el = document.getElementById('hebrewDateDisplay');
+    if (el) {
+      const heb = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      }).format(new Date());
+      const greg = new Intl.DateTimeFormat('he-IL', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      }).format(new Date());
+      el.textContent = heb + ' · ' + greg;
+    }
+  } catch (_) {}
 });
 
 (function () {
