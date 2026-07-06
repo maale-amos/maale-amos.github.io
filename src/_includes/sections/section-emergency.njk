@@ -1,20 +1,34 @@
-<section class="section" id="emergency" data-extra="1">
+{# Data-driven. Zero fabricated capacities. Source: sections.emergency. #}
+<section class="section" id="emergency" data-extra="1" aria-labelledby="emergencyTitle">
   <div class="container">
     <div class="section-header fade-up">
-      <h2><i class="bi bi-exclamation-octagon"></i> מידע חירום ומקלטים</h2>
+      <h2 id="emergencyTitle"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> {{ sections.emergency.title }}</h2>
       <div class="section-line"></div>
+      <p>{{ sections.emergency.subtitle }}</p>
     </div>
+
+    <div class="alert-box fade-up" role="status" style="margin-top:16px">
+      <h3><i class="bi bi-broadcast" aria-hidden="true"></i> בזמן אזעקה</h3>
+      <p>היכנסו למרחב מוגן תוך {{ sections.emergency.alertInstructions.enterTime }}. הישארו {{ sections.emergency.alertInstructions.stayTime }}.</p>
+    </div>
+
+    <h3 style="margin-top:24px">מקלטים</h3>
     <div class="shelter-grid fade-up">
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> מקלט מרכזי</h4><p>ליד בית הכנסת המרכזי. קיבולת: 200 איש. נגיש לנכים.</p></div>
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> מקלט שכונה צפונית</h4><p>רחוב רמב"ן. קיבולת: 80 איש.</p></div>
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> מקלט בית הספר</h4><p>בית הספר. קיבולת: 150 איש.</p></div>
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> מקלט שכונה דרומית</h4><p>רחוב רש"י. קיבולת: 80 איש.</p></div>
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> ממ"ד מרכז קהילתי</h4><p>מבנה המרכז הקהילתי. קיבולת: 60 איש.</p></div>
-      <div class="shelter-card"><h4><i class="bi bi-geo-alt-fill"></i> נקודת כינוס</h4><p>מגרש הספורט המרכזי. לאחר אירוע.</p></div>
+      {%- for s in sections.emergency.shelters %}
+      <div class="shelter-card">
+        <h4><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ s.name }}</h4>
+        <p>{{ s.location }}{% if s.note %}. {{ s.note }}{% endif %}</p>
+        {% if s.accessibility %}<small>{{ s.accessibility }}</small>{% endif %}
+      </div>
+      {%- endfor %}
     </div>
-    <div class="fade-up" style="margin-top:24px;background:#fff3cd;border-radius:var(--radius);padding:20px;text-align:center">
-      <h4 style="color:#856404"><i class="bi bi-exclamation-triangle-fill"></i> בזמן אזעקה</h4>
-      <p style="color:#856404;margin:0">היכנסו למרחב מוגן תוך 90 שניות. הישארו 10 דקות לאחר סיום האזעקה.</p>
-    </div>
+    <p style="margin-top:12px"><small class="verify-badge">קיבולות מקלטים — בבדיקה</small></p>
+
+    <h3 style="margin-top:24px">קווי חירום</h3>
+    <ul class="phone-list">
+      {%- for line in sections.emergency.emergencyLines %}
+      <li><strong>{{ line.name }}:</strong> <a href="tel:{{ line.phone }}">{{ line.phone }}</a>{% if line.note %} ({{ line.note }}){% endif %}</li>
+      {%- endfor %}
+    </ul>
   </div>
 </section>
