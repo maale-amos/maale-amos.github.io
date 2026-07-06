@@ -31,6 +31,13 @@ window.closeSearch = function () {
   const sr = document.getElementById('searchResults');
   if (sr) sr.style.display = 'none';
 };
+window.showTopic = function (topic, btn) {
+  document.querySelectorAll('.topic-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const target = document.getElementById(topic);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 window.searchSite = function (q) {
   q = (q || '').trim();
   const sr = document.getElementById('searchResults');
