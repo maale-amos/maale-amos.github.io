@@ -1,0 +1,28 @@
+name = "maale-amos-api"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Secrets (set via `wrangler secret put`):
+#   JWT_SECRET          — 32-byte random hex, for session tokens
+#   SMS_API_KEY         — Yemot API key for send-sms
+#   ADMIN_PIN_HASH      — bcrypt hash of admin PIN
+#   YEMOT_USER          — יוסף's Yemot username
+#   YEMOT_PASS          — יוסף's Yemot password
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "REPLACE_WITH_KV_ID"
+
+[[kv_namespaces]]
+binding = "OTP"
+id = "REPLACE_WITH_KV_ID"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "maale-amos"
+database_id = "REPLACE_WITH_D1_ID"
+
+[vars]
+CORS_ORIGIN = "https://maale-amos.github.io"
+OTP_TTL_SECONDS = "300"
+SESSION_TTL_SECONDS = "2592000"
