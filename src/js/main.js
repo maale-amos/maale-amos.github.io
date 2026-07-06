@@ -31,6 +31,20 @@ window.closeSearch = function () {
   const sr = document.getElementById('searchResults');
   if (sr) sr.style.display = 'none';
 };
+window.filterMarket = function (category, btn) {
+  document.querySelectorAll('#marketplace .tab-btn').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const grid = document.getElementById('marketGrid');
+  if (!grid) return;
+  grid.querySelectorAll('.market-card').forEach(card => {
+    const hit = category === 'all' || card.dataset.category === category;
+    card.style.display = hit ? '' : 'none';
+  });
+};
+window.showArchiveModal = function (type) {
+  // Minimal impl: navigate to hash of type; heavy modal is a future admin feature.
+  location.hash = '#' + type;
+};
 window.showTopic = function (topic, btn) {
   document.querySelectorAll('.topic-tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
