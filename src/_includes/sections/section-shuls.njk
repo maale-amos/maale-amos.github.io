@@ -1,45 +1,31 @@
-<section class="section" id="shuls" data-extra="1">
+{# Data-driven. Times marked בבדיקה until verified. Source: sections.shuls. #}
+<section class="section" id="shuls" data-extra="1" aria-labelledby="shulsTitle">
   <div class="container">
     <div class="section-header fade-up">
-      <h2><i class="bi bi-book"></i> בתי כנסת</h2>
+      <h2 id="shulsTitle"><i class="bi bi-book" aria-hidden="true"></i> {{ sections.shuls.title }}</h2>
       <div class="section-line"></div>
-      <p>בתי כנסת ומניינים בישוב</p>
+      <p>{{ sections.shuls.subtitle }}</p>
     </div>
     <div class="edu-cards fade-up">
-      <div class="edu-card" style="border-right-color:#1565c0">
-        <i class="bi bi-book" style="color:#1565c0"></i>
-        <h4>בית הכנסת המרכזי — ליטאי</h4>
-        <p><strong>נוסח:</strong> אשכנז</p>
-        <p><strong>שחרית:</strong> 06:30 / שבת 08:00</p>
-        <p><strong>מנחה:</strong> לפי זמנים</p>
-        <p><strong>ערבית:</strong> 20 דק' אחרי השקיעה</p>
-        <p style="font-size:0.8rem;color:var(--text-light)">beitknessetma@gmail.com</p>
+      {%- for s in sections.shuls.items %}
+      <div class="edu-card" style="border-right-color:{{ s.borderColor }}">
+        <i class="bi {{ s.icon }}" style="color:{{ s.iconColor }}" aria-hidden="true"></i>
+        <h4>{{ s.name }}</h4>
+        <p><strong>נוסח:</strong> {{ s.nosach }}</p>
+        {%- if s.times %}
+          <p><strong>שחרית:</strong> {{ s.times.shacharit }}</p>
+          <p><strong>מנחה:</strong> {{ s.times.mincha }}</p>
+          <p><strong>ערבית:</strong> {{ s.times.maariv }}</p>
+          {%- if s.timesStatus == "בבדיקה" %}
+          <p><small class="verify-badge">זמנים בבדיקה</small></p>
+          {%- endif %}
+        {%- endif %}
+        {%- if s.email %}<p style="font-size:0.8rem;color:var(--text-light)">{{ s.email }}</p>{%- endif %}
+        {%- if s.location %}<p style="font-size:0.8rem;color:var(--text-light)">{{ s.location }}</p>{%- endif %}
+        {%- if s.note %}<p>{{ s.note }}</p>{%- endif %}
+        {%- if s.notice %}<p style="font-size:0.8rem;color:var(--text-light)">{{ s.notice }}</p>{%- endif %}
       </div>
-      <div class="edu-card" style="border-right-color:#6a1b9a">
-        <i class="bi bi-house-heart" style="color:#6a1b9a"></i>
-        <h4>בית המדרש דחסידי ביאלא</h4>
-        <p><strong>נוסח:</strong> ספרד (חסידי)</p>
-        <p><strong>שחרית:</strong> 07:00 / שבת 08:30</p>
-        <p><strong>מנחה:</strong> לפי זמנים</p>
-        <p><strong>ערבית:</strong> אחרי מנחה</p>
-        <p style="font-size:0.8rem;color:var(--text-light)">שכונת קרית נוף</p>
-      </div>
-      <div class="edu-card" style="border-right-color:#e65100">
-        <i class="bi bi-lamp" style="color:#e65100"></i>
-        <h4>בית הכנסת ה-ספרדי</h4>
-        <p><strong>נוסח:</strong> עדות המזרח</p>
-        <p><strong>שחרית:</strong> 06:45 / שבת 07:30</p>
-        <p><strong>מנחה:</strong> לפי זמנים</p>
-        <p><strong>ערבית:</strong> במניין</p>
-      </div>
-      <div class="edu-card" style="border-right-color:#2e7d32">
-        <i class="bi bi-stars" style="color:#2e7d32"></i>
-        <h4>שטיבלך — מניינים</h4>
-        <p><strong>נוסח:</strong> מגוון</p>
-        <p>מניינים שונים לאורך היום</p>
-        <p>ברסלב, אמשינוב, בויאן</p>
-        <p style="font-size:0.8rem;color:var(--text-light)">בדקו בלוח המודעות</p>
-      </div>
+      {%- endfor %}
     </div>
   </div>
 </section>
