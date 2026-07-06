@@ -7,7 +7,7 @@ export default async function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"src/sw.js": "sw.js"});
   eleventyConfig.addPassthroughCopy({"data": "data"});
   eleventyConfig.addPassthroughCopy({"src/_data/sections": "data/sections"});
-  eleventyConfig.addPassthroughCopy({"src/_data/sections.json": "data/sections.json"});
+  // src/_data/sections.json conflicts with data/sections.json — admin loads from /data/sections.json (the runtime one, kept in sync manually)
 
   return {
     dir: {
