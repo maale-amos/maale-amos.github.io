@@ -7,7 +7,7 @@ directory, dynamic content editing.
 
 | Method | Path                        | Auth        | Purpose                      |
 |--------|-----------------------------|-------------|------------------------------|
-| POST   | /api/auth/request           | —           | Send OTP via Yemot SMS       |
+| POST   | /api/auth/request           | —           | Send OTP via SMS or voice call (`deliver:'sms'\|'voice'`) |
 | POST   | /api/auth/verify            | —           | Verify OTP, set session      |
 | POST   | /api/auth/logout            | session     | Clear session                |
 | GET    | /api/me                     | session     | Current user                 |
