@@ -1,0 +1,24 @@
+{
+  "colors": {
+    "primary": "#1a5c3a",
+    "primaryDark": "#0d3b2e",
+    "accent": "#b09a4f",
+    "bg": "#ffffff",
+    "text": "#1a1a1a",
+    "textLight": "#666666",
+    "danger": "#dc2626",
+    "sand": "#faf5e8",
+    "sky": "#dbeafe"
+  },
+  "font": {
+    "family": "Heebo",
+    "baseSize": "16px"
+  },
+  "radius": "12px",
+  "logo": "/images/logo_official.jpg",
+  "hero": {
+    "images": [],
+    "overlay": 0.55
+  },
+  "darkMode": true
+}

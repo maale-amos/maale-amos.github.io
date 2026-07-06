@@ -1,0 +1,17 @@
+{
+  "id": "gallery",
+  "title": "גלריה",
+  "subtitle": "תמונות מהישוב והסביבה",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#gallery",
+  "items": [
+    { "src": "/images/aerial_1.jpg", "alt": "מעלה עמוס מבט מהאוויר", "caption": "מעלה עמוס — מבט מהאוויר" },
+    { "src": "/images/maale_amos_1.jpg", "alt": "מעלה עמוס", "caption": "מעלה עמוס" },
+    { "src": "/images/kolel_1.jpg", "alt": "כולל אברכים שבות עמי", "caption": "כולל שבות עמי" },
+    { "src": "/images/talmud_1.jpg", "alt": "תלמוד תורה במעלה עמוס", "caption": "תלמוד תורה" },
+    { "src": "/images/charity_1.jpg", "alt": "ארגון חסד קמחא דפסחא", "caption": "ארגון החסד — קמחא דפסחא" },
+    { "src": "/images/zimmer_maale_amos.jpg", "alt": "צימר אירוח במעלה עמוס", "caption": "צימר במעלה עמוס" },
+    { "src": "/images/ptihat_kayitz.png", "alt": "הפנינג פתיחת קיץ", "caption": "הפנינג פתיחת קיץ" },
+    { "src": "/images/toshvei_maale_amos.jpg", "alt": "תושבי מעלה עמוס בארגון חסד", "caption": "ארגון החסד — תושבי מעלה עמוס" }
+  ]
+}

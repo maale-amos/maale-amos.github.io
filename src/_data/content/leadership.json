@@ -1,0 +1,15 @@
+{
+  "id": "leadership",
+  "title": "הנהלת הישוב",
+  "subtitle": "לחצו על כל באנר לצפייה בפרטים מלאים",
+  "verified": "2026-07-06",
+  "source": "מזכירות + FACTS.md",
+  "secretary": {
+    "name": "איתן סער",
+    "role": "מזכיר הישוב",
+    "phone": "02-9931767",
+    "verified": true
+  },
+  "dynamic": true,
+  "emptyMessage": "פרטי הנהלה נוספים יתפרסמו בקרוב"
+}

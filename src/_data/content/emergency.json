@@ -1,0 +1,26 @@
+{
+  "id": "emergency",
+  "title": "מידע חירום ומקלטים",
+  "subtitle": "מקלטים ציבוריים וכוננות חירום",
+  "verified": "2026-07-06",
+  "source": "FACTS.md#emergency",
+  "shelters": [
+    { "name": "מקלט מרכזי", "location": "ליד בית הכנסת המרכזי", "capacity": null, "accessibility": "נגיש לנכים" },
+    { "name": "מקלט שכונה צפונית", "location": "רחוב רמב\"ן", "capacity": null },
+    { "name": "מקלט בית הספר", "location": "בית הספר", "capacity": null },
+    { "name": "מקלט שכונה דרומית", "location": "רחוב רש\"י", "capacity": null },
+    { "name": "ממ\"ד מרכז קהילתי", "location": "מבנה המרכז הקהילתי", "capacity": null },
+    { "name": "נקודת כינוס", "location": "מגרש הספורט המרכזי", "note": "לאחר אירוע" }
+  ],
+  "alertInstructions": {
+    "enterTime": "90 שניות",
+    "stayTime": "10 דקות לאחר סיום האזעקה"
+  },
+  "emergencyLines": [
+    { "name": "מוקד חירום מועצה", "phone": "106", "note": "24/7" },
+    { "name": "מד\"א", "phone": "101" },
+    { "name": "כבאות", "phone": "102" },
+    { "name": "משטרה", "phone": "100" },
+    { "name": "פיקוד העורף", "phone": "104" }
+  ]
+}

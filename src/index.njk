@@ -1,0 +1,26 @@
+---
+layout: base.njk
+title: עמוד הבית
+---
+<section class="hero">
+  <div class="container">
+    <h1>ברוכים הבאים ל{{ site.name }}</h1>
+    <p class="lead">{{ site.tagline }}</p>
+  </div>
+</section>
+
+<section class="quick-links">
+  <div class="container">
+    <h2>שירותים מהירים</h2>
+    <div class="grid">
+      {% for item in nav.items %}
+        {% if item.url != "/" %}
+        <a href="{{ item.url }}" class="card">
+          <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
