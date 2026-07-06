@@ -1,5 +1,36 @@
 # STATUS — משימת לילה 2026-07-06
 
+## סבב bug-sweep עמוק — commits `05a5c53` → `aff0799`
+
+מעל 6 buхes נמצאו וצתוקנו בסבב אינטראקטיבי (Playwright headless):
+
+| # | Bug | Fix | Commit |
+|---|-----|-----|--------|
+| 1 | Mobile hamburger nav מת (toggleMenu לא קיים ב-JS) | הוספתי 12 window handlers ל-main.js | `05a5c53` |
+| 2 | dark-toggle + a11y widgets חופפו את hamburger ב-mobile | הזזתי ל-bottom ב-@media(max-width:991px) | `05a5c53` |
+| 3 | search bar בהירו — panel לא היה בכלל | חילצתי `#searchResults` מהמקור והוספתי ל-chrome-overlays | `69aa0e4` |
+| 4 | 16 טאבים ב-#topics מתים (showTopic undefined) | שוחזר | `c72dd88` |
+| 5 | 6 טאבי filter ב-marketplace מתים (filterMarket undefined) | שוחזר | `2a0cd3c` |
+| 6 | 2 archive buttons ב-news/announcements מתים | showArchiveModal שוחזר | `2a0cd3c` |
+| 7 | Phase 6 SEO: og:url + canonical חסרים | הוספתי דינמיים per-page + sitemap.xml | `aff0799` |
+
+**Live probe אחרי:**
+```
+window handlers: 12/12 מוגדרים ✅
+dropdown desktop: 5 items ✅
+search: 7 hits for "קהילה" ✅
+quickLink → smooth scroll to #events (y=2332) ✅
+dark toggle → <html.dark> ✅
++A a11y → 16→18px ✅
+mobile hamburger click → menu display:flex ✅
+FAQ 6 items · <details> native ✅
+0 JS errors · 0 failed requests ✅
+```
+
+**a11y probe:** 0 imgs w/o alt · 0 buttons w/o label · 0 empty links · 1 h1 · 33 headings.
+
+---
+
 ## סבב ניקוי — commit `c3fd6d5` (16:41 UTC)
 **סוגיה:** המבקר חשד שהאתר החי מגיש עדיין את `index.html` הישן מהשורש. בדיקה:
 - `gh api ... pages` → `build_type: "workflow"` ✅ (Pages מגיש רק את `_site` שנבנה)
