@@ -1,0 +1,16 @@
+{
+  "id": "home",
+  "title": "עמוד הבית",
+  "verified": "2026-07-06",
+  "source": "index.html hero",
+  "hero": {
+    "slides": [
+      { "image": "/images/drone_view_1.jpg", "alt": "צילום רחפן של מעלה עמוס — מבט 1" },
+      { "image": "/images/drone_view_2.jpg", "alt": "צילום רחפן של מעלה עמוס — מבט 2" },
+      { "image": "/images/drone_view_3.jpg", "alt": "צילום רחפן של מעלה עמוס — מבט 3" },
+      { "image": "/images/drone_view_4.jpg", "alt": "צילום רחפן של מעלה עמוס — מבט 4" }
+    ],
+    "heading": "ברוכים הבאים למעלה עמוס",
+    "tagline": "תורה · קהילה · ישוב הדעת"
+  }
+}
