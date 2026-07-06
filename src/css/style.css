@@ -1420,3 +1420,10 @@ body.dark .phone-item { background: #16213e; }
 .featured-item .featured-body { padding: 16px 22px; text-align: center; background: var(--sand); }
 .featured-item .featured-title { font-weight: 800; font-size: 1.1rem; margin: 0 0 4px; color: var(--primary-dark); }
 .featured-item .featured-subtitle { font-size: 0.88rem; color: var(--text-light); margin: 0; }
+
+/* Night-run additions */
+.section.is-empty { padding-top: 20px !important; padding-bottom: 20px !important; }
+.section.is-empty .section-header { margin-bottom: 10px !important; }
+.section.is-empty .empty-state { padding: 12px !important; }
+.empty-state { font-family: 'Heebo', sans-serif; }
+.verify-badge { display:inline-block;background:#fef3c7;color:#78350f;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600 }

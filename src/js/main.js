@@ -237,5 +237,17 @@
     wireSearch();
     wireExternalLinks();
     wireFadeUp();
+
+    // Collapse sections whose only content is an empty-state placeholder
+    setTimeout(() => {
+      const collapsible = ['#news', '#events', '#simchot', '#gemachim', '#marketplace',
+                           '#hot-bulletins', '#featured', '#announcements'];
+      collapsible.forEach(sel => {
+        const sec = document.querySelector(sel);
+        if (!sec) return;
+        const hasReal = sec.querySelector('article, .event-item, .simcha-item, .gemach-card, .market-card, .bulletin-card, .featured-card, .announcement');
+        if (!hasReal) sec.classList.add('is-empty');
+      });
+    }, 400);
   });
 })();
