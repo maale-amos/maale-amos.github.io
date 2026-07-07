@@ -51,6 +51,9 @@ async function run() {
         if (msg.type() !== 'error') return;
         const t = msg.text();
         if (IGNORE_URL.test(t)) return;
+        // Suppress bare "Failed to load resource" — always accompanied by a
+        // separate console log with the URL (which we filter above).
+        if (/^Failed to load resource:/.test(t)) return;
         errors.push({ type: 'console', msg: t });
       });
       page.on('requestfailed', r => {
