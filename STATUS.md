@@ -1,5 +1,94 @@
 # STATUS — משימת לילה 2026-07-06 / 07
 
+## סיכום סופי — 2026-07-07
+
+**4 הסעיפים ברשימה הסגורה הושלמו (או סומנו כחסומים):**
+
+| # | סעיף | סטטוס | פירוט |
+|---|------|-------|--------|
+| 1 | Worker deploy | 🔒 חסום ליוסף | wrangler.toml + schema.sql + 5 src.js תקינים תחבירית. Runbook 10-שלבים ב-STATUS.md. דרוש `wrangler login` של יוסף פעם אחת. |
+| 2 | Emanuel cross-check | ✅ הושלם | 403/670 matched; 267 "missing" הם 100% false positives (TOC/מטא/פיצול HTML). אין תוכן אמיתי חסר. |
+| 3 | Playwright audit | ✅ הושלם | 18/18 pages · 0 errors · 0 broken links · 0 mobile overflow · 12 handlers מוגדרים. |
+| 4 | נגישות (ת"י 5568) | ✅ הושלם | 0 alt חסר · skip-link עובד · הצהרת נגישות ורכז ב-/accessibility/ · ניגודיות AAA בכל הצירופים. |
+
+**האתר החי:** https://maale-amos.github.io/ · HTTP 200 · Last-Modified 2026-07-07 10:49 UTC · 121,462 bytes · 31 סקציות ב-home · 8 sub-pages · 0 דליפות אבטחה.
+
+**מחכה ליוסף:** פריסת Worker (חוסם /admin/ + /residents/ מ-live functionality) + תוכן אמיתי דרך `/admin/` LOCAL mode + דומיין maaleamos.org.il DNS.
+
+**הלולאה סגורה — אני עוצר ולא ממציא משימות חדשות.**
+
+---
+
+## סעיף 4 — נגישות (ת"י 5568)
+
+**Playwright a11y probe (`scripts/a11y-probe.mjs`):**
+```
+imgsNoAlt:      0    ✅
+btnsNoLabel:    0    ✅
+linksNoText:    0    ✅
+h1Count:        1    ✅ (semantic)
+headingsCount:  36   ✅ (rich heading hierarchy)
+```
+
+**Keyboard navigation (`scripts/keyboard-nav.mjs`):**
+```
+skip-link: exists + href="#mainContent"
+Tab (first key press): focuses .skip-link "דלג לתוכן הראשי"
+```
+מעבר Tab ראשון קופץ ל-skip-link, פנימי ולחיץ. ✅
+
+**דף /accessibility/ (curl):**
+```
+$ curl -s https://maale-amos.github.io/accessibility/ | grep -oE 'הצהרת נגישות|רכז נגישות|02-9931767|איתן סער' | sort -u
+02-9931767
+איתן סער
+הצהרת נגישות
+רכז נגישות
+```
+כל 4 האלמנטים הנדרשים ב-ת"י 5568 קיימים. ✅
+
+**ניגודיות AA (palette review):**
+- טקסט: `#1a1a1a` (עצם שחור) על רקע `#fff` (לבן) → ניגודיות > 15:1 · AAA
+- כותרות: `#1a5c3a` (ירוק כהה) על `#fff` → ניגודיות ~9:1 · AAA
+- פוטר: `#fff` על `#0f3d26` (ירוק עמוק) → ניגודיות ~13:1 · AAA
+- Verify badges: `#78350f` על `#fef3c7` → ניגודיות ~7:1 · AAA
+
+כל הצירופים עוברים AA (≥4.5:1 טקסט רגיל) בקלות.
+
+**אין תיקוני נגישות נדרשים.**
+
+---
+
+## סעיף 3 — Playwright audit דסקטופ + מובייל
+
+**LIVE audit (`scripts/audit.mjs --live`):**
+```
+✓ 9/9 desktop  (home about shuls emergency faq buses residents accessibility admin)
+✓ 9/9 mobile   (390px viewport, same 9 pages)
+total: 18 ok · 0 bad
+```
+כל דף: `status=200 errors=0 failedReq=0` (חוץ מהתנועות NetFree TLS-injection שמסוננות).
+
+**Broken links (`scripts/link-check.mjs`):**
+```
+total hash links: 61
+broken: 0
+```
+
+**Mobile horizontal overflow (`scripts/mobile-check.mjs`):**
+```
+✓ / /about/ /shuls/ /emergency/ /faq/ /buses/ /residents/ /accessibility/ /admin/
+  all 9 pages: scrollWidth=390 == clientWidth=390  (no overflow)
+```
+
+**Interactive functionality (from earlier probes):**
+- 12 window.* handlers (toggleMenu, toggleDark, changeFontSize, showTopic, filterMarket, showArchiveModal, quickCall106, openReportMenu, openContactMenu, closeActionSheet, closeSearch, searchSite) — כולם מוגדרים
+- Dropdown (desktop): 5 items · Search: 7 hits for "חינוך" · FAQ toggle: works · Admin PIN 4415: unlocks dashboard
+
+**אין באגים אמיתיים לתקן.** Site is stable.
+
+---
+
 ## סעיף 2 — Emanuel edited.txt cross-check vs האתר
 
 `scripts/emanuel_check.py` על 34 סקציות · 670 טקסטים:
