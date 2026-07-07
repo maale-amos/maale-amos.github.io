@@ -12,13 +12,15 @@ fs.mkdirSync(OUT, { recursive: true });
 const PAGES = [
   { slug: '',              name: 'home' },
   { slug: '/about/',       name: 'about' },
+  { slug: '/education/',   name: 'education' },
   { slug: '/shuls/',       name: 'shuls' },
   { slug: '/emergency/',   name: 'emergency' },
   { slug: '/faq/',         name: 'faq' },
   { slug: '/buses/',       name: 'buses' },
   { slug: '/residents/',   name: 'residents' },
+  { slug: '/admin/',       name: 'admin' },
   { slug: '/accessibility/', name: 'accessibility' },
-  { slug: '/admin/',       name: 'admin' }
+  { slug: '/contact/',     name: 'contact' }
 ];
 
 const results = [];

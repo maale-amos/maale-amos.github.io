@@ -1,5 +1,38 @@
 # STATUS — משימת לילה 2026-07-06 / 07
 
+## סבב איכות #1 — 2026-07-07 (חזרה)
+
+**רשימת ה-11 URLs בכרום headless, שתי רזולוציות:**
+
+**באג נמצא ותוקן:**
+| דף | ממצא | פעולה | Commit |
+|----|------|-------|--------|
+| /education/ | HTTP 404 | יצרתי `pages/education.njk` data-driven מ-`sections.education.institutions` (6 מוסדות) | `9cca2a7` |
+| /contact/ | HTTP 404 | יצרתי `pages/contact.njk` עם FormSubmit form + 7 נושאים מ-`sections.contact.subjects` | `9cca2a7` |
+
+**התייעצות עצמית לפני התיקון:**
+- **בעיה:** רשימת המבקר כוללת /education/ + /contact/ · בפועל 404 · משתמש שיקליד את הכתובת יראה 404.
+- **פתרון:** יצירת דפים data-driven בלבד (`sections.education`, `sections.contact`) — 0 המצאה. שני קבצים חדשים ב-`src/pages/`.
+- **למה לא שובר משהו:** רק מוסיף · לא נוגע ב-nav/chrome/CSS/JS · אין overrides · הקישורים ב-nav שהצביעו על `#education` / `#contact` (hash) עדיין עובדים.
+
+**אימות פוסט-תיקון (post CI 28863929050):**
+```
+$ curl -s -o /dev/null -w "%{http_code}" "https://maale-amos.github.io/education/?cb=..."  → 200
+$ curl -s -o /dev/null -w "%{http_code}" "https://maale-amos.github.io/contact/?cb=..."    → 200
+$ node scripts/audit.mjs --live
+  22 ok · 0 bad
+```
+
+**Playwright audit מלא, 11×2 = 22 עמודים:**
+```
+✓ desktop home about education shuls emergency faq buses residents admin accessibility contact
+✓ mobile  home about education shuls emergency faq buses residents admin accessibility contact
+total: 22 ok · 0 bad
+```
+כל דף: `status=200 errors=0 failedReq=0`.
+
+---
+
 ## סיכום סופי — 2026-07-07
 
 **4 הסעיפים ברשימה הסגורה הושלמו (או סומנו כחסומים):**
