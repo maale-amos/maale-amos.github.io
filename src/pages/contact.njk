@@ -1,0 +1,36 @@
+---
+layout: base.njk
+title: פנייה מקוונת
+description: שלחו פנייה למזכירות מעלה עמוס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.contact.title }}</h1>
+    <p>{{ sections.contact.subtitle }}</p>
+
+    <form class="contact-form" method="POST" action="https://formsubmit.co/6742853@gmail.com" style="max-width:600px;margin:24px auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+      <input type="hidden" name="_subject" value="פנייה חדשה מאתר מעלה עמוס">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://maale-amos.github.io/contact/">
+      <input type="hidden" name="_template" value="table">
+
+      <p><label>שם מלא: <input type="text" name="name" required placeholder="ישראל ישראלי" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px"></label></p>
+      <p><label>טלפון: <input type="tel" name="phone" required placeholder="050-1234567" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px"></label></p>
+      <p><label>דוא"ל: <input type="email" name="email" placeholder="email@example.com" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px"></label></p>
+      <p><label>נושא:
+        <select name="subject" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px">
+          <option value="">בחרו נושא...</option>
+          {%- for s in sections.contact.subjects %}
+          <option>{{ s }}</option>
+          {%- endfor %}
+        </select>
+      </label></p>
+      <p><label>תוכן הפנייה:
+        <textarea name="message" rows="5" required placeholder="פרטו את פנייתכם..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px"></textarea>
+      </label></p>
+      <p><button type="submit" class="btn btn-primary" style="padding:12px 24px;background:var(--primary);color:#fff;border:0;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer">
+        <i class="bi bi-send" aria-hidden="true"></i> שליחת פנייה
+      </button></p>
+    </form>
+  </div>
+</section>

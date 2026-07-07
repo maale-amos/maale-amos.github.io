@@ -1,0 +1,25 @@
+---
+layout: base.njk
+title: חינוך
+description: מוסדות חינוך במעלה עמוס — חדר לבנים, בית יעקב, גנים, כולל, מתנ"ס
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.education.title }}</h1>
+    <p>{{ sections.education.subtitle }}</p>
+
+    <div class="edu-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px">
+      {%- for i in sections.education.institutions %}
+      <div class="edu-card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid var(--primary)">
+        <h3 style="color:var(--primary-dark);margin-bottom:10px">{{ i.name }}</h3>
+        <p>{{ i.desc }}</p>
+        {% if i.hours %}<p><strong>שעות:</strong> {{ i.hours }}</p>{% endif %}
+        {% if i.moshadCode %}<p><strong>קוד מוסד:</strong> {{ i.moshadCode }}</p>{% endif %}
+        {% if i.ages %}<p><strong>גילאים:</strong> {{ i.ages }}</p>{% endif %}
+        {% if i.seder %}<p><strong>סדרים:</strong> {{ i.seder }}</p>{% endif %}
+        {% if i.activities %}<p><strong>{{ i.activities }}</strong></p>{% endif %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
