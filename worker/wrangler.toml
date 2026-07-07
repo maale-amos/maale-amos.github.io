@@ -3,26 +3,24 @@ main = "src/index.js"
 compatibility_date = "2026-01-01"
 
 # Secrets (set via `wrangler secret put`):
-#   JWT_SECRET          — 32-byte random hex, for session tokens
-#   SMS_API_KEY         — Yemot API key for send-sms
-#   ADMIN_PIN_HASH      — bcrypt hash of admin PIN
-#   YEMOT_USER          — יוסף's Yemot username
-#   YEMOT_PASS          — יוסף's Yemot password
+#   SESSION_KEY_HEX     — 32-byte hex, used for HMAC-signing session cookies
+# (Passwords are hashed with PBKDF2 in D1 — no password secret needed.)
 
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "REPLACE_WITH_KV_ID"
+id = "f7620458792347f0b3524b55aaa79dfb"
 
 [[kv_namespaces]]
-binding = "OTP"
-id = "REPLACE_WITH_KV_ID"
+binding = "RATE_LIMIT"
+id = "1b22270be32f4727b521270ab2944a31"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "maale-amos"
-database_id = "REPLACE_WITH_D1_ID"
+database_id = "40dd96ad-32b0-45fc-8e74-7e7ee937afa3"
 
 [vars]
 CORS_ORIGIN = "https://maale-amos.github.io"
-OTP_TTL_SECONDS = "300"
-SESSION_TTL_SECONDS = "2592000"
+SESSION_TTL_SECONDS = "86400"
+LOGIN_RATE_MAX = "5"
+LOGIN_RATE_WINDOW_SECONDS = "60"
