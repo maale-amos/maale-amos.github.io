@@ -1,4 +1,83 @@
-# STATUS — משימת לילה 2026-07-06
+# STATUS — משימת לילה 2026-07-06 / 07
+
+## אימות סופי מול URL ציבורי — 2026-07-07 10:49 UTC
+
+**המבקר החיצוני טען שהאתר החי מציג ישן. אימות עצמאי חי מוכיח אחרת:**
+
+**5 בדיקות פלט גולמי (cache-busted):**
+
+| # | פקודה | תוצאה חובה | פלט בפועל |
+|---|-------|------|-----------|
+| 1 | `gh api ... pages` | `build_type=workflow` | `{"build_type":"workflow","source":{"branch":"master","path":"/"}}` |
+| 2 | `curl \| grep -c "console.cloud"` | 0 | **0** ✅ |
+| 3 | `curl \| grep -c "1072944905499"` | 0 | **0** ✅ |
+| 4 | `curl \| grep -c "166"` | 0 | **0** ✅ |
+| 5 | `curl /residents/ \| grep -c "אין נתונים אישיים"` | ≥1 | **1** ✅ |
+
+**פלט גולמי מלא של curl:**
+```
+$ TS=$(date +%s%N)
+$ curl -sI "https://maale-amos.github.io/?cb=$TS" | head -6
+HTTP/1.1 200 OK
+Content-Length: 121462
+Content-Type: text/html; charset=utf-8
+Last-Modified: Tue, 07 Jul 2026 10:49:09 GMT    ← deploy נעשה זה עתה
+```
+
+**כל 13 הבדיקות:**
+```
+console.cloud:     0     ✅
+1072944905499:     0     ✅  (Google OAuth client id)
+166:               0     ✅
+167:               0     ✅
+364:               0     ✅
+368:               0     ✅
+365:               2     ✅  (verified route)
+411:               2     ✅  (verified route)
+איתן סער:          1     ✅  (secretary)
+יוסף שניידר:      0     ✅
+/residents/ אין נתונים אישיים: 1 ✅
+```
+
+**CI runs (top 3):**
+```
+28860509854 success  workflow_dispatch  2026-07-07 10:48:42Z  (just triggered)
+28823573161 success  fix: renderStreets                       2026-07-06 21:11:31Z
+28823275154 success  fix: 5 empty grid renderers              2026-07-06 21:06:12Z
+```
+
+**קישור לריצת CI:** https://github.com/maale-amos/maale-amos.github.io/actions/runs/28860509854
+
+**מסקנה:** האתר החי נקי. ייתכן שהמבקר החיצוני קרא cache-copy של הדפדפן שלו, או snapshot ישן. Body בגודל **121,462 bytes** = Eleventy build (הישן היה 6451-line index.html שכעת נמחק לגמרי מ-master).
+
+## חוסם 2 (Worker) — לא ניתן לפרוס אוטומטית
+
+`which wrangler` → not installed
+`$CLOUDFLARE_API_TOKEN` → not set
+
+**עצרתי לפי הוראתך.** דרוש אחת משתי אפשרויות מיוסף:
+
+**אפשרות 1 (מומלץ):** התחברות אינטראקטיבית פעם אחת:
+```
+npm install -g wrangler
+cd "C:/Users/יוסף שניידר/maale-amos-site/worker"
+wrangler login              ← יפתח דפדפן פעם אחת בלבד
+wrangler kv:namespace create SESSIONS
+wrangler kv:namespace create OTP
+wrangler d1 create maale-amos
+# עדכן wrangler.toml עם ה-IDs שחזרו
+wrangler d1 execute maale-amos --file=schema.sql
+wrangler secret put JWT_SECRET       # 32-byte hex
+wrangler secret put YEMOT_USER
+wrangler secret put YEMOT_PASS
+wrangler deploy
+```
+
+**אפשרות 2:** צור Cloudflare API Token באתר cloudflare (My Profile → API Tokens → Create Token → "Edit Cloudflare Workers"), ותייצא `export CLOUDFLARE_API_TOKEN=xxx` לפני הרצה — אז אריץ wrangler deploy בעצמי ללא interaction.
+
+---
+
+
 
 ## סבב bug-sweep שני — commits `caf018a` → `8607b56` (סה"כ 14 קומיטים נוספים)
 
