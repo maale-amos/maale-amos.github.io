@@ -67,7 +67,7 @@ async function run() {
 
       let status = 0;
       try {
-        const res = await page.goto(url, { waitUntil: 'load', timeout: 30000 });
+        const res = await page.goto(url, { waitUntil: 'load', timeout: 60000 });
         status = res?.status() || 0;
       } catch (e) {
         errors.push({ type: 'nav', msg: e.message });
