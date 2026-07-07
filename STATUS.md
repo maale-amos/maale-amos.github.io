@@ -1,5 +1,77 @@
 # STATUS — משימת לילה 2026-07-06 / 07
 
+## Auth username+password — 2026-07-07 12:35 UTC
+
+**מה שבוצע ואומת:**
+
+| שלב | פלט גולמי |
+|-----|-----------|
+| 1. יצירת KV `SESSIONS` | `id: f7620458792347f0b3524b55aaa79dfb` |
+| 2. יצירת KV `RATE_LIMIT` | `id: 1b22270be32f4727b521270ab2944a31` |
+| 3. יצירת D1 `maale-amos` | `id: 40dd96ad-32b0-45fc-8e74-7e7ee937afa3` (region WEUR) |
+| 4. `wrangler d1 execute --remote --command "CREATE TABLE admins..."` | `rows_written: 5 · success: true` |
+| 5. `wrangler secret put SESSION_KEY_HEX` (32-byte hex) | `Success! Uploaded secret SESSION_KEY_HEX` |
+| 6. `wrangler deploy` | `Deployed maale-amos-api triggers → https://maale-amos-api.6742853.workers.dev`<br>`Current Version ID: 1fa91218-b4fb-4abc-b0e4-794916753963` |
+| 7. `node create-admin.mjs admin <REDACTED_PWD>!` | `INSERT INTO admins → rows_written: 1 · ✓ Admin ready` |
+| 8. `wrangler d1 execute --command "SELECT ... FROM admins"` | `id:1 · username:admin · role:admin` |
+| 9. CSP updated לכלול origin של Worker | commit `b38b086` · CI success |
+| 10. `curl OPTIONS /api/admin/login` (preflight) | `HTTP 204` · `Access-Control-Allow-Origin: https://maale-amos.github.io` · `Access-Control-Allow-Credentials: true` |
+| 11. `/admin/` HTML has username+password fields (no OTP) | grep confirms |
+| 12. `/js/admin.js` calls Worker URL (no PIN/SMS/Yemot code) | grep confirms |
+
+**מה שחסום מלהיבדק אצלי (חובה שיוסף יבדוק ידנית מדפדפן):**
+
+`curl POST https://maale-amos-api.6742853.workers.dev/api/admin/login → HTTP 418 blockByNetFree`
+
+NetFree חוסמת את הדומיין `.workers.dev` על המחשב שלי (TLS interception) — לא יכול לבצע POST end-to-end.
+Playwright headless על אותו מחשב מקבל אותו block.
+
+**הוראות לבדיקה סופית של יוסף (חובה לפני שימוש):**
+
+1. **Whitelist ב-NetFree admin panel:**
+   הוסף כתובת `maale-amos-api.6742853.workers.dev` לרשימת ההיתר
+   (או קטגוריה כללית: Cloudflare Workers).
+
+2. **פתח דפדפן אמיתי:**
+   ```
+   https://maale-amos.github.io/admin/
+   ```
+
+3. **בדיקה 1 — סיסמה שגויה:**
+   הזן `username: admin` · `password: wrong`
+   ציפייה: הודעה "שם משתמש או סיסמה שגויים"
+
+4. **בדיקה 2 — סיסמה נכונה:**
+   הזן `username: admin` · `password: <REDACTED_PWD>!`
+   ציפייה: הדשבורד מוצג עם 5 טאבים
+
+5. **בדיקה 3 — Session persistence:**
+   רענן את הדף עם F5.
+   ציפייה: עדיין מחובר, אין צורך להזין שוב.
+
+6. **בדיקה 4 — התנתקות:**
+   לחץ "יציאה".
+   ציפייה: חזרה למסך כניסה.
+
+7. **בדיקה 5 — שינוי סיסמה (חובה מיד אחרי הכניסה!):**
+   לחץ "שנה סיסמה", הזן `<REDACTED_PWD>!` ובחר סיסמה חדשה חזקה.
+
+**פקודות ניהול נוספות ליוסף:**
+
+```bash
+# צור/החלף משתמש (נניח username=eitan, password=<בחר>)
+cd "C:/Users/יוסף שניידר/maale-amos-site/worker"
+node scripts/create-admin.mjs <username> <password>
+
+# ראה את כל המנהלים
+wrangler d1 execute maale-amos --remote --command "SELECT id, username, role, last_login_at FROM admins"
+
+# ראה audit log
+wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, target, ip, at FROM audit_log ORDER BY at DESC LIMIT 20"
+```
+
+---
+
 ## סבב איכות #1 — 2026-07-07 (חזרה)
 
 **רשימת ה-11 URLs בכרום headless, שתי רזולוציות:**
