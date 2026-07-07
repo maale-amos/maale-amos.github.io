@@ -50,6 +50,76 @@ console.cloud:     0     ✅
 
 **מסקנה:** האתר החי נקי. ייתכן שהמבקר החיצוני קרא cache-copy של הדפדפן שלו, או snapshot ישן. Body בגודל **121,462 bytes** = Eleventy build (הישן היה 6451-line index.html שכעת נמחק לגמרי מ-master).
 
+## סעיף 1 (ליוסף) — Worker deploy runbook · אימות תצורה
+
+**קונפיג בדוק וסולק תחבירית:**
+```
+$ ls worker/
+  README.md · schema.sql · wrangler.toml · src/{auth,content,http,index,residents}.js
+$ node --check worker/src/*.js → ALL SYNTAX OK
+$ head worker/wrangler.toml → name="maale-amos-api" · main=src/index.js
+                              compat_date=2026-01-01 · KV bindings SESSIONS+OTP
+                              D1 binding "maale-amos" (IDs REPLACE_WITH_KV_ID)
+$ head worker/schema.sql   → residents, content, announcements, events, audit_log
+```
+
+**הפקודות המדויקות שיוסף צריך להריץ פעם אחת (ההזמנה למטה):**
+
+```bash
+# 1. התקנה ראשונית של wrangler (פעם בחיים)
+npm install -g wrangler
+
+# 2. התחברות לחשבון Cloudflare — פעם בחיים, פותח דפדפן
+cd "C:/Users/יוסף שניידר/maale-amos-site/worker"
+wrangler login
+
+# 3. יצירת שני KV namespaces (חוזר עם ID; העתק ל-wrangler.toml)
+wrangler kv:namespace create SESSIONS
+wrangler kv:namespace create OTP
+
+# 4. יצירת D1 database (חוזר עם ID; העתק ל-wrangler.toml)
+wrangler d1 create maale-amos
+
+# 5. עדכן ידנית את worker/wrangler.toml — החלף שלושה REPLACE_WITH_*_ID
+#    עם ה-IDs שחזרו מהפקודות למעלה.
+
+# 6. יצירת ה-schema במסד D1
+wrangler d1 execute maale-amos --file=schema.sql
+
+# 7. הכנס secrets (Cloudflare Dashboard → Workers → Settings → Variables)
+#    או ב-CLI (כל פקודה שואלת ל-value):
+wrangler secret put JWT_SECRET       # value: 32-byte hex, למשל: openssl rand -hex 32
+wrangler secret put YEMOT_USER       # value: ה-username של Yemot של יוסף
+wrangler secret put YEMOT_PASS       # value: הסיסמה
+# רשות:
+wrangler secret put ADMIN_PIN_HASH   # bcrypt של PIN המנהל (אחרת נופל ל-LOCAL)
+
+# 8. פריסה
+wrangler deploy
+
+# 9. אחרי פריסה — קבל את ה-URL מהפלט (למשל https://maale-amos-api.workers.dev)
+#    עדכן ידנית ב-src/js/admin.js את השורה:
+#    const API = window.__API__ || 'https://maale-amos-api.workers.dev';
+#    (או הגדר CORS_ORIGIN + הוסף DNS route)
+
+# 10. הוסף רשומות תושבים דרך D1:
+wrangler d1 execute maale-amos --command \
+  "INSERT INTO residents (phone, family_name, role, active)
+   VALUES ('+972501234567', 'סער', 'admin', 1)"
+```
+
+**אימות מהצד שלי אחרי הפריסה** (רצוף אחרי שיוסף מודיע שסיים):
+```
+curl -s -X POST https://maale-amos-api.workers.dev/api/auth/request \
+  -H 'Content-Type: application/json' \
+  -d '{"phone":"+972501234567","deliver":"sms"}'   → HTTP 200 {"ok":true,"deliver":"sms",...}
+curl -sI https://maale-amos-api.workers.dev/api/me → HTTP 401 {"error":"unauthorized"}
+```
+
+**מה חסום עד יוסף:** wrangler לא מותקן · אין `$CLOUDFLARE_API_TOKEN` · אני לא ממציא credentials.
+
+---
+
 ## חוסם 2 (Worker) — לא ניתן לפרוס אוטומטית
 
 `which wrangler` → not installed
