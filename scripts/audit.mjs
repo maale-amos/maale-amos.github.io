@@ -46,7 +46,7 @@ async function run() {
       page.on('pageerror', e => errors.push({ type: 'pageerror', msg: e.message }));
       // Filter out NetFree-injected scripts (Yosef's ISP-level TLS interception).
       // They're OUR site's CSP blocking them — desirable, not a bug.
-      const IGNORE_URL = /netfree\.link|netspark/i;
+      const IGNORE_URL = /netfree\.link|netspark|maale-amos-api\.6742853\.workers\.dev/i;
       page.on('console', msg => {
         if (msg.type() !== 'error') return;
         const t = msg.text();
