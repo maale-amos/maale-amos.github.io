@@ -72,6 +72,25 @@ wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, targ
 
 ---
 
+## סבב איכות #3 — 2026-07-07 15:38 UTC
+
+**באג נמצא:** /education/ standalone עמוד מציג כותרת+subtitle אבל 0 כרטיסים.
+
+**התייעצות עצמית:**
+- **בעיה:** התבנית שלי משתמשת ב-`sections.education.institutions` (המצאה מסבב #1) אבל ה-JSON האמיתי מגדיר `sections.education.items` עם מבנה שדות אחר (name, description, hours, hoursStatus, note, noteStatus, icon).
+- **פתרון:** rewrite `pages/education.njk` לפי הסכימה האמיתית של ה-JSON.
+- **לא שובר:** `section-education.njk` (דף הבית) hardcoded — לא נגעתי בו.
+
+**אימות פוסט-תיקון:**
+```
+$ npx @11ty/eleventy → Wrote 13 files
+$ grep -c 'חדר לבנים\|כולל שבות' _site/education/index.html → 3
+$ curl -s "https://maale-amos.github.io/education/?cb=..." | grep -c ... → 3
+```
+6 כרטיסים חוזרים לרנדר עם icons + badges "בבדיקה" כשרלוונטי · commit `d60104c` · CI success.
+
+---
+
 ## סבב איכות #1 — 2026-07-07 (חזרה)
 
 **רשימת ה-11 URLs בכרום headless, שתי רזולוציות:**
