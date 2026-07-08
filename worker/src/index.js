@@ -22,15 +22,16 @@ export default {
     }
 
     try {
-      if (path === '/api/admin/login')            return handleLogin(request, env);
-      if (path === '/api/admin/logout')           return handleLogout(request, env);
-      if (path === '/api/admin/change-password')  return handleChangePassword(request, env);
-      if (path === '/api/me')                     return handleMe(request, env);
-      if (path.startsWith('/api/content/'))       return handleContent(request, env, path);
+      // await so rejections from async handlers are caught here, not by CF middleware.
+      if (path === '/api/admin/login')            return await handleLogin(request, env);
+      if (path === '/api/admin/logout')           return await handleLogout(request, env);
+      if (path === '/api/admin/change-password')  return await handleChangePassword(request, env);
+      if (path === '/api/me')                     return await handleMe(request, env);
+      if (path.startsWith('/api/content/'))       return await handleContent(request, env, path);
       return error(404, 'not_found', env);
     } catch (e) {
-      console.error(e);
-      return error(500, 'internal_error', env);
+      console.error('unhandled:', e && e.stack || e);
+      return error(500, 'internal_error', env, String((e && e.message) || 'internal_error'));
     }
   }
 };
