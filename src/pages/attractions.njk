@@ -1,0 +1,26 @@
+---
+layout: base.njk
+title: אטרקציות וטיולים
+description: אטרקציות ומקומות ראיה בסביבת מעלה עמוס — הרודיון, מערת חריטון, יקב גוש עציון ועוד
+---
+<section class="page-content">
+  <div class="container">
+    <h1>{{ sections.attractions.title }}</h1>
+    <p>{{ sections.attractions.subtitle }}
+      {% if sections.attractions.distancesStatus == "בבדיקה" %}
+        · <small class="verify-badge">אתרים ומרחקים בבדיקה</small>
+      {% endif %}
+    </p>
+
+    <div class="project-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:24px">
+      {%- for a in sections.attractions.items %}
+      <div class="project-card" style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid var(--primary)">
+        <i class="bi {{ a.icon or 'bi-geo-alt' }}" aria-hidden="true" style="font-size:2rem;color:var(--primary);display:block;margin-bottom:8px"></i>
+        <h3 style="color:var(--primary-dark);margin-bottom:8px">{{ a.name }}</h3>
+        <p style="color:var(--text-light);font-size:0.9rem;line-height:1.6">{{ a.description }}</p>
+        {% if a.distance %}<p style="margin-top:12px"><i class="bi bi-geo-alt" aria-hidden="true"></i> <strong>מרחק:</strong> {{ a.distance }}</p>{% endif %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>

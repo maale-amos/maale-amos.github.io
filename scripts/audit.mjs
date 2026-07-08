@@ -17,6 +17,7 @@ const PAGES = [
   { slug: '/emergency/',   name: 'emergency' },
   { slug: '/faq/',         name: 'faq' },
   { slug: '/buses/',       name: 'buses' },
+  { slug: '/attractions/', name: 'attractions' },
   { slug: '/residents/',   name: 'residents' },
   { slug: '/admin/',       name: 'admin' },
   { slug: '/accessibility/', name: 'accessibility' },
