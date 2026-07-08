@@ -1,5 +1,105 @@
 # STATUS — משימת לילה 2026-07-06 / 07
 
+## ★★★ סקירת אבטחה מקיפה + פלטפורמת קליטה — 2026-07-09 (ליל 08→09)
+
+**5 סוכני חקירה במקביל** מצאו: **3 CRITICAL · 8 HIGH · 12 MEDIUM · 8 LOW**.
+תיעוד מלא: `memory/project_maale_amos_security_audit_2026_07_08.md`.
+
+### פעולה קריטית של יוסף (רק אתה יכול):
+🔴 **Google OAuth של Drive חשוף בריפו פומבי `vimeo-downloader`**.
+`client_secret = <REDACTED_KEY>` · `refresh_token = 1//03doYP5sR8165...JtFuhLc`
+1. `https://console.cloud.google.com/apis/credentials` → מחק/החלף client_secret של `1072944905499-vm2v2i5dvn0a0d2o4ca36i1vge8cvbn0`.
+2. `https://myaccount.google.com/permissions` → revoke ל-OAuth client.
+3. עדכן secret `GOOGLE_REFRESH_TOKEN` בכל ריפו: vimeo-downloader, BHT, cheder-bht, gabbaim, tochen-echad, klita.
+4. אני הסרתי את ה-hardcoded fallbacks (`6afc1ab`). היסטוריית git עדיין מכילה — אחרי rotation ההיסטוריה מנוטרלת.
+
+### מה תוקן בסשן (deploys):
+
+**Cloudflare Worker — maale-amos-api Version `9df3507a`:**
+- **H-1** password_changed_at + `gen` בטוקן → password change מבטל כל session קודם
+- **H-2** dummy PBKDF2 על user לא קיים → אין timing enumeration
+- **M-1/M-2** timingSafeEqual + verify HMAC לפני KV → אין token oracle
+- **M-3** iat + server-side TTL check
+- **M-6** 256KB body cap + reject `__proto__`/`constructor`/`prototype`
+- **M-8** CORS origin allow-list (was env-var-only)
+- **L-3** SESSION_KEY_HEX length assertion
+- **C-1** trust רק CF-Connecting-IP (drop X-Forwarded-For)
+- **I-1** handleMe enforces GET
+- Rate-limit login by IP AND username
+- `nosniff` + `Referrer-Policy: no-referrer` על כל תגובה
+
+**dl-bridge — Worker Version `a15bd873`:**
+- Constant-time BRIDGE_TOKEN compare (SHA-256 digest)
+- **URL validation:** reject shell metachars + block localhost/RFC1918/169.254 metadata
+- Format + folder allow-list
+- Origin allow-list (was `*`)
+- 8KB body cap
+- GitHub error body returned (was swallowed)
+- GET / no longer enumerates endpoints
+- **KV rate limit:** 30/min + 200/hr per-token
+- `.gitignore` נוצר (מונע חשיפה עתידית של `.bridge_token`/`.gh_pat`)
+
+**vimeo-downloader workflows (commits `6afc1ab`, `2c2f512`):**
+- `download-to-drive.yml` (dl-bridge target): URL/FORMAT/QUALITY דרך `env:` block, scheme check, shell-metachar reject → **סוגר את שרשרת ה-RCE החמורה ביותר**
+- `universal-download.yml`, `crawl-site.yml`, `tochen-echad-weekly.yml`: הסרת fallbacks של OAuth, fail-fast if secrets missing
+- `yemot-health.yml`: הסרת סיסמת IVR `<REDACTED_PWD>`; YEMOT_PASS מ-secrets
+- `nli-batch.yml`, `search.yml`, `google-web-search.yml`: env-block לכל user input → סוגר 4 injection sinks נוספים
+
+**Frontend:**
+- admin.js structure editor: DOM builders + textContent (H-M2 XSS via `s.title`)
+- Nunjucks safeUrl filter: reject `javascript:`/`data:`/`vbscript:`
+- section-buses moovitUrl + section-about mapUrl → מסוננים
+- iframe מפה: `sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"`
+- admin.njk + klita.njk: frame-buster בראש הדף (clickjacking)
+
+### פלטפורמת קליטה — `/klita/` (חדש)
+
+**Worker:** `src/klita.js` — endpoints:
+- `POST /api/klita/register` — פתיחת תיק + סיסמה + פרטי משפחה. rate-limited 3/hour/IP
+- `GET /api/klita/me` — טעינת רשומת המבקש + טפסים (Bearer)
+- `POST /api/klita/applicant` — עדכון פרטי משפחה (auto-fill source)
+- `POST /api/klita/form` — שמירת טופס (draft/submitted). **מעדכן אוטומטית את applicants** מכל שדה שנמצא בטופס → אין צורך למלא שוב פעם הבאה
+- `GET /api/klita/form/:id` — שליפת טופס (owner / committee / admin)
+
+**Schema (migrated to prod D1):**
+- `admins`: `password_changed_at`, `email`, `active` נוספו
+- `applicants`: 15 שדות (משפחה, בעל, אישה, ת.ז., טלפון, מסלול, סטטוס)
+- `application_forms`: form_type + form_data (JSON) + status + signed_file_key
+
+**Frontend `/klita/`:** SPA-lite (single page, 6 views via `data-view`):
+1. Welcome — בחירת register/login
+2. Register — 10 שדות בסיסיים
+3. Login — email + password
+4. Portal — טפסים קיימים + סטטוס + 10 שלבים
+5. Applicant — עדכון פרטי משפחה (auto-fill source)
+6. Questionnaire — 5 חלקים (24 שדות) — **pre-filled מ-applicant record**
+7. Print — תצוגה להדפסה, `window.print()` לחתימה ידנית
+
+**זרימת עבודה:**
+1. משפחה נרשמת → נכנסת לפורטל
+2. פותחת שאלון → שדות שם/ת.ז./טלפון pre-filled מהרישום
+3. ממלאת את השאר → שמירה או Submit
+4. Submit → מציג תצוגת הדפסה → משפחה מדפיסה, חותמת, סורקת
+5. **בטופס הבא**: אין צורך למלא שוב את השם/ת.ז./טלפון — הכל מהרשומה
+
+**מה עוד לא נבנה (עתיד):**
+- העלאת PDF חתום
+- ועדת קבלה UI (הצבעה, החלטות)
+- 10 שלבי הקליטה — שלב-שלב עם מסמכים ייעודיים
+- מיילים אוטומטיים
+
+### מה נותר פתוח (מכוסה ב-memory `project_maale_amos_security_audit_2026_07_08.md`):
+
+- **H-M4** CSP `unsafe-inline` — דורש refactor של כל inline handlers ל-addEventListener
+- Rate-limit atomic (Durable Objects / CF Rate Limit binding)
+- CSP tighten `img-src https:` → allowlist
+- History rewrite של הריפו לניקוי המפתחות המודלפים
+- Fine-grained PAT ל-dl-bridge (במקום gh CLI token)
+- Password change: אין UI ב-klita עדיין
+
+---
+
+
 ## Auth username+password — 2026-07-07 12:35 UTC
 
 **מה שבוצע ואומת:**
