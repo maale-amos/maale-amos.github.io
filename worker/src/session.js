@@ -41,7 +41,12 @@ export async function issueSessionToken(uid, env) {
 }
 
 export async function getSession(request, env) {
-  const token = readSessionCookie(request);
+  // Prefer Authorization: Bearer <token>. Fallback to session cookie.
+  // Bearer path is needed for the Apps Script proxy flow (cookies are scoped to
+  // script.google.com, not workers.dev, so we pass the token in a header).
+  const authHeader = request.headers.get('Authorization') || '';
+  const bearerMatch = authHeader.match(/^Bearer\s+([^\s]+)$/i);
+  const token = bearerMatch ? bearerMatch[1] : readSessionCookie(request);
   if (!token) return null;
   const raw = await env.SESSIONS.get(token, 'json');
   if (!raw) return null;

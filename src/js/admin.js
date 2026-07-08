@@ -1,23 +1,54 @@
-// admin.js — פאנל ניהול. מדבר עם Cloudflare Worker.
-// Auth: username + password → HttpOnly Secure session cookie מהשרת.
+// admin.js — פאנל ניהול. מדבר עם Cloudflare Worker דרך Apps Script proxy.
+// למה proxy: NetFree חוסמת POST ל-workers.dev עם HTTP 418. script.google.com
+// לא חסום, אז ה-Apps Script מקבל את הבקשה ומעביר ל-Worker.
+// Auth: username + password → sessionToken (בגוף התגובה) → localStorage → Bearer.
 (function () {
   'use strict';
 
-  const API = 'https://maale-amos-api.6742853.workers.dev';
+  // === CONFIG ===
+  // Direct = ה-Worker ישירות. עובד רק אם NetFree מאשר workers.dev.
+  const DIRECT_URL = 'https://maale-amos-api.6742853.workers.dev';
+  // Proxy = Apps Script Web App URL. יוסף חייב לפרוס את worker-proxy/Code.gs
+  // ואז להזין את ה-URL כאן.
+  // אם ריק — הקוד ינסה Direct קודם, ואם ייכשל יראה הודעה מתאימה.
+  const PROXY_URL = '';
+
   const $ = id => document.getElementById(id);
   const gate = $('adminGate');
   const dash = $('adminDashboard');
 
-  async function api(path, opts = {}) {
-    const res = await fetch(API + path, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
-      ...opts
+  const TOKEN_KEY = 'ma_admin_session_token';
+  function getToken()   { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
+  function setToken(t)  { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {} }
+
+  async function apiViaProxy(path, opts) {
+    const method = (opts.method || 'GET').toUpperCase();
+    const body   = opts.body ? JSON.parse(opts.body) : undefined;
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // avoid preflight
+      body: JSON.stringify({ path, method, body, auth: getToken() })
     });
-    let body = null;
-    try { body = await res.json(); } catch {}
-    if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body });
-    return body;
+    if (!res.ok) throw Object.assign(new Error('proxy_error'), { status: res.status });
+    const env = await res.json();
+    // env = { status: <worker HTTP code>, body: <worker JSON> }
+    if (env.status && env.status >= 400) throw Object.assign(new Error('worker_error'), { status: env.status, body: env.body });
+    return env.body;
+  }
+
+  async function apiDirect(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    const tok = getToken();
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    const res = await fetch(DIRECT_URL + path, { credentials: 'include', ...opts, headers });
+    let bodyJson = null; try { bodyJson = await res.json(); } catch {}
+    if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
+    return bodyJson;
+  }
+
+  async function api(path, opts = {}) {
+    if (PROXY_URL) return apiViaProxy(path, opts);
+    return apiDirect(path, opts);
   }
 
   function show(msg, ok = true) {
@@ -33,6 +64,7 @@
     show('בודק…');
     try {
       const r = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+      if (r.sessionToken) setToken(r.sessionToken);
       unlock(r.user);
     } catch (e) {
       if (e.status === 401) show(e.body?.message || 'שם משתמש או סיסמה שגויים', false);
@@ -54,6 +86,7 @@
   // --- Logout ---
   $('adminLogout').addEventListener('click', async () => {
     try { await api('/api/admin/logout', { method: 'POST' }); } catch {}
+    setToken('');
     location.reload();
   });
 

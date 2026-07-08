@@ -60,7 +60,13 @@ async function handleLogin(request, env) {
     'INSERT INTO audit_log (actor_id, action, ip) VALUES (?, ?, ?)'
   ).bind(row.id, 'login', ip).run();
 
-  return json({ ok: true, user: { id: row.id, username, role: row.role } }, env, 200, {
+  // Return token in body too (Apps Script proxy path — cookies scoped to
+  // script.google.com won't reach us; client will use Authorization: Bearer).
+  return json({
+    ok: true,
+    user: { id: row.id, username, role: row.role },
+    sessionToken: token
+  }, env, 200, {
     'Set-Cookie': setSessionCookie('session', token, { maxAge: Number(env.SESSION_TTL_SECONDS) })
   });
 }
