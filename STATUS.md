@@ -72,6 +72,46 @@ wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, targ
 
 ---
 
+## CORS preflight removed — 2026-07-08 · commit `b1ba3a4` · Build run `28941467740` (success)
+
+**דיווח יוסף:** דפדפן עדיין נופל על CORS למרות שה-Worker מחזיר Access-Control-Allow-Origin ב-curl.
+
+**סיבת שורש:** `apiDirect` שלח `Content-Type: application/json` → הדפדפן מפעיל **preflight OPTIONS** אוטומטי. אם NetFree מאשר `POST` אבל חוסם/מסלף `OPTIONS`, הדפדפן נופל על preflight ולא שולח את ה-POST בכלל — התוצאה: שגיאת CORS גנרית. גם `credentials:'include'` מוסיף דרישות preflight (Allow-Credentials חייב על התגובה).
+
+**התיקון (commit `b1ba3a4`):**
+```javascript
+// src/js/admin.js apiDirect
+const headers = { 'Content-Type': 'text/plain;charset=utf-8', ... };  // ← was application/json
+if (tok) headers['Authorization'] = 'Bearer ' + tok;
+const res = await fetch(DIRECT_URL + path, { ...opts, headers });     // ← dropped credentials:'include'
+```
+
+- `text/plain` = **simple request** בעיני הדפדפן → **בלי preflight**. שולח POST ישירות.
+- Worker's `request.json()` מנתח את ה-body ללא בדיקת Content-Type → אין שינוי צד-שרת.
+- Bearer מ-localStorage מחליף cookie → `credentials` לא נדרש.
+
+**אימות שהאתר החי מציג את הגרסה החדשה:**
+```
+$ curl -sSI "https://maale-amos.github.io/js/admin.js"
+Last-Modified: Wed, 08 Jul 2026 12:10:05 GMT
+ETag: "6a4e3e1d-2b2c"
+
+$ curl -sS "https://maale-amos.github.io/js/admin.js" | grep -n "text/plain"
+29:      headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // avoid preflight
+44:    const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
+```
+
+**Service Worker לא מפריע:** `src/sw.js` = **unregister stub**. ב-activate עושה `caches.delete` על כל המפתחות ואז `registration.unregister()`. ב-fetch: `fetch(e.request)` pass-through בלבד. אין caching של admin.js.
+
+**מה שיוסף צריך לעשות כדי לוודא שהדפדפן שלו קיבל את הגרסה החדשה:**
+1. פתח `https://maale-amos.github.io/admin/`
+2. **Ctrl+Shift+R** (hard-refresh) — עוקף cache
+3. אם עדיין ישן — DevTools → Application → Storage → Clear site data → refresh
+4. נסה: `admin` / `<REDACTED_PWD>`
+5. אם עדיין CORS — DevTools → Network → סמן את בקשת ה-login → העתק Request+Response headers ושלח לי
+
+---
+
 ## D1 verification + password reset — 2026-07-08
 
 **רקע:** ה-500 שראית בפלט ה-curl היה **מ-`wrangler dev --local`**, לא מפרודקשן. Local D1 ריק בשונה מ-remote D1.
