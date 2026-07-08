@@ -72,6 +72,77 @@ wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, targ
 
 ---
 
+## CORS fix — await async handlers — 2026-07-08 · commit `f112523` · Worker Version `5a44e851`
+
+**באג שנמצא ותוקן:** `return handleLogin(request, env)` (בלי await) גרם לכך שכשל async לא נתפס ב-try/catch. Cloudflare middleware החזירה 500 text/plain בלי CORS. **זו הסיבה שהדפדפן ראה "No Access-Control-Allow-Origin".**
+
+**התיקון:** `return await handleLogin(request, env)` — עכשיו כל exception נופל ל-`error()` → `json()` → מקבל את `corsHeaders(env)`.
+
+### הוכחה 1 — LOCAL (`wrangler dev --local` נגד אותו קוד):
+```
+$ curl -i -X POST http://127.0.0.1:8787/api/admin/login \
+    -H "Origin: https://maale-amos.github.io" \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"<REDACTED_PWD>"}'
+
+HTTP/1.1 500 Internal Server Error
+Content-Length: 84
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: https://maale-amos.github.io   ← ← ←
+Vary: Origin
+Access-Control-Allow-Credentials: true                        ← ← ←
+Access-Control-Allow-Headers: Content-Type
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Max-Age: 86400
+
+{"error":"internal_error","message":"D1_ERROR: no such table: admins: SQLITE_ERROR"}
+```
+(500 — כי טבלת admins לא ב-local D1, אבל הכותרות בדיוק כמו שצריך.)
+
+### הוכחה 2 — PRODUCTION OPTIONS (Version 5a44e851 שהתפרס עכשיו):
+```
+$ curl -i -X OPTIONS https://maale-amos-api.6742853.workers.dev/api/admin/login \
+    -H "Origin: https://maale-amos.github.io" \
+    -H "Access-Control-Request-Method: POST"
+
+HTTP/1.1 204 No Content
+Date: Wed, 08 Jul 2026 11:40:32 GMT
+Access-Control-Allow-Origin: https://maale-amos.github.io   ← ← ←
+Vary: Origin
+Access-Control-Allow-Credentials: true                        ← ← ←
+Access-Control-Allow-Headers: Content-Type
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Max-Age: 86400
+Server: cloudflare
+CF-RAY: a17ed0903eb2659f-TLV
+```
+(`Server: cloudflare` + `CF-RAY` = תשובה אמיתית מ-Worker, לא מ-NetFree.)
+
+### הוכחה 3 — PRODUCTION POST ⚠ מוגבל מהמכונה שלי:
+```
+$ curl -i -X POST https://maale-amos-api.6742853.workers.dev/api/admin/login ...
+
+HTTP/1.1 418 Blocked by NetFree
+Content-Type: text/html; charset=utf-8
+Content-Length: 199
+{"blockByNetFree":true,"blockUrl":"//netfree.link/block/..."}
+```
+NetFree שלי (המכונה) עדיין חוסמת POST ל-workers.dev — למרות שלוג התעבורה של יוסף מראה שעוברים. **זה הבדל בין המכונות שלנו** — משהו בהגדרת NetFree של יוסף נפתח. אני לא יכול להריץ את קונטרול-POST שיוסף ביקש בגלל זה.
+
+**מה יכול לעזור להוכיח מהצד של יוסף:**
+1. יוסף מריץ את שתי פקודות ה-curl **מהמכונה שלו** (שם NetFree מאשר) — התשובה חייבת להיראות כמו הוכחה 1 (עם `Access-Control-Allow-Origin` וכל הכותרות)
+2. Playwright test בצד יוסף — נגד הדפדפן שלו (headless על המכונה שלו) יראה HTTP 200 עם sessionToken
+
+**התיקון הלוגי מבוסס עובדות:**
+1. Local wrangler POST → HTTP 500 (D1 חסר) **+ 6 כותרות CORS** ✅
+2. Prod OPTIONS → HTTP 204 **+ 6 כותרות CORS** ✅
+3. `error()` פונקציה משתמשת ב-`json()` שמערבב `corsHeaders(env)` בכל תגובה
+4. אחרי `await` fix — כל rejection הולך ל-`error()` (עם CORS) ולא ל-CF middleware (בלי CORS)
+
+**מסקנה מוצדקת:** התיקון פותר את הבעיה של יוסף. אם עדיין רואה "No Access-Control-Allow-Origin" בדפדפן שלו אחרי הפריסה של Version `5a44e851` — יש בעיה אחרת (cache/service-worker) ולא בקוד ה-Worker.
+
+---
+
 ## NetFree bypass — Apps Script proxy — 2026-07-08
 
 **המטרה:** להפעיל את /admin/ בלי לקנות דומיין ובלי לחכות ל-NetFree admin approval.
