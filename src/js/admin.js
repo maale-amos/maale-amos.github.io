@@ -37,10 +37,14 @@
   }
 
   async function apiDirect(path, opts = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    // text/plain avoids CORS preflight (application/json triggers OPTIONS which
+    // NetFree may block even when POST passes). Worker's request.json() parses
+    // the body regardless of Content-Type. Bearer replaces cookie auth so
+    // credentials:'include' isn't needed either.
+    const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
-    const res = await fetch(DIRECT_URL + path, { credentials: 'include', ...opts, headers });
+    const res = await fetch(DIRECT_URL + path, { ...opts, headers });
     let bodyJson = null; try { bodyJson = await res.json(); } catch {}
     if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
     return bodyJson;
