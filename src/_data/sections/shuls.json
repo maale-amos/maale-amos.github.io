@@ -2,7 +2,7 @@
   "id": "shuls",
   "title": "בתי כנסת",
   "subtitle": "בתי כנסת ומניינים בישוב",
-  "verified": "2026-07-06",
+  "verified": "2026-07-08",
   "source": "FACTS.md#shuls",
   "items": [
     {
@@ -11,12 +11,7 @@
       "icon": "bi-book",
       "iconColor": "#1565c0",
       "borderColor": "#1565c0",
-      "times": {
-        "shacharit": "06:30 / שבת 08:00",
-        "mincha": "לפי זמנים",
-        "maariv": "20 דק' אחרי השקיעה"
-      },
-      "timesStatus": "בבדיקה",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
       "email": "beitknessetma@gmail.com",
       "image": ""
     },
@@ -26,12 +21,7 @@
       "icon": "bi-house-heart",
       "iconColor": "#6a1b9a",
       "borderColor": "#6a1b9a",
-      "times": {
-        "shacharit": "07:00 / שבת 08:30",
-        "mincha": "לפי זמנים",
-        "maariv": "אחרי מנחה"
-      },
-      "timesStatus": "בבדיקה",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
       "location": "שכונת קרית נוף",
       "image": ""
     },
@@ -41,12 +31,7 @@
       "icon": "bi-lamp",
       "iconColor": "#e65100",
       "borderColor": "#e65100",
-      "times": {
-        "shacharit": "06:45 / שבת 07:30",
-        "mincha": "לפי זמנים",
-        "maariv": "במניין"
-      },
-      "timesStatus": "בבדיקה",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
       "image": ""
     },
     {

@@ -1,9 +1,15 @@
+const ALLOWED_ORIGIN = 'https://maale-amos.github.io';
+
 export function corsHeaders(env) {
+  // Fallback to the constant if env var missing — never send bare '*'
+  // because credentials:'include' requires exact origin.
+  const origin = (env && env.CORS_ORIGIN) || ALLOWED_ORIGIN;
   return {
-    'Access-Control-Allow-Origin': env.CORS_ORIGIN,
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
     'Vary': 'Origin'
   };
 }
@@ -11,7 +17,11 @@ export function corsHeaders(env) {
 export function json(data, env, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...corsHeaders(env), ...extra }
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...corsHeaders(env),
+      ...extra
+    }
   });
 }
 
@@ -32,5 +42,7 @@ export function readSessionCookie(request) {
 }
 
 export function clientIp(request) {
-  return request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For')?.split(',')[0] || 'unknown';
+  return request.headers.get('CF-Connecting-IP')
+      || request.headers.get('X-Forwarded-For')?.split(',')[0]
+      || 'unknown';
 }
