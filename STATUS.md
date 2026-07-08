@@ -72,6 +72,55 @@ wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, targ
 
 ---
 
+## סבב תוכן — הסרת נתונים לא מאומתים — 2026-07-08
+
+**חוק (FACTS.md):** "עדיף סקציה ריקה מנתון שגוי".
+
+**קבצי JSON ששונו (data-driven):**
+
+| קובץ | פעולה |
+|------|-------|
+| `sections/about.json` | פסקה 2: הוסרו הסוכנות היהודית + אש התורה + הרב זוהר + הרב דרעי. פסקה 1: `725 מ'` → `רב`. stats: נשארה רק `תשמ"א`. |
+| `sections/shuls.json` | 3 בתי כנסת (מרכזי/ביאלא/ספרדי): הוסר `times{}` + `timesStatus`, נוסף `note: "זמני התפילות מתפרסמים בלוח המודעות"`. |
+| `sections/attractions.json` | הוסר שדה `distance` מכל 6 האטרקציות. הוסר `distancesStatus`. |
+| `sections/faq.json` | `בגובה 725 מ'` → `בגובה רב`. |
+
+**תבניות שהיו hardcoded ותוקנו:**
+
+| תבנית | תיקון |
+|--------|-------|
+| `section-about.njk` | rewrite data-driven מ-`sections.about.paragraphs/stats`. הסיר את המשפט המומצא + סטטים מומצאים. |
+| `section-attractions.njk` | הוסרו 6 spans של `X ק"מ` + הוסרה מילה "10 דקות נסיעה מהישוב". |
+| `section-faq.njk` | `725 מ'` → `רב`, וגם `#buses` → `/#buses` (broken hash fix). |
+
+**JSON validation:**
+```
+$ node -e "JSON.parse(require('fs').readFileSync('src/_data/sections/about.json'))"
+$ node -e "JSON.parse(require('fs').readFileSync('src/_data/sections/shuls.json'))"
+$ node -e "JSON.parse(require('fs').readFileSync('src/_data/sections/attractions.json'))"
+$ node -e "JSON.parse(require('fs').readFileSync('src/_data/sections/faq.json'))"
+→ all OK
+```
+
+**LIVE verification (cache-busted, commit `b76bd6e`, CI 28934337741 success):**
+```
+$ TS=$(date +%s%N)
+$ curl -s "https://maale-amos.github.io/about/?cb=$TS" | grep -c "אריה דרעי"  → 0 ✅
+$ curl -s "https://maale-amos.github.io/about/?cb=$TS" | grep -c "725"        → 0 ✅
+$ curl -s "https://maale-amos.github.io/about/?cb=$TS" | grep -c "175+"       → 0 ✅
+$ curl -s "https://maale-amos.github.io/about/?cb=$TS" | grep -c "1,592"      → 0 ✅
+$ curl -s "https://maale-amos.github.io/?cb=$TS"       | grep -c "אריה דרעי"  → 0 ✅
+$ curl -s "https://maale-amos.github.io/?cb=$TS"       | grep -c "725"        → 0 ✅
+$ curl -s "https://maale-amos.github.io/shuls/?cb=$TS" | grep -c "06:30"     → 0 ✅
+$ curl -s "https://maale-amos.github.io/attractions/?cb=$TS" | grep -c "5 ק" → 0 ✅
+```
+
+**Full functional audit** (`scripts/full-functional.mjs`): `24/24 clean · 0 problems`.
+
+**הערה על CORS ל-Worker:** בדיקת OPTIONS preflight החזירה כותרות תקינות (`Access-Control-Allow-Origin: https://maale-amos.github.io` + credentials + methods + headers + Max-Age). את http.js הקשחתי עם fallback קבוע (ALLOWED_ORIGIN) אם env var חסר. Deploy: Version `b25deec1-1bae-4016-a29a-0b4b53fbcfa0`. **מה שיוסף רואה כ"No Access-Control-Allow-Origin header" הוא NetFree שמחזירה HTTP 418 על POST ל-`.workers.dev` — היא מפילה את כל ה-response, כולל כותרות. חובה whitelist ל-workers.dev ב-NetFree admin, אחרת שום התחברות לא תעבוד מדפדפן מאחורי הפילטר.**
+
+---
+
 ## סבב תפקודי + ויזואלי מלא — 2026-07-08
 
 **רשימת ה-12 URLs × 2 רזולוציות = 24 בדיקות (`scripts/full-functional.mjs`):**
