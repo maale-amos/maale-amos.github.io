@@ -252,10 +252,24 @@
       const li = document.createElement('li');
       li.dataset.id = s.id;
       li.style.cssText = 'display:flex;gap:12px;align-items:center;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.05)';
-      li.innerHTML = `<button data-move="up" aria-label="למעלה" style="background:none;border:1px solid #ddd;border-radius:4px;padding:2px 8px">▲</button>
-        <button data-move="down" aria-label="למטה" style="background:none;border:1px solid #ddd;border-radius:4px;padding:2px 8px">▼</button>
-        <span style="flex:1">${s.title}</span>
-        <label><input type="checkbox" data-visible ${s.visible ? 'checked' : ''}> מוצג</label>`;
+      // SECURITY: build DOM nodes with textContent to prevent XSS via s.title.
+      // s.title comes from JSON that could be attacker-influenced (H-M2 in audit).
+      const btnUp   = document.createElement('button');
+      btnUp.dataset.move = 'up'; btnUp.setAttribute('aria-label','למעלה');
+      btnUp.style.cssText = 'background:none;border:1px solid #ddd;border-radius:4px;padding:2px 8px';
+      btnUp.textContent = '▲';
+      const btnDn   = document.createElement('button');
+      btnDn.dataset.move = 'down'; btnDn.setAttribute('aria-label','למטה');
+      btnDn.style.cssText = 'background:none;border:1px solid #ddd;border-radius:4px;padding:2px 8px';
+      btnDn.textContent = '▼';
+      const span    = document.createElement('span');
+      span.style.flex = '1';
+      span.textContent = String(s.title || '');
+      const lbl     = document.createElement('label');
+      const chk     = document.createElement('input');
+      chk.type = 'checkbox'; chk.dataset.visible = ''; chk.checked = !!s.visible;
+      lbl.append(chk, document.createTextNode(' מוצג'));
+      li.append(btnUp, btnDn, span, lbl);
       list.appendChild(li);
     });
     list.addEventListener('click', e => {

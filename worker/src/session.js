@@ -1,9 +1,13 @@
 import { readSessionCookie } from './http.js';
 
 const enc = new TextEncoder();
-const dec = new TextDecoder();
 
 async function hmac(secretHex, data) {
+  // Enforce a minimum key length so a mis-set env var doesn't silently
+  // reduce HMAC strength (L-3 in security audit).
+  if (typeof secretHex !== 'string' || secretHex.length < 64) {
+    throw new Error('SESSION_KEY_HEX must be >= 32 bytes (>= 64 hex chars)');
+  }
   const key = await crypto.subtle.importKey(
     'raw',
     hexToBytes(secretHex),
@@ -20,6 +24,14 @@ function hexToBytes(hex) {
   for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
   return out;
 }
+
+// Constant-time string compare — mitigates M-1 (HMAC compare timing oracle).
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 function b64urlEncode(bytes) {
   let s = '';
   for (const b of bytes) s += String.fromCharCode(b);
@@ -27,14 +39,20 @@ function b64urlEncode(bytes) {
 }
 
 export async function issueSessionToken(uid, env) {
+  // Embed the user's current password_changed_at ("gen") in the token so a
+  // password change atomically invalidates all previously-issued tokens for
+  // that user (H-1 in security audit). We also record `role` at issue time
+  // but never trust it on read — always re-query on session verify.
   const nonce = crypto.randomUUID();
   const now = Math.floor(Date.now() / 1000);
-  const payload = `${uid}.${nonce}.${now}`;
+  const genRow = await env.DB.prepare('SELECT password_changed_at FROM admins WHERE id = ?').bind(uid).first();
+  const gen = Number(genRow && genRow.password_changed_at) || 0;
+  const payload = `${uid}.${gen}.${nonce}.${now}`;
   const sig = await hmac(env.SESSION_KEY_HEX, payload);
   const token = `${payload}.${sig}`;
   await env.SESSIONS.put(
     token,
-    JSON.stringify({ uid, issuedAt: now }),
+    JSON.stringify({ uid, gen, issuedAt: now }),
     { expirationTtl: Number(env.SESSION_TTL_SECONDS) }
   );
   return token;
@@ -42,20 +60,39 @@ export async function issueSessionToken(uid, env) {
 
 export async function getSession(request, env) {
   // Prefer Authorization: Bearer <token>. Fallback to session cookie.
-  // Bearer path is needed for the Apps Script proxy flow (cookies are scoped to
-  // script.google.com, not workers.dev, so we pass the token in a header).
   const authHeader = request.headers.get('Authorization') || '';
   const bearerMatch = authHeader.match(/^Bearer\s+([^\s]+)$/i);
   const token = bearerMatch ? bearerMatch[1] : readSessionCookie(request);
   if (!token) return null;
+
+  // Token shape: uid.gen.nonce.iat.sig
+  const parts = token.split('.');
+  if (parts.length !== 5) return null;
+  const [uid, gen, nonce, iat, sig] = parts;
+  if (!/^\d+$/.test(uid) || !/^\d+$/.test(gen) || !/^\d+$/.test(iat)) return null;
+
+  // Verify HMAC BEFORE hitting KV/D1 — cheap; prevents token-existence timing
+  // oracle (M-2) and saves quota on garbage input.
+  const expected = await hmac(env.SESSION_KEY_HEX, `${uid}.${gen}.${nonce}.${iat}`);
+  if (!timingSafeEqual(expected, sig)) return null;
+
+  // Server-side TTL (M-3): defense in depth in case KV TTL misfires.
+  const ttl = Number(env.SESSION_TTL_SECONDS) || 86400;
+  if ((Math.floor(Date.now() / 1000) - Number(iat)) > ttl) return null;
+
   const raw = await env.SESSIONS.get(token, 'json');
   if (!raw) return null;
-  const parts = token.split('.');
-  if (parts.length !== 4) return null;
-  const [uid, nonce, iat, sig] = parts;
-  const expected = await hmac(env.SESSION_KEY_HEX, `${uid}.${nonce}.${iat}`);
-  if (expected !== sig) return null;
-  return { ...raw, token };
+
+  // Look up the user's current role + password_changed_at. If the user has
+  // rotated their password since this token was issued, the token's `gen`
+  // won't match and we reject (H-1: password change invalidates all sessions).
+  const user = await env.DB.prepare(
+    'SELECT id, role, password_changed_at, active FROM admins WHERE id = ?'
+  ).bind(Number(uid)).first();
+  if (!user || !user.active) return null;
+  if (Number(user.password_changed_at) !== Number(gen)) return null;
+
+  return { uid: user.id, role: user.role, token, issuedAt: raw.issuedAt };
 }
 
 export async function revokeSession(token, env) {

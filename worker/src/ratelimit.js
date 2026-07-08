@@ -1,10 +1,13 @@
-// KV-based sliding rate limit.
-// Key: `login:${ip}` → counter of attempts within window.
-// Simplification: fixed window using key TTL.
+// KV-based fixed-window rate limit.
+// NOTE (M-1/C-2 in audit): This uses non-atomic get+put on KV, which is
+// eventually consistent → real limits may exceed the configured max under
+// bursts. For hard guarantees use Durable Objects or Cloudflare's Rate
+// Limiting bindings. Reasonable protection for casual abuse; not for
+// determined attackers.
 
-export async function checkRateLimit(env, key) {
-  const max = Number(env.LOGIN_RATE_MAX);
-  const win = Number(env.LOGIN_RATE_WINDOW_SECONDS);
+export async function checkRateLimit(env, key, maxOverride, winOverride) {
+  const max = Number(maxOverride ?? env.LOGIN_RATE_MAX) || 5;
+  const win = Number(winOverride ?? env.LOGIN_RATE_WINDOW_SECONDS) || 60;
   const bucket = 'rl:' + key;
   const raw = await env.RATE_LIMIT.get(bucket);
   const count = raw ? Number(raw) : 0;

@@ -3,6 +3,10 @@ layout: base.njk
 title: פאנל ניהול
 description: פאנל ניהול תוכן ועיצוב
 ---
+{# SECURITY: frame-buster to defeat clickjacking. GitHub Pages doesn't allow
+   setting frame-ancestors headers, so this JS check is our only defense.
+   Must run before any other script or UI renders. #}
+<script>if (top !== self) { top.location = self.location; }</script>
 <section class="page-content" id="adminApp">
   <div class="container">
     <h1><i class="bi bi-shield-lock" aria-hidden="true"></i> פאנל ניהול</h1>

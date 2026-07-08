@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="map-container fade-up">
-      <iframe src="{{ sections.about.mapUrl }}" allowfullscreen loading="lazy" title="מפת מעלה עמוס" aria-label="מפת המיקום של מעלה עמוס"></iframe>
+      <iframe src="{{ sections.about.mapUrl | safeUrl }}" allowfullscreen loading="lazy" title="מפת מעלה עמוס" aria-label="מפת המיקום של מעלה עמוס" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 </section>
