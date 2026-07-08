@@ -8,3 +8,8 @@ _emanuel_edits/
 !.env.example
 *.log
 audit/
+
+# Cloudflare Worker local state — MUST NOT commit
+worker/.dev.vars
+worker/.wrangler/
+scripts/prove-cors.mjs
