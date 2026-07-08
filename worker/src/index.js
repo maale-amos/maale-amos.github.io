@@ -90,16 +90,19 @@ async function handleLogin(request, env) {
     ).bind(row.id, 'login', ip).run();
   } catch (e) { console.error('audit_log login failed:', e); }
 
-  // sessionToken in the JSON body is only needed for the Apps-Script proxy
-  // path (cookies scoped to script.google.com don't reach us). Direct callers
-  // should rely on the HttpOnly cookie. To reduce XSS blast-radius we only
-  // include it when the request signals it went through the proxy.
-  const viaProxy = request.headers.get('X-Via-Proxy') === '1';
-  const payload = { ok: true, user: { id: row.id, username, role: row.role } };
-  if (viaProxy) payload.sessionToken = token;
-  return json(payload, env, 200, {
+  // sessionToken in JSON is required for the cross-site call from
+  // maale-amos.github.io → maale-amos-api.workers.dev, because a
+  // SameSite=Strict cookie won't be sent cross-site. XSS-mitigation instead
+  // relies on the frontend defenses (CSP, textContent-only DOM writes, and
+  // safeUrl filter on admin-editable URLs). The cookie is set as a fallback
+  // for same-origin future setups (custom domain).
+  return json({
+    ok: true,
+    user: { id: row.id, username, role: row.role },
+    sessionToken: token
+  }, env, 200, {
     'Set-Cookie': setSessionCookie('session', token, { maxAge: Number(env.SESSION_TTL_SECONDS) })
-  });
+  }, request);
 }
 
 async function handleLogout(request, env) {

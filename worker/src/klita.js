@@ -90,10 +90,11 @@ export async function handleKlitaRegister(request, env) {
   } catch (e) { console.error('audit klita_register', e); }
 
   const token = await issueSessionToken(uid, env);
-  const viaProxy = request.headers.get('X-Via-Proxy') === '1';
-  const payload = { ok: true, user: { id: uid, username: email, role: 'family' } };
-  if (viaProxy) payload.sessionToken = token;
-  return json(payload, env, 200, {
+  return json({
+    ok: true,
+    user: { id: uid, username: email, role: 'family' },
+    sessionToken: token
+  }, env, 200, {
     'Set-Cookie': setSessionCookie('session', token, { maxAge: Number(env.SESSION_TTL_SECONDS) })
   }, request);
 }

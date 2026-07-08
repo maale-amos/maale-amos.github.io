@@ -7,6 +7,7 @@
     { "label": "חירום", "url": "/emergency/", "icon": "bi-exclamation-octagon" },
     { "label": "אטרקציות", "url": "/attractions/", "icon": "bi-compass" },
     { "label": "שאלות נפוצות", "url": "/faq/", "icon": "bi-question-circle" },
-    { "label": "פנייה", "url": "/contact/", "icon": "bi-envelope-paper" }
+    { "label": "פנייה", "url": "/contact/", "icon": "bi-envelope-paper" },
+    { "label": "פורטל קליטה", "url": "/klita/", "icon": "bi-house-heart" }
   ]
 }
