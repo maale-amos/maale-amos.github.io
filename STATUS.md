@@ -72,6 +72,38 @@ wrangler d1 execute maale-amos --remote --command "SELECT actor_id, action, targ
 
 ---
 
+## סבב תפקודי + ויזואלי מלא — 2026-07-08
+
+**רשימת ה-12 URLs × 2 רזולוציות = 24 בדיקות (`scripts/full-functional.mjs`):**
+
+**באגים שנמצאו ותוקנו:**
+
+| # | דף/רזולוציה | ממצא | פעולה | Commit |
+|---|-------------|------|-------|--------|
+| 1 | /attractions/ | HTTP 404 (לא קיים) | יצרתי `pages/attractions.njk` data-driven מ-`sections.attractions.items` (6 אתרים + מרחקים בבדיקה) | `099c54b` |
+| 2 | כל 22 העמודים המשניים (mobile+desktop) | **36 קישורי hash שבורים לכל דף** (nav mega-dropdown + footer מצביעים ל-`#about #leadership #events...` שקיימים רק ב-home) | rewrite `href="#X"` → `href="/#X"` ב-chrome-body + chrome-foot. הדפדפן מבצע same-page hash-scroll ב-home, ו-navigation+scroll מסוב-דף | `f966a6f` |
+| 3 | navbar-brand-area (הלוגו) | `href="#"` = no-op | שיניתי ל-`href="/"` (לחיצה על הלוגו = דף הבית) | `7c3380a` |
+
+**התייעצות עצמית לפני התיקון (כלל בבאג #2):**
+- **בעיה:** משתמש בדף `/about/` שלוחץ על "אודות" בתפריט → פוגע ב-`#about` שאינו קיים בדף → לא קורה כלום.
+- **פתרון:** convert `href="#X"` → `href="/#X"` בכל chrome. הדפדפן: על home = same-page hash-scroll · מסוב-דף = navigate to `/` + scroll ל-`#X` (טוב יותר).
+- **לא שובר:** על home `/#X` פועל זהה ל-`#X` (Chrome/Firefox/Safari) · על סוב-דף מוסיף פונקציונליות שלא הייתה.
+
+**אימות פוסט-תיקון (probe מלא):**
+```
+=== 24/24 clean · 0 problems ===
+✓ D+M × 12 pages · all 200 · 0 console errors · 0 failed reqs
+✓ 0 broken hash links · 0 broken images · 0 mobile overflow
+```
+
+**בדיקה ויזואלית מדגמית (screenshots):**
+- Desktop home: hero + 31 סקציות · nav mega-dropdown · FABs · פוטר
+- Desktop /education/: 6 מוסדות עם icons + בבדיקה badges (RTL תקין, כרטיסים באותו גובה)
+- Desktop /contact/: טופס עם 5 שדות + validation + submit button
+- Mobile /faq/ /admin/ /shuls/: hamburger פועל · טקסט קריא · אין גלישה אופקית
+
+---
+
 ## סבב איכות #3 — 2026-07-07 15:38 UTC
 
 **באג נמצא:** /education/ standalone עמוד מציג כותרת+subtitle אבל 0 כרטיסים.
