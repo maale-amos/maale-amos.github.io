@@ -44,7 +44,17 @@
     const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
-    const res = await fetch(DIRECT_URL + path, { ...opts, headers });
+    let res;
+    try {
+      res = await fetch(DIRECT_URL + path, { ...opts, headers });
+    } catch (netErr) {
+      // TypeError from fetch = network / CORS failure (the browser doesn't tell
+      // us which). Surface it so the login screen can show a useful diagnostic.
+      throw Object.assign(new Error('network_error'), {
+        status: 0,
+        cause: String(netErr && netErr.message || netErr)
+      });
+    }
     let bodyJson = null; try { bodyJson = await res.json(); } catch {}
     if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
     return bodyJson;
@@ -73,11 +83,59 @@
     } catch (e) {
       if (e.status === 401) show(e.body?.message || 'שם משתמש או סיסמה שגויים', false);
       else if (e.status === 429) show(e.body?.message || 'נסיונות רבים מדי — נסה שוב עוד דקה', false);
-      else show('שגיאה מהשרת', false);
+      else if (e.status === 0) show('בעיית רשת / CORS — פרטים: ' + (e.cause || 'unknown') + ' (בדוק Console+Network)', false);
+      else show('שגיאה מהשרת (סטטוס ' + (e.status || '?') + '): ' + (e.body?.message || e.body?.error || 'unknown'), false);
     }
   });
   // Enter key on password
   $('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('adminLoginBtn').click(); });
+
+  // --- Connection self-test (helps diagnose CORS/NetFree issues from browser) ---
+  const diagBtn = $('adminDiagBtn');
+  const diagOut = $('adminDiagOut');
+  if (diagBtn && diagOut) {
+    diagBtn.addEventListener('click', async () => {
+      diagOut.hidden = false;
+      diagOut.textContent = 'בודק…\n';
+      const lines = [];
+      const now = new Date().toISOString();
+      lines.push(`Time: ${now}`);
+      lines.push(`Origin: ${location.origin}`);
+      lines.push(`Direct URL: ${DIRECT_URL}`);
+      lines.push(`Proxy URL: ${PROXY_URL || '(not configured)'}`);
+      lines.push('');
+      // Test 1: /api/me GET — simple request, no preflight, expects 401 with CORS
+      lines.push('--- Test 1: GET /api/me (should return 401 with CORS) ---');
+      try {
+        const res = await fetch(DIRECT_URL + '/api/me', { method: 'GET' });
+        lines.push(`Status: ${res.status} ${res.statusText}`);
+        lines.push(`ACAO:   ${res.headers.get('access-control-allow-origin') || '(missing!)'}`);
+        lines.push(`ACAC:   ${res.headers.get('access-control-allow-credentials') || '(missing)'}`);
+        const t = await res.text();
+        lines.push(`Body:   ${t.slice(0, 200)}`);
+      } catch (e) {
+        lines.push(`✗ Network/CORS error: ${e.name}: ${e.message}`);
+        lines.push('  → הדפדפן דחה את הבקשה. פתח DevTools → Network → בדוק אם הבקשה נשלחה בכלל.');
+      }
+      lines.push('');
+      // Test 2: POST /api/admin/login with text/plain (should return 401 with CORS)
+      lines.push('--- Test 2: POST /api/admin/login (bad creds — should return 401 with CORS) ---');
+      try {
+        const res = await fetch(DIRECT_URL + '/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ username: '__diag__', password: '__diag__' })
+        });
+        lines.push(`Status: ${res.status} ${res.statusText}`);
+        lines.push(`ACAO:   ${res.headers.get('access-control-allow-origin') || '(missing!)'}`);
+        const t = await res.text();
+        lines.push(`Body:   ${t.slice(0, 200)}`);
+      } catch (e) {
+        lines.push(`✗ Network/CORS error: ${e.name}: ${e.message}`);
+      }
+      diagOut.textContent = lines.join('\n');
+    });
+  }
 
   function unlock(user) {
     $('adminUser').textContent = user.username;

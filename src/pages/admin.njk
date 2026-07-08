@@ -17,8 +17,10 @@ description: פאנל ניהול תוכן ועיצוב
           <input type="password" id="adminPassword" required autocomplete="current-password"
                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:4px">
         </label></p>
-        <p><button type="button" id="adminLoginBtn" class="btn btn-primary">כניסה</button></p>
+        <p><button type="button" id="adminLoginBtn" class="btn btn-primary">כניסה</button>
+           <button type="button" id="adminDiagBtn" class="btn" title="בודק אם ה-Worker נגיש מהדפדפן">בדוק חיבור</button></p>
         <p id="adminAuthMsg" role="status" aria-live="polite"></p>
+        <pre id="adminDiagOut" hidden style="background:#f5f5f5;padding:10px;border-radius:6px;font-size:0.8rem;overflow-x:auto;max-height:200px"></pre>
       </form>
     </div>
 
@@ -89,4 +91,4 @@ description: פאנל ניהול תוכן ועיצוב
     </div>
   </div>
 </section>
-<script src="/js/admin.js" defer></script>
+<script src="/js/admin.js?v={{ build.ts }}" defer></script>
