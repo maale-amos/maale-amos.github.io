@@ -33,12 +33,10 @@
   }
 
   // --------- Views ----------
-  const VIEWS = ['welcome', 'register', 'login', 'portal', 'applicant', 'questionnaire', 'print'];
+  const VIEWS = ['welcome', 'register', 'login', 'portal', 'applicant', 'questionnaire', 'print', 'uploads', 'committee'];
   function showView(name) {
     qa('[data-view]').forEach(el => { el.hidden = (el.dataset.view !== name); });
-    // Scroll to top of section
     const app = $('klitaApp'); if (app) app.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Update hash so refreshing keeps you in place
     if (history.replaceState) history.replaceState(null, '', '#/' + name);
   }
 
@@ -58,13 +56,15 @@
 
   async function go(view) {
     msg('');
-    if (view === 'portal' || view === 'questionnaire' || view === 'applicant') {
+    if (['portal','questionnaire','applicant','uploads','committee'].includes(view)) {
       if (!getToken()) return showView('welcome');
-      if (!ME) await refreshMe();
+      if (!ME) { try { await refreshMe(); } catch (_) { return; } }
     }
     if (view === 'portal')        renderPortal();
     if (view === 'applicant')     renderApplicant();
     if (view === 'questionnaire') renderQuestionnaire();
+    if (view === 'uploads')       renderUploads();
+    if (view === 'committee')     renderCommittee();
     showView(view);
   }
 
@@ -91,13 +91,13 @@
       track:        $('reg_track').value,
       address:      $('reg_address').value.trim()
     };
-    if (!body.email || !body.password || !body.family_name) return msg('חובה: דוא"ל, סיסמה, שם משפחה', false);
+    if (!body.email || !body.password || !body.family_name) return msg('חובה: דוא״ל, סיסמה, שם משפחה', false);
     if (body.password.length < 10) return msg('סיסמה חייבת להיות באורך 10 תווים לפחות', false);
     msg('פותח תיק…');
     try {
       const r = await api('/api/klita/register', { method: 'POST', body: JSON.stringify(body) });
       if (r.sessionToken) setToken(r.sessionToken);
-      msg('בעז"ה נפתח תיק — ממשיכים לפורטל');
+      msg('בעז״ה נפתח תיק — ממשיכים לפורטל');
       await refreshMe();
       go('portal');
     } catch (e) {
@@ -113,7 +113,7 @@
   $('loginSubmit').addEventListener('click', async () => {
     const username = $('login_email').value.trim();
     const password = $('login_password').value;
-    if (!username || !password) return msg('הזינו דוא"ל וסיסמה', false);
+    if (!username || !password) return msg('הזינו דוא״ל וסיסמה', false);
     msg('בודק…');
     try {
       const r = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username, password }) });
@@ -122,7 +122,7 @@
       msg('שלום ' + (r.user && r.user.username));
       go('portal');
     } catch (e) {
-      if (e.status === 401)      msg('דוא"ל או סיסמה שגויים', false);
+      if (e.status === 401)      msg('דוא״ל או סיסמה שגויים', false);
       else if (e.status === 429) msg('נסיונות רבים — נסו עוד רגע', false);
       else if (e.status === 0)   msg('בעיית רשת', false);
       else msg('שגיאה', false);
@@ -138,7 +138,7 @@
     'אבחון מקצועי',
     'ועדת קבלה אזורית',
     'עסקת הנכס',
-    'תשלומים והקמת הו"ק',
+    'תשלומים והקמת הו״ק',
     'טפסי החטיבה להתיישבות',
     'מפתח ואכלוס'
   ];
@@ -148,6 +148,9 @@
     const statusEl = $('portalStatus');
     const stagesEl = $('portalStages');
     const formsEl = $('portalForms');
+    const badgeEl = $('autofillBadge');
+    const badgeSummary = $('autofillSummary');
+    const committeeBtn = $('portalCommitteeBtn');
     nameEl.textContent = (ME.applicant && ME.applicant.family_name) || (ME.user && ME.user.username) || '';
     const status = (ME.applicant && ME.applicant.status) || 'pending';
     statusEl.textContent = ({
@@ -157,6 +160,33 @@
       rejected: 'נדחה',
       archived: 'ארכיון'
     })[status] || status;
+
+    // Highlight auto-fill: show a green badge that summarizes the fields the
+    // portal will pre-populate on the next form. Empty when nothing yet.
+    if (badgeEl && badgeSummary) {
+      const a = ME.applicant;
+      const bits = [];
+      if (a) {
+        if (a.husband_name) bits.push('שם הבעל: ' + a.husband_name);
+        if (a.wife_name)    bits.push('שם האישה: ' + a.wife_name);
+        if (a.husband_id)   bits.push('ת״ז הבעל');
+        if (a.wife_id)      bits.push('ת״ז האישה');
+        if (a.phone)        bits.push('טלפון: ' + a.phone);
+      }
+      if (bits.length) {
+        badgeEl.hidden = false;
+        badgeSummary.textContent = 'נשמרים: ' + bits.join(' · ');
+      } else {
+        badgeEl.hidden = true;
+      }
+    }
+
+    // Committee button visible only for role=committee/admin.
+    if (committeeBtn) {
+      const role = ME.user && ME.user.role;
+      committeeBtn.hidden = !(role === 'committee' || role === 'admin');
+      committeeBtn.onclick = () => go('committee');
+    }
 
     // Forms list
     formsEl.replaceChildren();
@@ -221,7 +251,7 @@
     { key: 'husband_id',   label: 'ת.ז. הבעל', pattern: '\\d{5,9}' },
     { key: 'wife_id',      label: 'ת.ז. האישה', pattern: '\\d{5,9}' },
     { key: 'phone',        label: 'טלפון', type: 'tel' },
-    { key: 'email',        label: 'דוא"ל ליצירת קשר', type: 'email' },
+    { key: 'email',        label: 'דוא״ל ליצירת קשר', type: 'email' },
     { key: 'address',      label: 'כתובת נוכחית' },
     { key: 'track',        label: 'מסלול', type: 'select', options: [
         { v: 'buy', l: 'רכישת דירה' },
@@ -268,7 +298,7 @@
     try {
       await api('/api/klita/applicant', { method: 'POST', body: JSON.stringify(payload) });
       await refreshMe();
-      msg('נשמר בעז"ה');
+      msg('נשמר בעז״ה');
       go('portal');
     } catch (e) {
       msg('שמירה נכשלה: ' + (e.body && e.body.message || e.status), false);
@@ -422,7 +452,7 @@
       });
       CURRENT_FORM_ID = r.form_id;
       await refreshMe();
-      msg(status === 'draft' ? 'נשמר בעז"ה' : 'הוגש בעז"ה');
+      msg(status === 'draft' ? 'נשמר בעז״ה' : 'הוגש בעז״ה');
       return r;
     } catch (e) {
       msg('שגיאה: ' + (e.body && e.body.message || e.status), false);
@@ -442,7 +472,7 @@
     area.replaceChildren();
 
     const h = document.createElement('h1');
-    h.textContent = 'שאלון הרשמה — קהילת קודש מעלה עמוס יצ"ו';
+    h.textContent = 'שאלון הרשמה — קהילת קודש מעלה עמוס יצ״ו';
     area.append(h);
 
     const sub = document.createElement('p');
@@ -467,20 +497,236 @@
       });
     });
 
-    // Signature block
+    // Signature block — DOM builders only, no innerHTML with data.
     const sig = document.createElement('div');
     sig.className = 'qsig';
-    sig.innerHTML = '';
     const p1 = document.createElement('p');
     p1.textContent = 'אני החתום מטה מצהיר/ה שכל הפרטים לעיל נכונים.';
     const sigRow = document.createElement('table');
     sigRow.style.cssText = 'width:100%; margin-top:20px; border-collapse:collapse';
-    sigRow.innerHTML = '<tr><td style="width:50%;padding:24px 0 0;border-bottom:1px solid #000">חתימת הבעל</td><td style="width:50%;padding:24px 0 0;border-bottom:1px solid #000">חתימת האישה</td></tr>';
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    td1.style.cssText = 'width:50%;padding:24px 0 0;border-bottom:1px solid #000';
+    td1.textContent = 'חתימת הבעל';
+    const td2 = document.createElement('td');
+    td2.style.cssText = 'width:50%;padding:24px 0 0;border-bottom:1px solid #000';
+    td2.textContent = 'חתימת האישה';
+    tr.append(td1, td2);
+    sigRow.append(tr);
     sig.append(p1, sigRow);
     area.append(sig);
   }
 
   $('doPrint').addEventListener('click', () => window.print());
+
+  // ============ Uploads view ============
+  async function renderUploads() {
+    const sel = $('uploadFormSelect');
+    sel.replaceChildren();
+    if (!ME.forms || !ME.forms.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'אין טפסים — מלאו קודם שאלון';
+      sel.append(opt);
+    } else {
+      ME.forms.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = String(f.id);
+        opt.textContent = (({
+          questionnaire: 'שאלון הרשמה', medical: 'טופס בריאות',
+          financial: 'טופס פיננסי', stage: 'טופס שלב'
+        })[f.form_type] || f.form_type) + ' — ' + (f.status || 'draft');
+        sel.append(opt);
+      });
+    }
+    sel.onchange = () => refreshExistingUploads();
+    await refreshExistingUploads();
+  }
+
+  async function refreshExistingUploads() {
+    const box = $('uploadsExisting');
+    box.replaceChildren();
+    const formId = $('uploadFormSelect').value;
+    if (!formId) return;
+    try {
+      const r = await api('/api/klita/uploads/' + formId, { method: 'GET' });
+      const list = r.uploads || [];
+      if (!list.length) {
+        const p = document.createElement('p');
+        p.textContent = 'לא הועלו קבצים לטופס זה עדיין.';
+        box.append(p);
+        return;
+      }
+      const ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none;padding:0;margin-top:8px';
+      list.forEach(u => {
+        const li = document.createElement('li');
+        li.style.cssText = 'padding:6px 0;border-bottom:1px dashed #eee';
+        li.textContent = `${u.filename} (${(u.size_bytes/1024).toFixed(1)}KB)`;
+        ul.append(li);
+      });
+      box.append(ul);
+    } catch (e) {
+      const p = document.createElement('p');
+      p.textContent = 'שגיאה בטעינת קבצים';
+      p.style.color = '#c62828';
+      box.append(p);
+    }
+  }
+
+  $('uploadSubmit').addEventListener('click', async () => {
+    const formId = $('uploadFormSelect').value;
+    const file = $('uploadFile').files[0];
+    if (!formId) return msg('בחר טופס', false);
+    if (!file) return msg('בחר קובץ', false);
+    if (file.size > 8 * 1024 * 1024) return msg('קובץ גדול מ-8MB', false);
+    msg('מעלה…');
+    try {
+      const b64 = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const s = r.result;
+          const idx = s.indexOf('base64,');
+          resolve(idx >= 0 ? s.slice(idx + 7) : s);
+        };
+        r.onerror = () => reject(new Error('read'));
+        r.readAsDataURL(file);
+      });
+      await api('/api/klita/upload', {
+        method: 'POST',
+        body: JSON.stringify({
+          form_id: Number(formId),
+          filename: file.name,
+          content_type: file.type || 'application/octet-stream',
+          data_b64: b64
+        })
+      });
+      msg('הועלה בעז״ה');
+      $('uploadFile').value = '';
+      await refreshMe();
+      await refreshExistingUploads();
+    } catch (e) {
+      const detail = e.body && (e.body.message || e.body.error);
+      msg('העלאה נכשלה' + (detail ? ': ' + detail : ''), false);
+    }
+  });
+
+  // ============ Committee view ============
+  let CURRENT_COMMITTEE_APP = null;
+
+  async function renderCommittee() {
+    const qEl = $('committeeQueue');
+    qEl.replaceChildren();
+    try {
+      const r = await api('/api/klita/committee/queue', { method: 'GET' });
+      const list = r.applicants || [];
+      if (!list.length) {
+        const p = document.createElement('p');
+        p.textContent = 'אין ממתינים להחלטה כרגע.';
+        qEl.append(p);
+      } else {
+        const ul = document.createElement('ul');
+        ul.style.cssText = 'list-style:none;padding:0';
+        list.forEach(a => {
+          const li = document.createElement('li');
+          li.style.cssText = 'padding:10px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center';
+          const label = document.createElement('div');
+          const strong = document.createElement('strong');
+          strong.textContent = a.family_name;
+          const small = document.createElement('small');
+          small.textContent = ' · ' + (a.track || '') + ' · שלב ' + (a.current_stage || 1);
+          label.append(strong, small);
+          const badge = document.createElement('small');
+          badge.className = 'verify-badge';
+          badge.textContent = a.status;
+          li.append(label, badge);
+          li.onclick = () => loadCommitteeApplicant(a.id);
+          ul.append(li);
+        });
+        qEl.append(ul);
+      }
+    } catch (e) {
+      qEl.textContent = 'שגיאה בטעינת הרשימה: ' + (e.body?.error || e.status);
+    }
+  }
+
+  async function loadCommitteeApplicant(id) {
+    try {
+      const r = await api('/api/klita/committee/applicant/' + id, { method: 'GET' });
+      CURRENT_COMMITTEE_APP = r.applicant;
+      $('committeeDetail').hidden = false;
+      $('committeeDetailName').textContent = r.applicant.family_name;
+      const body = $('committeeDetailBody');
+      body.replaceChildren();
+      const rows = [
+        ['בעל', r.applicant.husband_name],
+        ['אישה', r.applicant.wife_name],
+        ['ת״ז בעל (4 ספרות אחרונות)', r.applicant.husband_id_last4],
+        ['ת״ז אישה (4 ספרות אחרונות)', r.applicant.wife_id_last4],
+        ['טלפון', r.applicant.phone],
+        ['דוא״ל', r.applicant.email],
+        ['מסלול', r.applicant.track],
+        ['סטטוס', r.applicant.status],
+        ['שלב', r.applicant.current_stage]
+      ];
+      const tbl = document.createElement('table');
+      tbl.style.cssText = 'width:100%;border-collapse:collapse';
+      rows.forEach(([k, v]) => {
+        if (!v) return;
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        td1.style.cssText = 'padding:4px 0;color:#666;width:40%';
+        td1.textContent = k;
+        const td2 = document.createElement('td');
+        td2.style.cssText = 'padding:4px 0';
+        td2.textContent = String(v);
+        tr.append(td1, td2);
+        tbl.append(tr);
+      });
+      body.append(tbl);
+      // Existing decisions
+      if (r.decisions && r.decisions.length) {
+        const h = document.createElement('h4');
+        h.textContent = 'החלטות עד עכשיו';
+        h.style.marginTop = '12px';
+        body.append(h);
+        const ul = document.createElement('ul');
+        r.decisions.forEach(d => {
+          const li = document.createElement('li');
+          li.textContent = `${d.by_user}: ${d.decision}${d.comment ? ' — ' + d.comment : ''}`;
+          ul.append(li);
+        });
+        body.append(ul);
+      }
+    } catch (e) {
+      msg('שגיאה בטעינת פרטי משפחה', false);
+    }
+  }
+
+  qa('[data-decision]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!CURRENT_COMMITTEE_APP) return msg('בחרו משפחה קודם', false);
+      const decision = btn.dataset.decision;
+      const comment = ($('committeeComment').value || '').trim();
+      msg('שולח החלטה…');
+      try {
+        const r = await api('/api/klita/committee/decide', {
+          method: 'POST',
+          body: JSON.stringify({
+            applicant_id: CURRENT_COMMITTEE_APP.id,
+            decision,
+            comment
+          })
+        });
+        msg('החלטה נשמרה — סטטוס כעת: ' + r.status);
+        $('committeeComment').value = '';
+        await renderCommittee();
+        $('committeeDetail').hidden = true;
+      } catch (e) {
+        msg('שגיאה: ' + (e.body?.message || e.status), false);
+      }
+    });
+  });
 
   // --------- Boot ----------
   async function boot() {

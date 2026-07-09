@@ -71,7 +71,7 @@ window.searchSite = function (q) {
   });
   body.innerHTML = hits.length
     ? hits.slice(0, 20).map(h => `<a href="#${h.id}" style="display:block;padding:10px;border-bottom:1px solid #eee;text-decoration:none;color:inherit"><strong>${h.title}</strong><br><small>…${h.snippet}…</small></a>`).join('')
-    : '<p style="padding:12px">אין תוצאות</p>';
+    : '<p style=״padding:12px״>אין תוצאות</p>';
   sr.style.display = 'block';
 };
 

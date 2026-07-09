@@ -13,7 +13,10 @@ import { issueSessionToken, getSession, revokeSession } from './session.js';
 import { checkRateLimit } from './ratelimit.js';
 import {
   handleKlitaRegister, handleKlitaMe, handleKlitaApplicant,
-  handleKlitaFormSave, handleKlitaFormGet
+  handleKlitaFormSave, handleKlitaFormGet,
+  handleKlitaUploadPost, handleKlitaUploadsList, handleKlitaUploadGet,
+  handleKlitaCommitteeQueue, handleKlitaCommitteeDecide, handleKlitaCommitteeApplicant,
+  handleKlitaStage
 } from './klita.js';
 
 export default {
@@ -39,6 +42,19 @@ export default {
       if (path === '/api/klita/form')             return await handleKlitaFormSave(request, env);
       const mForm = path.match(/^\/api\/klita\/form\/(\d+)$/);
       if (mForm)                                  return await handleKlitaFormGet(request, env, mForm[1]);
+      // Uploads
+      if (path === '/api/klita/upload')           return await handleKlitaUploadPost(request, env);
+      const mUploads = path.match(/^\/api\/klita\/uploads\/(\d+)$/);
+      if (mUploads)                               return await handleKlitaUploadsList(request, env, mUploads[1]);
+      const mUp = path.match(/^\/api\/klita\/upload\/(\d+)$/);
+      if (mUp)                                    return await handleKlitaUploadGet(request, env, mUp[1]);
+      // Committee
+      if (path === '/api/klita/committee/queue')    return await handleKlitaCommitteeQueue(request, env);
+      if (path === '/api/klita/committee/decide')   return await handleKlitaCommitteeDecide(request, env);
+      const mAp = path.match(/^\/api\/klita\/committee\/applicant\/(\d+)$/);
+      if (mAp)                                      return await handleKlitaCommitteeApplicant(request, env, mAp[1]);
+      // Stages
+      if (path === '/api/klita/stage')             return await handleKlitaStage(request, env);
       return error(404, 'not_found', env, undefined, request);
     } catch (e) {
       // Log full detail server-side, but do NOT echo the exception message to

@@ -14,6 +14,12 @@ id = "f7620458792347f0b3524b55aaa79dfb"
 binding = "RATE_LIMIT"
 id = "1b22270be32f4727b521270ab2944a31"
 
+# Klita signed-PDF uploads. Uncomment + fill id after:
+#   wrangler kv namespace create "KLITA_UPLOADS"
+# [[kv_namespaces]]
+# binding = "KLITA_UPLOADS"
+# id = "REPLACE_WITH_ID"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "maale-amos"
@@ -24,3 +30,7 @@ CORS_ORIGIN = "https://maale-amos.github.io"
 SESSION_TTL_SECONDS = "86400"
 LOGIN_RATE_MAX = "5"
 LOGIN_RATE_WINDOW_SECONDS = "60"
+# Mail is HARD-DISABLED. Do not set to "true" until Yosef explicitly approves
+# an outbound transport (SES/SendGrid). Even when enabled, every send must
+# include `approved:true` in the sendMail() payload. See src/mail.js.
+MAIL_ENABLED = "false"

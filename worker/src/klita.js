@@ -123,18 +123,20 @@ export async function handleKlitaMe(request, env) {
   const s = await getSession(request, env);
   if (!s) return error(401, 'unauthorized', env);
 
+  const user = await env.DB.prepare('SELECT id, username, role FROM admins WHERE id = ?').bind(s.uid).first();
+
   const applicant = await env.DB.prepare(
     `SELECT id, family_name, husband_name, wife_name, husband_id, wife_id,
             phone, email, address, track, current_stage, status, created_at, updated_at
      FROM applicants WHERE user_id = ?`
   ).bind(s.uid).first();
-  if (!applicant) return json({ ok: true, applicant: null, forms: [] }, env, 200, {}, request);
+  if (!applicant) return json({ ok: true, user, applicant: null, forms: [] }, env, 200, {}, request);
 
   const forms = await env.DB.prepare(
     'SELECT id, form_type, status, created_at, updated_at FROM application_forms WHERE applicant_id = ? ORDER BY updated_at DESC LIMIT 50'
   ).bind(applicant.id).all();
 
-  return json({ ok: true, applicant, forms: forms.results || [] }, env, 200, {}, request);
+  return json({ ok: true, user, applicant, forms: forms.results || [] }, env, 200, {}, request);
 }
 
 // ---------- upsert applicant fields (auto-fill source) ----------
@@ -306,4 +308,310 @@ export async function handleKlitaFormGet(request, env, formId) {
     return json({ ok: true, form: { ...anyRow, form_data: data } }, env, 200, {}, request);
   }
   return error(403, 'forbidden', env);
+}
+
+// ============================================================================
+// Uploads — signed PDFs and other attachments per form.
+// Storage: KV namespace KLITA_UPLOADS (25 MB / value). Metadata: form_uploads.
+// ============================================================================
+
+const ALLOWED_UPLOAD_MIME = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp'
+]);
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;   // 8 MB
+
+// helper: base64-URL → Uint8Array (used in size check)
+function b64Length(b64) {
+  const s = String(b64 || '').replace(/=+$/, '');
+  return Math.floor(s.length * 3 / 4);
+}
+
+export async function handleKlitaUploadPost(request, env) {
+  if (request.method !== 'POST') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+
+  if (!env.KLITA_UPLOADS) {
+    return error(503, 'uploads_unavailable', env, 'העלאת קבצים לא מוגדרת בשרת עדיין');
+  }
+
+  const raw = await request.text();
+  // Cap at 12 MB base64 (~9 MB binary). MAX_UPLOAD_BYTES enforces the real cap.
+  if (raw.length > 12 * 1024 * 1024) return error(413, 'payload_too_large', env);
+  let body; try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env); }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return error(400, 'bad_json', env);
+  if (hasBadKeys(body)) return error(400, 'bad_json', env);
+
+  const formIdN = Number(body.form_id);
+  if (!Number.isInteger(formIdN) || formIdN <= 0) return error(400, 'bad_form_id', env);
+  const filename = String(body.filename || '').slice(0, 120).trim();
+  const contentType = String(body.content_type || '').toLowerCase();
+  const dataB64 = String(body.data_b64 || '');
+  if (!filename || !/^[\p{L}\p{N} _\-.()]+$/u.test(filename)) return error(400, 'bad_filename', env);
+  if (!ALLOWED_UPLOAD_MIME.has(contentType)) return error(400, 'bad_content_type', env);
+  const sizeBytes = b64Length(dataB64);
+  if (sizeBytes === 0) return error(400, 'empty_file', env);
+  if (sizeBytes > MAX_UPLOAD_BYTES) return error(413, 'file_too_large', env, `הקובץ גדול מ-${MAX_UPLOAD_BYTES / (1024*1024)}MB`);
+
+  // Ownership check on the form (family/viewer own, committee/admin any).
+  let ownForm;
+  if (s.role === 'family' || s.role === 'viewer') {
+    ownForm = await env.DB.prepare(
+      `SELECT f.id, f.applicant_id
+       FROM application_forms f
+       JOIN applicants a ON a.id = f.applicant_id
+       WHERE f.id = ? AND a.user_id = ?`
+    ).bind(formIdN, s.uid).first();
+  } else if (s.role === 'committee' || s.role === 'admin') {
+    ownForm = await env.DB.prepare(
+      'SELECT id, applicant_id FROM application_forms WHERE id = ?'
+    ).bind(formIdN).first();
+  } else {
+    return error(403, 'forbidden', env);
+  }
+  if (!ownForm) return error(404, 'form_not_found', env);
+
+  // Cap uploads per form to prevent bloat.
+  const cnt = await env.DB.prepare('SELECT COUNT(*) c FROM form_uploads WHERE form_id = ?').bind(formIdN).first();
+  if (cnt && Number(cnt.c) >= 10) return error(429, 'too_many_uploads', env, 'מקסימום 10 קבצים לטופס');
+
+  // Store in KV under a random key, then insert metadata.
+  const key = `${formIdN}/${crypto.randomUUID()}`;
+  await env.KLITA_UPLOADS.put(key, dataB64, {
+    metadata: { content_type: contentType, filename, size_bytes: sizeBytes }
+  });
+  const ins = await env.DB.prepare(
+    'INSERT INTO form_uploads (form_id, filename, content_type, size_bytes, file_key, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(formIdN, filename, contentType, sizeBytes, key, s.uid).run();
+
+  // Mark form as signed if this is the first upload and current status is 'submitted'.
+  await env.DB.prepare(
+    `UPDATE application_forms SET status = 'signed', updated_at = unixepoch()
+      WHERE id = ? AND status = 'submitted'`
+  ).bind(formIdN).run();
+
+  try {
+    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+      .bind(s.uid, 'klita_upload', `form:${formIdN}:${ins.meta.last_row_id}`, clientIp(request)).run();
+  } catch (e) { console.error('audit upload', e); }
+
+  return json({ ok: true, upload_id: ins.meta.last_row_id, size_bytes: sizeBytes }, env, 200, {}, request);
+}
+
+export async function handleKlitaUploadsList(request, env, formId) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  const fid = Number(formId);
+  if (!Number.isInteger(fid) || fid <= 0) return error(400, 'bad_form_id', env);
+
+  // Ownership check first
+  let owned;
+  if (s.role === 'family' || s.role === 'viewer') {
+    owned = await env.DB.prepare(
+      `SELECT f.id FROM application_forms f
+       JOIN applicants a ON a.id = f.applicant_id
+       WHERE f.id = ? AND a.user_id = ?`
+    ).bind(fid, s.uid).first();
+  } else if (s.role === 'committee' || s.role === 'admin') {
+    owned = await env.DB.prepare('SELECT id FROM application_forms WHERE id = ?').bind(fid).first();
+  } else {
+    return error(403, 'forbidden', env);
+  }
+  if (!owned) return error(404, 'not_found', env);
+
+  const list = await env.DB.prepare(
+    'SELECT id, filename, content_type, size_bytes, uploaded_by, uploaded_at FROM form_uploads WHERE form_id = ? ORDER BY uploaded_at DESC'
+  ).bind(fid).all();
+  return json({ ok: true, uploads: list.results || [] }, env, 200, {}, request);
+}
+
+export async function handleKlitaUploadGet(request, env, uploadId) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  if (!env.KLITA_UPLOADS) return error(503, 'uploads_unavailable', env);
+  const uid = Number(uploadId);
+  if (!Number.isInteger(uid) || uid <= 0) return error(400, 'bad_id', env);
+
+  // Join through form → applicant → owner check
+  let row;
+  if (s.role === 'family' || s.role === 'viewer') {
+    row = await env.DB.prepare(
+      `SELECT u.id, u.filename, u.content_type, u.size_bytes, u.file_key
+       FROM form_uploads u
+       JOIN application_forms f ON f.id = u.form_id
+       JOIN applicants a ON a.id = f.applicant_id
+       WHERE u.id = ? AND a.user_id = ?`
+    ).bind(uid, s.uid).first();
+  } else if (s.role === 'committee' || s.role === 'admin') {
+    row = await env.DB.prepare(
+      'SELECT id, filename, content_type, size_bytes, file_key FROM form_uploads WHERE id = ?'
+    ).bind(uid).first();
+  } else {
+    return error(403, 'forbidden', env);
+  }
+  if (!row) return error(404, 'not_found', env);
+
+  const b64 = await env.KLITA_UPLOADS.get(row.file_key);
+  if (!b64) return error(404, 'file_missing', env);
+  return json({
+    ok: true,
+    filename: row.filename,
+    content_type: row.content_type,
+    size_bytes: row.size_bytes,
+    data_b64: b64
+  }, env, 200, {}, request);
+}
+
+// ============================================================================
+// Committee — queue + decision endpoints. Role gate: committee or admin only.
+// ============================================================================
+
+export async function handleKlitaCommitteeQueue(request, env) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  if (s.role !== 'committee' && s.role !== 'admin') return error(403, 'forbidden', env);
+
+  const list = await env.DB.prepare(
+    `SELECT id, family_name, husband_name, wife_name, phone, email, track,
+            current_stage, status, created_at, updated_at
+     FROM applicants
+     WHERE status IN ('pending','in_review')
+     ORDER BY updated_at DESC LIMIT 100`
+  ).all();
+  return json({ ok: true, applicants: list.results || [] }, env, 200, {}, request);
+}
+
+const DECISIONS = new Set(['approve','reject','abstain','question']);
+
+export async function handleKlitaCommitteeDecide(request, env) {
+  if (request.method !== 'POST') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  if (s.role !== 'committee' && s.role !== 'admin') return error(403, 'forbidden', env);
+
+  const raw = await request.text();
+  if (raw.length > 8192) return error(413, 'payload_too_large', env);
+  let body; try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env); }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return error(400, 'bad_json', env);
+  if (hasBadKeys(body)) return error(400, 'bad_json', env);
+
+  const applicantId = Number(body.applicant_id);
+  const decision = String(body.decision || '');
+  const comment = String(body.comment || '').slice(0, 2000);
+  if (!Number.isInteger(applicantId) || applicantId <= 0) return error(400, 'bad_applicant', env);
+  if (!DECISIONS.has(decision)) return error(400, 'bad_decision', env);
+
+  const app = await env.DB.prepare('SELECT id FROM applicants WHERE id = ?').bind(applicantId).first();
+  if (!app) return error(404, 'not_found', env);
+
+  await env.DB.prepare(
+    `INSERT INTO committee_decisions (applicant_id, user_id, decision, comment)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(applicant_id, user_id) DO UPDATE SET
+       decision = excluded.decision, comment = excluded.comment,
+       created_at = unixepoch()`
+  ).bind(applicantId, s.uid, decision, comment).run();
+
+  // Recompute applicant status: majority approve → approved (admin only can
+  // confirm), any reject → rejected, else in_review.
+  const rows = await env.DB.prepare('SELECT decision FROM committee_decisions WHERE applicant_id = ?').bind(applicantId).all();
+  const counts = { approve: 0, reject: 0, abstain: 0, question: 0 };
+  for (const r of rows.results || []) counts[r.decision] = (counts[r.decision] || 0) + 1;
+  let newStatus = 'in_review';
+  if (counts.reject > 0) newStatus = 'rejected';
+  else if (counts.approve >= 3 && s.role === 'admin') newStatus = 'approved';
+  await env.DB.prepare('UPDATE applicants SET status = ?, updated_at = unixepoch() WHERE id = ?')
+    .bind(newStatus, applicantId).run();
+
+  try {
+    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+      .bind(s.uid, `committee_${decision}`, `applicant:${applicantId}`, clientIp(request)).run();
+  } catch (e) { console.error('audit committee', e); }
+
+  return json({ ok: true, status: newStatus, counts }, env, 200, {}, request);
+}
+
+export async function handleKlitaCommitteeApplicant(request, env, applicantId) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  if (s.role !== 'committee' && s.role !== 'admin') return error(403, 'forbidden', env);
+  const aid = Number(applicantId);
+  if (!Number.isInteger(aid) || aid <= 0) return error(400, 'bad_id', env);
+
+  const applicant = await env.DB.prepare(
+    `SELECT id, family_name, husband_name, wife_name,
+            husband_id_last4, wife_id_last4, phone, email, address, track,
+            current_stage, status, created_at, updated_at
+     FROM applicants WHERE id = ?`
+  ).bind(aid).first();
+  if (!applicant) return error(404, 'not_found', env);
+
+  const forms = await env.DB.prepare(
+    'SELECT id, form_type, status, created_at, updated_at FROM application_forms WHERE applicant_id = ? ORDER BY updated_at DESC'
+  ).bind(aid).all();
+  const decisions = await env.DB.prepare(
+    `SELECT d.id, d.decision, d.comment, d.created_at, u.username as by_user
+     FROM committee_decisions d
+     JOIN admins u ON u.id = d.user_id
+     WHERE d.applicant_id = ?
+     ORDER BY d.created_at DESC`
+  ).bind(aid).all();
+
+  return json({
+    ok: true,
+    applicant,
+    forms: forms.results || [],
+    decisions: decisions.results || []
+  }, env, 200, {}, request);
+}
+
+// ============================================================================
+// Stages — advance current_stage. Family may declare done up to stage 2;
+// stages 3+ require committee/admin.
+// ============================================================================
+
+export async function handleKlitaStage(request, env) {
+  if (request.method !== 'POST') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+
+  const raw = await request.text();
+  if (raw.length > 4096) return error(413, 'payload_too_large', env);
+  let body; try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env); }
+
+  const targetStage = Number(body.stage);
+  const applicantId = Number(body.applicant_id);
+  if (!Number.isInteger(targetStage) || targetStage < 1 || targetStage > 10) return error(400, 'bad_stage', env);
+  if (!Number.isInteger(applicantId) || applicantId <= 0) return error(400, 'bad_applicant', env);
+
+  let app;
+  if (s.role === 'family' || s.role === 'viewer') {
+    app = await env.DB.prepare('SELECT id, current_stage FROM applicants WHERE id = ? AND user_id = ?')
+      .bind(applicantId, s.uid).first();
+    if (!app) return error(404, 'not_found', env);
+    // Family can only advance from 1 → 2 (submitted questionnaire). Deeper
+    // stages require committee/admin. Prevents users self-approving.
+    if (targetStage > 2) return error(403, 'forbidden', env, 'שלב זה מותנה בוועדה');
+  } else if (s.role === 'committee' || s.role === 'admin') {
+    app = await env.DB.prepare('SELECT id, current_stage FROM applicants WHERE id = ?').bind(applicantId).first();
+    if (!app) return error(404, 'not_found', env);
+  } else {
+    return error(403, 'forbidden', env);
+  }
+
+  await env.DB.prepare('UPDATE applicants SET current_stage = ?, updated_at = unixepoch() WHERE id = ?')
+    .bind(targetStage, applicantId).run();
+  try {
+    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+      .bind(s.uid, `stage_${targetStage}`, `applicant:${applicantId}`, clientIp(request)).run();
+  } catch (e) { console.error('audit stage', e); }
+
+  return json({ ok: true, current_stage: targetStage }, env, 200, {}, request);
 }

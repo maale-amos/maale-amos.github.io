@@ -50,30 +50,30 @@ permalink: /klita/
             <input type="password" id="reg_password" autocomplete="new-password" minlength="10" required>
           </label>
           <label>שם המשפחה*
-            <input type="text" id="reg_family_name" autocomplete="family-name" required>
+            <input type="text" id="reg_family_name" name="family_name" autocomplete="family-name" required>
           </label>
           <div class="grid-2">
             <label>שם הבעל
-              <input type="text" id="reg_husband_name" autocomplete="given-name">
+              <input type="text" id="reg_husband_name" name="husband_name" autocomplete="section-husband given-name">
             </label>
             <label>שם האישה
-              <input type="text" id="reg_wife_name" autocomplete="given-name">
+              <input type="text" id="reg_wife_name" name="wife_name" autocomplete="section-wife given-name">
             </label>
           </div>
           <div class="grid-2">
             <label>ת.ז. הבעל
-              <input type="text" id="reg_husband_id" inputmode="numeric" pattern="\d{5,9}">
+              <input type="text" id="reg_husband_id" name="husband_id" inputmode="numeric" pattern="\d{5,9}" autocomplete="off">
             </label>
             <label>ת.ז. האישה
-              <input type="text" id="reg_wife_id" inputmode="numeric" pattern="\d{5,9}">
+              <input type="text" id="reg_wife_id" name="wife_id" inputmode="numeric" pattern="\d{5,9}" autocomplete="off">
             </label>
           </div>
           <div class="grid-2">
             <label>טלפון
-              <input type="tel" id="reg_phone" autocomplete="tel">
+              <input type="tel" id="reg_phone" name="phone" autocomplete="tel">
             </label>
             <label>מסלול
-              <select id="reg_track">
+              <select id="reg_track" name="track">
                 <option value="buy">רכישת דירה</option>
                 <option value="rent">שכירות</option>
                 <option value="plot">מגרש/בניה עצמית</option>
@@ -81,7 +81,7 @@ permalink: /klita/
             </label>
           </div>
           <label>כתובת מלאה נוכחית
-            <input type="text" id="reg_address" autocomplete="street-address">
+            <input type="text" id="reg_address" name="address" autocomplete="street-address">
           </label>
 
           <div style="margin-top:14px;display:flex;gap:8px">
@@ -113,7 +113,16 @@ permalink: /klita/
     <div data-view="portal" hidden>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div>שלום <strong id="portalUserName"></strong> · <span id="portalStatus" class="verify-badge"></span></div>
-        <button class="btn" id="portalLogout">יציאה</button>
+        <div>
+          <button class="btn" id="portalCommitteeBtn" hidden><i class="bi bi-people" aria-hidden="true"></i> ועדת קבלה</button>
+          <button class="btn" id="portalLogout">יציאה</button>
+        </div>
+      </div>
+
+      {# Auto-fill highlight — shown only when applicant record exists. #}
+      <div id="autofillBadge" hidden style="background:#e8f5e9;border-inline-start:4px solid #1a5c3a;padding:12px 16px;border-radius:8px;margin-bottom:16px">
+        <strong><i class="bi bi-check2-circle" aria-hidden="true"></i> הפרטים שלך נשמרו — יופיעו מלאים בכל טופס הבא</strong>
+        <br><small id="autofillSummary" style="color:#333"></small>
       </div>
 
       <div style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:16px">
@@ -122,12 +131,59 @@ permalink: /klita/
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-primary" data-goto="questionnaire">מילוי שאלון הרשמה</button>
           <button class="btn" data-goto="applicant">עדכון פרטי המשפחה</button>
+          <button class="btn" data-goto="uploads"><i class="bi bi-cloud-upload" aria-hidden="true"></i> העלאת PDF חתום</button>
         </div>
       </div>
 
       <div style="background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
         <h3>10 שלבי הקליטה</h3>
         <ol id="portalStages" style="padding-inline-start:22px;margin:0"></ol>
+      </div>
+    </div>
+
+    {# =========== VIEW: UPLOADS (per-form signed-PDF upload) =========== #}
+    <div data-view="uploads" hidden>
+      <div style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+        <h2><i class="bi bi-cloud-upload" aria-hidden="true"></i> העלאת PDF חתום</h2>
+        <p><small>לאחר הדפסת השאלון, חתימה, וסריקה — העלו את הקובץ כאן. גודל מקסימלי 8MB. פורמטים: PDF/JPG/PNG.</small></p>
+        <label>בחר טופס:
+          <select id="uploadFormSelect"></select>
+        </label>
+        <label>קובץ:
+          <input type="file" id="uploadFile" accept=".pdf,.jpg,.jpeg,.png,.webp">
+        </label>
+        <div id="uploadsExisting"></div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-primary" id="uploadSubmit">העלה קובץ</button>
+          <button class="btn" data-goto="portal">חזרה</button>
+        </div>
+      </div>
+    </div>
+
+    {# =========== VIEW: COMMITTEE (role=committee/admin only) =========== #}
+    <div data-view="committee" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="margin:0"><i class="bi bi-people" aria-hidden="true"></i> ועדת קבלה</h2>
+        <button class="btn" data-goto="portal">חזרה</button>
+      </div>
+      <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:16px">
+        <h3>ממתינים להחלטה</h3>
+        <div id="committeeQueue"></div>
+      </div>
+      <div id="committeeDetail" hidden style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+        <h3 id="committeeDetailName"></h3>
+        <div id="committeeDetailBody"></div>
+        <div style="margin-top:14px">
+          <label>תגובה:
+            <textarea id="committeeComment" rows="2" maxlength="2000"></textarea>
+          </label>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" data-decision="approve"><i class="bi bi-check-lg" aria-hidden="true"></i> אישור</button>
+          <button class="btn" data-decision="question"><i class="bi bi-question-lg" aria-hidden="true"></i> יש שאלה</button>
+          <button class="btn" data-decision="abstain">נמנע</button>
+          <button class="btn" style="background:#c62828;color:#fff" data-decision="reject"><i class="bi bi-x-lg" aria-hidden="true"></i> דחייה</button>
+        </div>
       </div>
     </div>
 
