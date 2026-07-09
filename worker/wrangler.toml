@@ -14,11 +14,10 @@ id = "f7620458792347f0b3524b55aaa79dfb"
 binding = "RATE_LIMIT"
 id = "1b22270be32f4727b521270ab2944a31"
 
-# Klita signed-PDF uploads. Uncomment + fill id after:
-#   wrangler kv namespace create "KLITA_UPLOADS"
-# [[kv_namespaces]]
-# binding = "KLITA_UPLOADS"
-# id = "REPLACE_WITH_ID"
+# Klita signed-PDF uploads (base64 in JSON, 8MB cap).
+[[kv_namespaces]]
+binding = "KLITA_UPLOADS"
+id = "fe3deedd21a64efa9eafea09565891a7"
 
 [[d1_databases]]
 binding = "DB"
