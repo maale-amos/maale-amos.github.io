@@ -1,17 +1,10 @@
-// admin.js — פאנל ניהול. מדבר עם Cloudflare Worker דרך Apps Script proxy.
-// למה proxy: NetFree חוסמת POST ל-workers.dev עם HTTP 418. script.google.com
-// לא חסום, אז ה-Apps Script מקבל את הבקשה ומעביר ל-Worker.
-// Auth: username + password → sessionToken (בגוף התגובה) → localStorage → Bearer.
+// admin.js — פאנל ניהול. מדבר עם Cloudflare Worker ישירות.
+// API_BASE נקבע ב-src/js/config.js (window.API_BASE) — לא לקבע כאן דומיין.
+// אחרי מעבר ל-Custom Domain: מספיק לעדכן את config.js או meta ma-api-base.
 (function () {
   'use strict';
 
-  // === CONFIG ===
-  // Direct = ה-Worker ישירות. עובד רק אם NetFree מאשר workers.dev.
-  const DIRECT_URL = 'https://maale-amos-api.6742853.workers.dev';
-  // Proxy = Apps Script Web App URL. יוסף חייב לפרוס את worker-proxy/Code.gs
-  // ואז להזין את ה-URL כאן.
-  // אם ריק — הקוד ינסה Direct קודם, ואם ייכשל יראה הודעה מתאימה.
-  const PROXY_URL = '';
+  const API_BASE = (window.API_BASE || '').replace(/\/+$/, '');
 
   const $ = id => document.getElementById(id);
   const gate = $('adminGate');
@@ -21,35 +14,17 @@
   function getToken()   { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
   function setToken(t)  { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {} }
 
-  async function apiViaProxy(path, opts) {
-    const method = (opts.method || 'GET').toUpperCase();
-    const body   = opts.body ? JSON.parse(opts.body) : undefined;
-    const res = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // avoid preflight
-      body: JSON.stringify({ path, method, body, auth: getToken() })
-    });
-    if (!res.ok) throw Object.assign(new Error('proxy_error'), { status: res.status });
-    const env = await res.json();
-    // env = { status: <worker HTTP code>, body: <worker JSON> }
-    if (env.status && env.status >= 400) throw Object.assign(new Error('worker_error'), { status: env.status, body: env.body });
-    return env.body;
-  }
-
-  async function apiDirect(path, opts = {}) {
-    // text/plain avoids CORS preflight (application/json triggers OPTIONS which
-    // NetFree may block even when POST passes). Worker's request.json() parses
-    // the body regardless of Content-Type. Bearer replaces cookie auth so
-    // credentials:'include' isn't needed either.
+  async function api(path, opts = {}) {
+    // text/plain avoids CORS preflight (application/json triggers OPTIONS
+    // which some filters block even when POST passes). Worker's request.json()
+    // parses the body regardless of Content-Type.
     const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
     let res;
     try {
-      res = await fetch(DIRECT_URL + path, { ...opts, headers });
+      res = await fetch(API_BASE + path, { ...opts, headers });
     } catch (netErr) {
-      // TypeError from fetch = network / CORS failure (the browser doesn't tell
-      // us which). Surface it so the login screen can show a useful diagnostic.
       throw Object.assign(new Error('network_error'), {
         status: 0,
         cause: String(netErr && netErr.message || netErr)
@@ -58,11 +33,6 @@
     let bodyJson = null; try { bodyJson = await res.json(); } catch {}
     if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
     return bodyJson;
-  }
-
-  async function api(path, opts = {}) {
-    if (PROXY_URL) return apiViaProxy(path, opts);
-    return apiDirect(path, opts);
   }
 
   function show(msg, ok = true) {
@@ -101,13 +71,12 @@
       const now = new Date().toISOString();
       lines.push(`Time: ${now}`);
       lines.push(`Origin: ${location.origin}`);
-      lines.push(`Direct URL: ${DIRECT_URL}`);
-      lines.push(`Proxy URL: ${PROXY_URL || '(not configured)'}`);
+      lines.push(`Direct URL: ${API_BASE}`);
       lines.push('');
       // Test 1: /api/me GET — simple request, no preflight, expects 401 with CORS
       lines.push('--- Test 1: GET /api/me (should return 401 with CORS) ---');
       try {
-        const res = await fetch(DIRECT_URL + '/api/me', { method: 'GET' });
+        const res = await fetch(API_BASE + '/api/me', { method: 'GET' });
         lines.push(`Status: ${res.status} ${res.statusText}`);
         lines.push(`ACAO:   ${res.headers.get('access-control-allow-origin') || '(missing!)'}`);
         lines.push(`ACAC:   ${res.headers.get('access-control-allow-credentials') || '(missing)'}`);
@@ -121,7 +90,7 @@
       // Test 2: POST /api/admin/login with text/plain (should return 401 with CORS)
       lines.push('--- Test 2: POST /api/admin/login (bad creds — should return 401 with CORS) ---');
       try {
-        const res = await fetch(DIRECT_URL + '/api/admin/login', {
+        const res = await fetch(API_BASE + '/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ username: '__diag__', password: '__diag__' })

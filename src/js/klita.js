@@ -6,11 +6,8 @@
 (function () {
   'use strict';
 
-  const DIRECT_URL = 'https://maale-amos-api.6742853.workers.dev';
-  // Apps Script proxy URL. NetFree TLS-intercepts *.workers.dev and returns 418
-  // on POST/GET (OPTIONS passes). script.google.com is NOT filtered, so the
-  // proxy relays. Empty → use DIRECT_URL. See worker-proxy/Code.gs.
-  const PROXY_URL = '';
+  // API_BASE from src/js/config.js (window.API_BASE). Never hardcode here.
+  const API_BASE = (window.API_BASE || '').replace(/\/+$/, '');
   const TOKEN_KEY = 'ma_klita_session_token';
   const $ = (id) => document.getElementById(id);
   const q = (sel, root) => (root || document).querySelector(sel);
@@ -19,38 +16,20 @@
   function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
   function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {} }
 
-  async function apiViaProxy(path, opts) {
-    const method = (opts.method || 'GET').toUpperCase();
-    const body   = opts.body ? JSON.parse(opts.body) : undefined;
-    const res = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },  // avoid preflight
-      body: JSON.stringify({ path, method, body, auth: getToken() })
-    });
-    if (!res.ok) throw Object.assign(new Error('proxy_error'), { status: res.status });
-    const env = await res.json();
-    if (env.status && env.status >= 400) throw Object.assign(new Error('api_error'), { status: env.status, body: env.body });
-    return env.body;
-  }
-
-  async function apiDirect(path, opts = {}) {
+  async function api(path, opts = {}) {
+    // text/plain avoids CORS preflight; Worker's request.json() parses regardless.
     const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
     let res;
     try {
-      res = await fetch(DIRECT_URL + path, { ...opts, headers });
+      res = await fetch(API_BASE + path, { ...opts, headers });
     } catch (netErr) {
       throw Object.assign(new Error('network_error'), { status: 0, cause: String(netErr && netErr.message || netErr) });
     }
     let bodyJson = null; try { bodyJson = await res.json(); } catch {}
     if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
     return bodyJson;
-  }
-
-  async function api(path, opts = {}) {
-    if (PROXY_URL) return apiViaProxy(path, opts);
-    return apiDirect(path, opts);
   }
 
   // --------- Views ----------
