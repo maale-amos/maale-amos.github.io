@@ -6,6 +6,38 @@ import { json, error, clientIp, setSessionCookie } from './http.js';
 import { verifyPassword, hashPassword } from './password.js';
 import { issueSessionToken, getSession } from './session.js';
 import { checkRateLimit } from './ratelimit.js';
+import {
+  driveConfigured, createFolder, shareToUser, uploadFile, downloadFile,
+  b64ToUint8, uint8ToB64
+} from './drive.js';
+
+// One-shot best-effort provisioning. Errors are surfaced back so committee
+// members see them (registration itself still succeeds and D1 stores what it
+// can — the folder can be provisioned later via a re-run).
+async function provisionDriveForFamily(env, applicantRow, familyEmail) {
+  if (!driveConfigured(env) || !env.KLITA_DRIVE_ROOT_ID) {
+    return { ok: false, reason: 'not_configured' };
+  }
+  try {
+    const folderName = `${applicantRow.family_name} · תיק ${applicantRow.id}`;
+    const folderId = await createFolder(env, folderName, env.KLITA_DRIVE_ROOT_ID);
+    // Share to family email only. NEVER anyone/link.
+    if (familyEmail && /@/.test(familyEmail)) {
+      try { await shareToUser(env, folderId, familyEmail, 'reader'); }
+      catch (e) { console.error('share family', e); }
+    }
+    // Share to every committee/rakaz email listed in the env var (comma-sep).
+    const list = String(env.KLITA_COMMITTEE_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
+    for (const c of list) {
+      try { await shareToUser(env, folderId, c, 'writer'); }
+      catch (e) { console.error('share committee', c, e); }
+    }
+    return { ok: true, folderId };
+  } catch (e) {
+    console.error('provisionDriveForFamily', e);
+    return { ok: false, reason: String(e.message || e) };
+  }
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HEB_TEXT_RE = /^[\p{L}\p{N}\s'\-.,()]{1,120}$/u;
@@ -94,7 +126,7 @@ export async function handleKlitaRegister(request, env) {
   // Compute last-4 digits so the committee UI can render masked IDs without
   // pulling the raw column (R1 cross-review fix).
   const last4 = (s) => (s && s.length >= 4) ? s.slice(-4) : null;
-  await env.DB.prepare(
+  const insA = await env.DB.prepare(
     `INSERT INTO applicants (user_id, family_name, husband_name, wife_name, husband_id, wife_id,
                               husband_id_last4, wife_id_last4,
                               phone, email, address, track, status)
@@ -105,10 +137,20 @@ export async function handleKlitaRegister(request, env) {
     last4(applicant.husband_id), last4(applicant.wife_id),
     applicant.phone || null, applicant.email || email, applicant.address || null, applicant.track
   ).run();
+  const applicantId = insA.meta.last_row_id;
+
+  // Provision a Drive folder for this family and share it with the family's
+  // email + committee. Best-effort — registration succeeds even if Drive isn't
+  // configured yet (returns { ok:false, reason:'not_configured' }).
+  const prov = await provisionDriveForFamily(env, { id: applicantId, family_name: applicant.family_name }, email);
+  if (prov.ok) {
+    await env.DB.prepare('UPDATE applicants SET drive_folder_id = ? WHERE id = ?')
+      .bind(prov.folderId, applicantId).run();
+  }
 
   try {
-    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, ip) VALUES (?, ?, ?)')
-      .bind(uid, 'klita_register', ip).run();
+    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+      .bind(uid, 'klita_register', prov.ok ? `drive:${prov.folderId}` : `drive:none:${prov.reason}`, ip).run();
   } catch (e) { console.error('audit klita_register', e); }
 
   const token = await issueSessionToken(uid, env);
@@ -329,7 +371,8 @@ export async function handleKlitaFormGet(request, env, formId) {
 
 // ============================================================================
 // Uploads — signed PDFs and other attachments per form.
-// Storage: KV namespace KLITA_UPLOADS (25 MB / value). Metadata: form_uploads.
+// Storage: Google Drive (folder per family). D1 keeps only metadata + drive
+// file id. KV path retained as legacy fallback for older rows.
 // ============================================================================
 
 const ALLOWED_UPLOAD_MIME = new Set([
@@ -351,12 +394,12 @@ export async function handleKlitaUploadPost(request, env) {
   const s = await getSession(request, env);
   if (!s) return error(401, 'unauthorized', env);
 
-  if (!env.KLITA_UPLOADS) {
-    return error(503, 'uploads_unavailable', env, 'העלאת קבצים לא מוגדרת בשרת עדיין');
+  if (!driveConfigured(env)) {
+    return error(503, 'drive_not_configured', env,
+      'אחסון הקבצים ב-Drive עדיין לא מוגדר בשרת. פנה לרכז.');
   }
 
   const raw = await request.text();
-  // Cap at 12 MB base64 (~9 MB binary). MAX_UPLOAD_BYTES enforces the real cap.
   if (raw.length > 12 * 1024 * 1024) return error(413, 'payload_too_large', env);
   let body; try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env); }
   if (!body || typeof body !== 'object' || Array.isArray(body)) return error(400, 'bad_json', env);
@@ -373,36 +416,63 @@ export async function handleKlitaUploadPost(request, env) {
   if (sizeBytes === 0) return error(400, 'empty_file', env);
   if (sizeBytes > MAX_UPLOAD_BYTES) return error(413, 'file_too_large', env, `הקובץ גדול מ-${MAX_UPLOAD_BYTES / (1024*1024)}MB`);
 
-  // Ownership check on the form (family/viewer own, committee/admin any).
+  // Ownership check + fetch the applicant's Drive folder id in one query.
   let ownForm;
   if (s.role === 'family' || s.role === 'viewer') {
     ownForm = await env.DB.prepare(
-      `SELECT f.id, f.applicant_id
+      `SELECT f.id, f.applicant_id, a.drive_folder_id, a.family_name
        FROM application_forms f
        JOIN applicants a ON a.id = f.applicant_id
        WHERE f.id = ? AND a.user_id = ?`
     ).bind(formIdN, s.uid).first();
   } else if (s.role === 'committee' || s.role === 'admin') {
     ownForm = await env.DB.prepare(
-      'SELECT id, applicant_id FROM application_forms WHERE id = ?'
+      `SELECT f.id, f.applicant_id, a.drive_folder_id, a.family_name
+       FROM application_forms f JOIN applicants a ON a.id = f.applicant_id
+       WHERE f.id = ?`
     ).bind(formIdN).first();
   } else {
     return error(403, 'forbidden', env);
   }
   if (!ownForm) return error(404, 'form_not_found', env);
 
-  // Cap uploads per form to prevent bloat.
+  // Cap uploads per form.
   const cnt = await env.DB.prepare('SELECT COUNT(*) c FROM form_uploads WHERE form_id = ?').bind(formIdN).first();
   if (cnt && Number(cnt.c) >= 10) return error(429, 'too_many_uploads', env, 'מקסימום 10 קבצים לטופס');
 
-  // Store in KV under a random key, then insert metadata.
-  const key = `${formIdN}/${crypto.randomUUID()}`;
-  await env.KLITA_UPLOADS.put(key, dataB64, {
-    metadata: { content_type: contentType, filename, size_bytes: sizeBytes }
-  });
+  // If this applicant has no Drive folder yet (Drive was down at register,
+  // or admin created the applicant), provision one lazily now.
+  let folderId = ownForm.drive_folder_id;
+  if (!folderId) {
+    const familyRow = await env.DB.prepare('SELECT id, family_name, email FROM applicants WHERE id = ?')
+      .bind(ownForm.applicant_id).first();
+    const prov = await provisionDriveForFamily(env, familyRow, familyRow.email);
+    if (!prov.ok) return error(503, 'drive_provision_failed', env, prov.reason || 'ניסה ליצור תיקייה ונכשל');
+    await env.DB.prepare('UPDATE applicants SET drive_folder_id = ? WHERE id = ?')
+      .bind(prov.folderId, ownForm.applicant_id).run();
+    folderId = prov.folderId;
+  }
+
+  // Upload to Drive.
+  const bytes = b64ToUint8(dataB64);
+  let driveFile;
+  try {
+    driveFile = await uploadFile(env, folderId, filename, contentType, bytes);
+  } catch (e) {
+    console.error('drive upload', e);
+    return error(502, 'drive_upload_failed', env, 'העלאה ל-Drive נכשלה');
+  }
+
   const ins = await env.DB.prepare(
-    'INSERT INTO form_uploads (form_id, filename, content_type, size_bytes, file_key, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)'
-  ).bind(formIdN, filename, contentType, sizeBytes, key, s.uid).run();
+    `INSERT INTO form_uploads (form_id, filename, content_type, size_bytes,
+                               file_key, drive_file_id, drive_web_view_link,
+                               storage, uploaded_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'drive', ?)`
+  ).bind(
+    formIdN, filename, contentType, sizeBytes,
+    driveFile.id, driveFile.id, driveFile.webViewLink || null,
+    s.uid
+  ).run();
 
   // Mark form as signed if this is the first upload and current status is 'submitted'.
   await env.DB.prepare(
@@ -450,15 +520,16 @@ export async function handleKlitaUploadGet(request, env, uploadId) {
   if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
   const s = await getSession(request, env);
   if (!s) return error(401, 'unauthorized', env);
-  if (!env.KLITA_UPLOADS) return error(503, 'uploads_unavailable', env);
   const uid = Number(uploadId);
   if (!Number.isInteger(uid) || uid <= 0) return error(400, 'bad_id', env);
 
-  // Join through form → applicant → owner check
+  // Join through form → applicant → owner check. Fetch storage/drive fields
+  // so we can route between Drive and legacy KV.
   let row;
   if (s.role === 'family' || s.role === 'viewer') {
     row = await env.DB.prepare(
-      `SELECT u.id, u.filename, u.content_type, u.size_bytes, u.file_key
+      `SELECT u.id, u.filename, u.content_type, u.size_bytes, u.file_key,
+              u.drive_file_id, u.drive_web_view_link, u.storage
        FROM form_uploads u
        JOIN application_forms f ON f.id = u.form_id
        JOIN applicants a ON a.id = f.applicant_id
@@ -466,13 +537,32 @@ export async function handleKlitaUploadGet(request, env, uploadId) {
     ).bind(uid, s.uid).first();
   } else if (s.role === 'committee' || s.role === 'admin') {
     row = await env.DB.prepare(
-      'SELECT id, filename, content_type, size_bytes, file_key FROM form_uploads WHERE id = ?'
+      `SELECT id, filename, content_type, size_bytes, file_key,
+              drive_file_id, drive_web_view_link, storage
+       FROM form_uploads WHERE id = ?`
     ).bind(uid).first();
   } else {
     return error(403, 'forbidden', env);
   }
   if (!row) return error(404, 'not_found', env);
 
+  if (row.storage === 'drive' && row.drive_file_id) {
+    if (!driveConfigured(env)) return error(503, 'drive_not_configured', env);
+    let buf;
+    try { buf = await downloadFile(env, row.drive_file_id); }
+    catch (e) { console.error('drive download', e); return error(502, 'drive_download_failed', env); }
+    const b64 = uint8ToB64(new Uint8Array(buf));
+    return json({
+      ok: true,
+      filename: row.filename,
+      content_type: row.content_type,
+      size_bytes: row.size_bytes,
+      data_b64: b64,
+      drive_web_view_link: row.drive_web_view_link || null
+    }, env, 200, {}, request);
+  }
+  // Legacy KV path (only for rows created before the Drive migration).
+  if (!env.KLITA_UPLOADS || !row.file_key) return error(404, 'file_missing', env);
   const b64 = await env.KLITA_UPLOADS.get(row.file_key);
   if (!b64) return error(404, 'file_missing', env);
   return json({

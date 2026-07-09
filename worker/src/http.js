@@ -1,7 +1,10 @@
 const ALLOWED_ORIGINS = new Set([
+  // Current GitHub Pages front-end.
   'https://maale-amos.github.io',
-  // Add other trusted origins here if the site is ever fronted by a custom
-  // domain. Never include '*' — Allow-Credentials + '*' is spec-rejected.
+  // Future custom-domain front-ends (both apex and www variants).
+  'https://maale-amos.org.il',
+  'https://www.maale-amos.org.il',
+  // Never include '*' — Allow-Credentials + '*' is spec-rejected.
 ]);
 const DEFAULT_ORIGIN = 'https://maale-amos.github.io';
 
