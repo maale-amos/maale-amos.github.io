@@ -1,9 +1,26 @@
 name = "maale-amos-api"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
+workers_dev = true  # Fallback while the custom domain isn't wired yet.
+
+# ──────────────────────────────────────────────────────────────────────
+#  Custom Domain (production target for NetFree/Rimon/Etrog residents)
+#
+#  Once the domain is purchased and its zone is on Cloudflare, uncomment
+#  the routes block below. Recommended: api.maale-amos.org.il
+#  See DEPLOY_WHEN_DOMAIN_READY.md at the repo root for the full runbook.
+#
+#  Also flip `workers_dev = false` above once residents cut over.
+# ──────────────────────────────────────────────────────────────────────
+# [[routes]]
+# pattern = "api.maale-amos.org.il"
+# custom_domain = true
 
 # Secrets (set via `wrangler secret put`):
 #   SESSION_KEY_HEX     — 32-byte hex, used for HMAC-signing session cookies
+#   GDRIVE_CLIENT_ID    — OAuth client id for Google Drive access
+#   GDRIVE_CLIENT_SECRET
+#   GDRIVE_REFRESH_TOKEN — long-lived Drive refresh_token (offline access)
 # (Passwords are hashed with PBKDF2 in D1 — no password secret needed.)
 
 [[kv_namespaces]]
@@ -33,3 +50,11 @@ LOGIN_RATE_WINDOW_SECONDS = "60"
 # an outbound transport (SES/SendGrid). Even when enabled, every send must
 # include `approved:true` in the sendMail() payload. See src/mail.js.
 MAIL_ENABLED = "false"
+
+# ─── Klita Drive integration ────────────────────────────────────────────
+# Master folder that contains one sub-folder per applicant family.
+# Fill in the Drive folder id AFTER Yosef creates the root folder and
+# shares it with the OAuth-authorized user + committee members.
+# Committee members' emails (comma-separated) get share access on that root.
+KLITA_DRIVE_ROOT_ID = ""
+KLITA_COMMITTEE_EMAILS = ""  # e.g. "committee@example.com,rakaz@example.com"
