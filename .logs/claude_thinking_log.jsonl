@@ -1,0 +1,4 @@
+{"ts":"2026-07-09T12:19:15+03:00","phase":"1_secret_scan","action":"start"}
+{"ts":"2026-07-09T12:19:16+03:00","phase":"1_secret_scan","action":"grep_complete"}
+{"ts":"2026-07-09T12:21:17+03:00","phase":"1_secret_scan","action":"verify_after_scrub"}
+{"ts":"2026-07-09T12:21:39+03:00","phase":"1_secret_scan","action":"clean"}

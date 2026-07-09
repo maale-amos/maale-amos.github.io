@@ -43,7 +43,7 @@ await step('POST wrong password (expect 401)', async () => {
 });
 
 await step('POST correct password (expect dash visible)', async () => {
-  await p.fill('#adminPassword', '<REDACTED_PWD>!');
+  await p.fill('#adminPassword', process.env.ADMIN_PASSWORD || '');
   await p.click('#adminLoginBtn');
   await p.waitForTimeout(3000);
   const dashHidden = await p.evaluate(() => document.getElementById('adminDashboard').hidden);

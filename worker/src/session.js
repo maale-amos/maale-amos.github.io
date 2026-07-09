@@ -19,6 +19,10 @@ async function hmac(secretHex, data) {
 }
 
 function hexToBytes(hex) {
+  // Reject non-hex — parseInt silently returns NaN which coerces to 0 in the
+  // Uint8Array, resulting in an all-zero HMAC key on misconfiguration.
+  // (Audit 2026-07-09 competitive review.)
+  if (!/^[0-9a-fA-F]+$/.test(hex)) throw new Error('SESSION_KEY_HEX contains non-hex chars');
   if (hex.length % 2) throw new Error('bad hex');
   const out = new Uint8Array(hex.length / 2);
   for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
@@ -45,8 +49,14 @@ export async function issueSessionToken(uid, env) {
   // but never trust it on read — always re-query on session verify.
   const nonce = crypto.randomUUID();
   const now = Math.floor(Date.now() / 1000);
-  const genRow = await env.DB.prepare('SELECT password_changed_at FROM admins WHERE id = ?').bind(uid).first();
-  const gen = Number(genRow && genRow.password_changed_at) || 0;
+  let genRow = await env.DB.prepare('SELECT password_changed_at FROM admins WHERE id = ?').bind(uid).first();
+  let gen = Number(genRow && genRow.password_changed_at) || 0;
+  // If password_changed_at was never set (legacy row / migration), stamp it
+  // NOW so gen>0 and getSession rejects gen=0. Prevents an unrevocable token.
+  if (gen === 0) {
+    gen = now;
+    await env.DB.prepare('UPDATE admins SET password_changed_at = ? WHERE id = ? AND (password_changed_at IS NULL OR password_changed_at = 0)').bind(gen, uid).run();
+  }
   const payload = `${uid}.${gen}.${nonce}.${now}`;
   const sig = await hmac(env.SESSION_KEY_HEX, payload);
   const token = `${payload}.${sig}`;
@@ -90,7 +100,14 @@ export async function getSession(request, env) {
     'SELECT id, role, password_changed_at, active FROM admins WHERE id = ?'
   ).bind(Number(uid)).first();
   if (!user || !user.active) return null;
-  if (Number(user.password_changed_at) !== Number(gen)) return null;
+  // Reject gen=0 explicitly: prevents an admin row inserted without a
+  // password_changed_at (NULL → Number 0) from having tokens that survive
+  // password rotations (audit 2026-07-09). issueSessionToken now floors gen
+  // to unixepoch() when 0.
+  const uGen = Number(user.password_changed_at);
+  const tGen = Number(gen);
+  if (!uGen || !tGen) return null;
+  if (uGen !== tGen) return null;
 
   return { uid: user.id, role: user.role, token, issuedAt: raw.issuedAt };
 }

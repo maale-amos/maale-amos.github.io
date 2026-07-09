@@ -6,7 +6,8 @@ await p.waitForTimeout(2500);
 // Login
 await p.click('#adminRequestBtn');
 await p.waitForTimeout(300);
-await p.fill('#adminCode', '4415');
+// SECURITY 2026-07-09: hard-coded PIN removed. Provide via env var when running the script.
+await p.fill('#adminCode', process.env.ADMIN_PIN || '');
 await p.click('#adminVerifyBtn');
 await p.waitForTimeout(500);
 // Test tabs

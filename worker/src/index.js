@@ -41,8 +41,11 @@ export default {
       if (mForm)                                  return await handleKlitaFormGet(request, env, mForm[1]);
       return error(404, 'not_found', env, undefined, request);
     } catch (e) {
+      // Log full detail server-side, but do NOT echo the exception message to
+      // the client. Prior code leaked D1 constraint names (username enum),
+      // KV key hints, etc. Fix from 2026-07-09 audit competitive review.
       console.error('unhandled:', e && e.stack || e);
-      return error(500, 'internal_error', env, String((e && e.message) || 'internal_error'), request);
+      return error(500, 'internal_error', env, 'internal_error', request);
     }
   }
 };
@@ -63,10 +66,15 @@ async function handleLogin(request, env) {
   let body; try { body = JSON.parse(raw); } catch { body = {}; }
   const username = String(body.username || '').trim().toLowerCase();
   const password = String(body.password || '');
+  // Length bounds prevent oversize KV keys (>512B) blowing up ratelimit path.
   if (!username || !password) return error(400, 'missing_fields', env);
+  if (username.length > 254) return error(400, 'bad_username', env);
+  if (password.length > 512) return error(400, 'bad_password', env);
 
+  // Rate-limit key is a hash prefix — keeps KV key < 128B regardless of input.
+  const rlUser = username.slice(0, 96);
   const rateIp   = await checkRateLimit(env, `ip:${ip}`);
-  const rateUser = await checkRateLimit(env, `user:${username}`);
+  const rateUser = await checkRateLimit(env, `user:${rlUser}`);
   if (!rateIp.allowed || !rateUser.allowed) {
     const s = Math.max(rateIp.resetInSec || 0, rateUser.resetInSec || 0);
     return error(429, 'too_many_attempts', env, `נסיונות התחברות רבים מדי. נסה שוב עוד ${s} שניות.`);
@@ -118,21 +126,29 @@ async function handleChangePassword(request, env) {
   if (request.method !== 'POST') return error(405, 'method_not_allowed', env);
   const s = await getSession(request, env);
   if (!s) return error(401, 'unauthorized', env);
+  // Rate-limit brute-forcing of oldPassword (audit 2026-07-09 M/H).
+  const rl = await checkRateLimit(env, `chpw:${s.uid}`, 5, 300);
+  if (!rl.allowed) return error(429, 'too_many_attempts', env, `נסיונות רבים מדי — נסה שוב עוד ${rl.resetInSec} שניות.`);
+
   const body = await request.json().catch(() => ({}));
   const oldp = String(body.oldPassword || '');
   const newp = String(body.newPassword || '');
-  if (!oldp || newp.length < 8) return error(400, 'weak_password', env, 'סיסמה חדשה חייבת להיות באורך של 8 תווים לפחות');
+  // Modest stronger minimum + upper bound to avoid oversized PBKDF2 inputs.
+  if (!oldp || oldp.length > 512) return error(400, 'bad_input', env);
+  if (newp.length < 10 || newp.length > 512) return error(400, 'weak_password', env, 'סיסמה חדשה חייבת להיות באורך 10 תווים לפחות');
 
   const row = await env.DB.prepare('SELECT password_hash FROM admins WHERE id = ?').bind(s.uid).first();
   if (!row || !(await verifyPassword(oldp, row.password_hash))) {
     return error(401, 'bad_old_password', env, 'סיסמה נוכחית שגויה');
   }
   const hash = await hashPassword(newp);
-  // H-1 fix: bump password_changed_at so all previously issued session tokens
-  // (which have iat < now) are rejected by getSession going forward.
   await env.DB.prepare(
     'UPDATE admins SET password_hash = ?, password_changed_at = unixepoch() WHERE id = ?'
   ).bind(hash, s.uid).run();
+  // Delete current session's KV row immediately. gen bump invalidates every
+  // token via getSession check, but the current token still lives in KV until
+  // TTL. Removing it here closes the KV eventual-consistency read window.
+  try { await revokeSession(s.token, env); } catch (e) { console.error('revoke on chpw', e); }
   await env.DB.prepare('INSERT INTO audit_log (actor_id, action, ip) VALUES (?, ?, ?)')
     .bind(s.uid, 'change-password', clientIp(request)).run();
   return json({ ok: true }, env);
@@ -147,27 +163,47 @@ async function handleMe(request, env) {
   return json({ id: row.id, username: row.username, role: row.role, lastLoginAt: row.last_login_at }, env);
 }
 
+// Recursive prototype-pollution guard. Returns true if any nested object
+// key equals __proto__, constructor, or prototype. Handles arrays.
+function hasBadKeys(v, depth = 0) {
+  if (v === null || typeof v !== 'object' || depth > 30) return false;
+  if (Array.isArray(v)) return v.some(x => hasBadKeys(x, depth + 1));
+  for (const k of Object.keys(v)) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') return true;
+    if (hasBadKeys(v[k], depth + 1)) return true;
+  }
+  return false;
+}
+
 async function handleContent(request, env, path) {
   const section = path.replace('/api/content/', '');
-  if (!/^[a-z0-9_-]+$/.test(section)) return error(400, 'bad_section', env);
+  // C-1 defense: section must be short + safe. 64 char cap prevents storage
+  // amplification by a compromised session.
+  if (!/^[a-z0-9_-]{1,64}$/.test(section)) return error(400, 'bad_section', env);
 
   if (request.method === 'GET') {
     const row = await env.DB.prepare('SELECT json_data, updated_at FROM content WHERE section_id = ?').bind(section).first();
-    if (!row) return json({ section, data: null }, env);
-    return json({ section, data: JSON.parse(row.json_data), updatedAt: row.updated_at }, env);
+    if (!row) return json({ section, data: null }, env, 200, {}, request);
+    let data = null;
+    try { data = JSON.parse(row.json_data); } catch (_) { data = null; }
+    return json({ section, data, updatedAt: row.updated_at }, env, 200, {}, request);
   }
   if (request.method === 'POST') {
     const s = await getSession(request, env);
-    if (!s) return error(401, 'unauthorized', env);
-    // Cap body at 256KB to prevent D1 bloat from a compromised session (M-6).
+    if (!s) return error(401, 'unauthorized', env, undefined, request);
+    // CRITICAL fix (audit 2026-07-09 C-1): only admin+editor may write site
+    // content. Prior code accepted ANY authenticated session — including
+    // self-service klita family users — allowing anonymous defacement.
+    if (s.role !== 'admin' && s.role !== 'editor') {
+      return error(403, 'forbidden', env, 'תוכן האתר מיועד למנהלי אתר בלבד', request);
+    }
     const raw = await request.text();
-    if (raw.length > 256 * 1024) return error(413, 'payload_too_large', env);
+    if (raw.length > 256 * 1024) return error(413, 'payload_too_large', env, undefined, request);
     let body;
-    try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env); }
-    if (!body || typeof body !== 'object' || Array.isArray(body)) return error(400, 'bad_json', env);
-    // Reject prototype-pollution vectors (defense in depth for downstream code).
-    if ('__proto__' in body || 'constructor' in body || 'prototype' in body) {
-      return error(400, 'bad_json', env, 'forbidden top-level key');
+    try { body = JSON.parse(raw); } catch { return error(400, 'bad_json', env, undefined, request); }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return error(400, 'bad_json', env, undefined, request);
+    if (hasBadKeys(body)) {
+      return error(400, 'bad_json', env, 'forbidden object key found in payload', request);
     }
     await env.DB.prepare(
       `INSERT INTO content (section_id, json_data, updated_by, updated_at)
@@ -177,9 +213,11 @@ async function handleContent(request, env, path) {
          updated_by = excluded.updated_by,
          updated_at = excluded.updated_at`
     ).bind(section, JSON.stringify(body), s.uid).run();
-    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
-      .bind(s.uid, 'content_write', section, clientIp(request)).run();
-    return json({ ok: true, section }, env);
+    try {
+      await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+        .bind(s.uid, 'content_write', section, clientIp(request)).run();
+    } catch (e) { console.error('audit content_write failed:', e); }
+    return json({ ok: true, section }, env, 200, {}, request);
   }
-  return error(405, 'method_not_allowed', env);
+  return error(405, 'method_not_allowed', env, undefined, request);
 }

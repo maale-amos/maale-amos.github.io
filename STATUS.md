@@ -7,8 +7,8 @@
 
 ### פעולה קריטית של יוסף (רק אתה יכול):
 🔴 **Google OAuth של Drive חשוף בריפו פומבי `vimeo-downloader`**.
-`client_secret = <REDACTED_KEY>` · `refresh_token = 1//03doYP5sR8165...JtFuhLc`
-1. `https://console.cloud.google.com/apis/credentials` → מחק/החלף client_secret של `1072944905499-vm2v2i5dvn0a0d2o4ca36i1vge8cvbn0`.
+הערכים המדויקים לא נשמרים כאן — ראה memory מוצפן אצל יוסף.
+1. `https://console.cloud.google.com/apis/credentials` → מחק/החלף client_secret של הלקוח `1072944905499-...` (רשום ב-vimeo-downloader).
 2. `https://myaccount.google.com/permissions` → revoke ל-OAuth client.
 3. עדכן secret `GOOGLE_REFRESH_TOKEN` בכל ריפו: vimeo-downloader, BHT, cheder-bht, gabbaim, tochen-echad, klita.
 4. אני הסרתי את ה-hardcoded fallbacks (`6afc1ab`). היסטוריית git עדיין מכילה — אחרי rotation ההיסטוריה מנוטרלת.
@@ -42,7 +42,7 @@
 **vimeo-downloader workflows (commits `6afc1ab`, `2c2f512`):**
 - `download-to-drive.yml` (dl-bridge target): URL/FORMAT/QUALITY דרך `env:` block, scheme check, shell-metachar reject → **סוגר את שרשרת ה-RCE החמורה ביותר**
 - `universal-download.yml`, `crawl-site.yml`, `tochen-echad-weekly.yml`: הסרת fallbacks של OAuth, fail-fast if secrets missing
-- `yemot-health.yml`: הסרת סיסמת IVR `<REDACTED_PWD>`; YEMOT_PASS מ-secrets
+- `yemot-health.yml`: הסרת סיסמת IVR `<REDACTED>`; YEMOT_PASS מ-secrets
 - `nli-batch.yml`, `search.yml`, `google-web-search.yml`: env-block לכל user input → סוגר 4 injection sinks נוספים
 
 **Frontend:**
@@ -112,7 +112,7 @@
 | 4. `wrangler d1 execute --remote --command "CREATE TABLE admins..."` | `rows_written: 5 · success: true` |
 | 5. `wrangler secret put SESSION_KEY_HEX` (32-byte hex) | `Success! Uploaded secret SESSION_KEY_HEX` |
 | 6. `wrangler deploy` | `Deployed maale-amos-api triggers → https://maale-amos-api.6742853.workers.dev`<br>`Current Version ID: 1fa91218-b4fb-4abc-b0e4-794916753963` |
-| 7. `node create-admin.mjs admin <REDACTED_PWD>!` | `INSERT INTO admins → rows_written: 1 · ✓ Admin ready` |
+| 7. `node create-admin.mjs admin <REDACTED_PWD>` | `INSERT INTO admins → rows_written: 1 · ✓ Admin ready` |
 | 8. `wrangler d1 execute --command "SELECT ... FROM admins"` | `id:1 · username:admin · role:admin` |
 | 9. CSP updated לכלול origin של Worker | commit `b38b086` · CI success |
 | 10. `curl OPTIONS /api/admin/login` (preflight) | `HTTP 204` · `Access-Control-Allow-Origin: https://maale-amos.github.io` · `Access-Control-Allow-Credentials: true` |
@@ -142,7 +142,7 @@ Playwright headless על אותו מחשב מקבל אותו block.
    ציפייה: הודעה "שם משתמש או סיסמה שגויים"
 
 4. **בדיקה 2 — סיסמה נכונה:**
-   הזן `username: admin` · `password: <REDACTED_PWD>!`
+   הזן `username: admin` · `password: <REDACTED_PWD>`
    ציפייה: הדשבורד מוצג עם 5 טאבים
 
 5. **בדיקה 3 — Session persistence:**
@@ -154,7 +154,7 @@ Playwright headless על אותו מחשב מקבל אותו block.
    ציפייה: חזרה למסך כניסה.
 
 7. **בדיקה 5 — שינוי סיסמה (חובה מיד אחרי הכניסה!):**
-   לחץ "שנה סיסמה", הזן `<REDACTED_PWD>!` ובחר סיסמה חדשה חזקה.
+   לחץ "שנה סיסמה", הזן `<REDACTED_PWD>` ובחר סיסמה חדשה חזקה.
 
 **פקודות ניהול נוספות ליוסף:**
 
@@ -233,10 +233,10 @@ $ wrangler d1 execute maale-amos --remote --command "SELECT name FROM sqlite_mas
 
 ### שלב 2 — עדכון סיסמת admin ל-`<REDACTED_PWD>`
 
-הסיסמה הראשונית ששמרתי הייתה `<REDACTED_PWD>!` (עם `!`). אתה בודק עם `<REDACTED_PWD>` (בלי `!`). עדכנתי:
+הסיסמה הראשונית ששמרתי הייתה `<REDACTED_PWD>` (עם `!`). אתה בודק עם `<REDACTED_PWD>` (בלי `!`). עדכנתי:
 
 ```
-$ node -e "PBKDF2 of '<REDACTED_PWD>' → 210000$nDIIHBLlTfSaM5m8ixOhSw==$WZyS9GOkzjMJS/NHry+X59DrYp8PiQdhgvD4NxljLwU="
+$ node -e "PBKDF2 of '<REDACTED_PWD>' → <REDACTED_HASH>"
 $ wrangler d1 execute maale-amos --remote --command "UPDATE admins SET password_hash = '<hash>' WHERE username = 'admin'"
 "changes": 1, "rows_written": 1, "changed_db": true
 ```
@@ -457,7 +457,7 @@ Browser: localStorage.setItem('ma_admin_session_token', sessionToken)
 
 **אימות** (יוסף בדפדפן):
 - `curl "PROXY_URL"` → `{"ok":true,"proxy":"maale-amos-api","worker":"..."}` (health check דרך GET)
-- פתח `/admin/`, הזן `admin` / `<REDACTED_PWD>!` → אמור להיכנס לדשבורד
+- פתח `/admin/`, הזן `admin` / `<REDACTED_PWD>` → אמור להיכנס לדשבורד
 - Console (F12) → אין `Access-Control-Allow-Origin blocked` · אין 418
 
 ### אם הפתרון החינמי לא מתאים
@@ -682,7 +682,7 @@ broken: 0
 
 **Interactive functionality (from earlier probes):**
 - 12 window.* handlers (toggleMenu, toggleDark, changeFontSize, showTopic, filterMarket, showArchiveModal, quickCall106, openReportMenu, openContactMenu, closeActionSheet, closeSearch, searchSite) — כולם מוגדרים
-- Dropdown (desktop): 5 items · Search: 7 hits for "חינוך" · FAQ toggle: works · Admin PIN 4415: unlocks dashboard
+- Dropdown (desktop): 5 items · Search: 7 hits for "חינוך" · FAQ toggle: works · Admin PIN <REDACTED>: unlocks dashboard
 
 **אין באגים אמיתיים לתקן.** Site is stable.
 
@@ -891,7 +891,7 @@ wrangler deploy
 - Interaction: dropdown, search, FAB clicks, dark toggle, +A, hero quick links → כולם עובדים
 - Mobile 390px: overflow test על 9 עמודים → 9/9 clean
 - FAQ toggle → עבד (אחרי nav-padding fix)
-- Admin login LOCAL (PIN 4415) → dashboard + 5 tabs + 32 structure items + 7 theme controls
+- Admin login LOCAL (PIN <REDACTED>) → dashboard + 5 tabs + 32 structure items + 7 theme controls
 - A11y: 0 imgs w/o alt · 0 buttons w/o label · 1 h1 · 33 headings
 
 ---
@@ -987,7 +987,7 @@ grep -c "איתן סער"     → 1 ✅
 
 ### עדיפות 3 — פאנל ניהול (`/admin/`) — עובד ללא Worker
 - מזהה אוטומטית LIVE / LOCAL
-- **LOCAL mode** (Worker לא פרוס): PIN ברירת מחדל `4415`
+- **LOCAL mode** (Worker לא פרוס): PIN ברירת מחדל <REDACTED>
 - שינויים נשמרים ב-localStorage + מורדים כ-JSON להעלאה ידנית לגיט
 - טאבים: תוכן סקציות · עיצוב · הודעות · אירועים · מבנה הדף
 - הודעות/אירועים: אפשר להוסיף/למחוק פריטים בפאנל, כולל מחיקת פריטים "זרים"

@@ -20,7 +20,13 @@ const TABS = {
   AUDIT: 'audit',                // v2: admin action audit trail
   SESSIONS: 'sessions',          // v2: active login sessions
 };
-const ADMIN_TOKEN = '<REDACTED_TOKEN>';
+// SECURITY 2026-07-09: hardcoded token removed. Set via Apps Script
+// PropertiesService: File → Project settings → Script properties → ADMIN_TOKEN.
+// The Apps Script backend is legacy — the current auth is via Cloudflare Worker.
+const ADMIN_TOKEN = (function() {
+  try { return PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN') || ''; }
+  catch (e) { return ''; }
+})();
 
 function _sheet(name) {
   let ss;
@@ -445,7 +451,9 @@ function _analyticsSummary() {
 function setupSeed() {
   const seed = {
     residents: [
-      { name: 'יוסף שניידר', code: '4415', role: 'מזכיר / מנהל אתר', status: 'אושר' },
+      // SECURITY 2026-07-09: seed row scrubbed of PIN. Admins set their own
+      // code via the admin panel (or D1-backed Cloudflare Worker auth).
+      { name: 'יוסף שניידר', code: '', role: 'מזכיר / מנהל אתר', status: 'אושר' },
     ],
   };
   Object.keys(seed).forEach(tab => {
