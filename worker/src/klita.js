@@ -91,13 +91,18 @@ export async function handleKlitaRegister(request, env) {
   ).bind(email, hash, 'family', email, now).run();
   const uid = ins.meta.last_row_id;
 
+  // Compute last-4 digits so the committee UI can render masked IDs without
+  // pulling the raw column (R1 cross-review fix).
+  const last4 = (s) => (s && s.length >= 4) ? s.slice(-4) : null;
   await env.DB.prepare(
     `INSERT INTO applicants (user_id, family_name, husband_name, wife_name, husband_id, wife_id,
-                              phone, email, address, track)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                              husband_id_last4, wife_id_last4,
+                              phone, email, address, track, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
   ).bind(
     uid, applicant.family_name, applicant.husband_name || null, applicant.wife_name || null,
     applicant.husband_id || null, applicant.wife_id || null,
+    last4(applicant.husband_id), last4(applicant.wife_id),
     applicant.phone || null, applicant.email || email, applicant.address || null, applicant.track
   ).run();
 
@@ -153,15 +158,18 @@ export async function handleKlitaApplicant(request, env) {
   const errs = validateApplicant(applicant, { requireContact: false });
   if (errs.length) return error(400, 'validation', env, 'שדות לא תקינים: ' + errs.join(', '));
 
+  const last4 = (s) => (s && s.length >= 4) ? s.slice(-4) : null;
   const now = Math.floor(Date.now() / 1000);
   const existing = await env.DB.prepare('SELECT id FROM applicants WHERE user_id = ?').bind(s.uid).first();
   if (existing) {
     await env.DB.prepare(
       `UPDATE applicants SET family_name=?, husband_name=?, wife_name=?, husband_id=?, wife_id=?,
+                             husband_id_last4=?, wife_id_last4=?,
                              phone=?, email=?, address=?, track=?, updated_at=? WHERE id=?`
     ).bind(
       applicant.family_name, applicant.husband_name || null, applicant.wife_name || null,
       applicant.husband_id || null, applicant.wife_id || null,
+      last4(applicant.husband_id), last4(applicant.wife_id),
       applicant.phone || null, applicant.email || null, applicant.address || null,
       applicant.track, now, existing.id
     ).run();
@@ -169,11 +177,13 @@ export async function handleKlitaApplicant(request, env) {
   } else {
     const ins = await env.DB.prepare(
       `INSERT INTO applicants (user_id, family_name, husband_name, wife_name, husband_id, wife_id,
+                                husband_id_last4, wife_id_last4,
                                 phone, email, address, track)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       s.uid, applicant.family_name, applicant.husband_name || null, applicant.wife_name || null,
       applicant.husband_id || null, applicant.wife_id || null,
+      last4(applicant.husband_id), last4(applicant.wife_id),
       applicant.phone || null, applicant.email || null, applicant.address || null, applicant.track
     ).run();
     return json({ ok: true, applicant_id: ins.meta.last_row_id }, env, 200, {}, request);
@@ -229,12 +239,17 @@ export async function handleKlitaFormSave(request, env) {
     if (applicantFields.family_name) {
       const errs = validateApplicant(applicantFields, { requireContact: false });
       if (errs.length) return error(400, 'validation', env, 'שדות בטופס לא תקינים: ' + errs.join(', '));
+      const last4 = (v) => (v && v.length >= 4) ? v.slice(-4) : null;
+      const newH4 = last4(applicantFields.husband_id);
+      const newW4 = last4(applicantFields.wife_id);
       await env.DB.prepare(
         `UPDATE applicants SET family_name=COALESCE(NULLIF(?, ''), family_name),
                                husband_name=COALESCE(NULLIF(?, ''), husband_name),
                                wife_name=COALESCE(NULLIF(?, ''), wife_name),
                                husband_id=COALESCE(NULLIF(?, ''), husband_id),
                                wife_id=COALESCE(NULLIF(?, ''), wife_id),
+                               husband_id_last4=COALESCE(?, husband_id_last4),
+                               wife_id_last4=COALESCE(?, wife_id_last4),
                                phone=COALESCE(NULLIF(?, ''), phone),
                                email=COALESCE(NULLIF(?, ''), email),
                                address=COALESCE(NULLIF(?, ''), address),
@@ -242,7 +257,9 @@ export async function handleKlitaFormSave(request, env) {
          WHERE id=?`
       ).bind(
         applicantFields.family_name, applicantFields.husband_name, applicantFields.wife_name,
-        applicantFields.husband_id, applicantFields.wife_id, applicantFields.phone,
+        applicantFields.husband_id, applicantFields.wife_id,
+        newH4, newW4,
+        applicantFields.phone,
         applicantFields.email, applicantFields.address, applicant.id
       ).run();
     }
