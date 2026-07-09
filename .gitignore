@@ -13,3 +13,4 @@ audit/
 worker/.dev.vars
 worker/.wrangler/
 scripts/prove-cors.mjs
+.logs/
