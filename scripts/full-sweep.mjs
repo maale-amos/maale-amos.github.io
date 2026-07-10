@@ -39,13 +39,14 @@ for (const vp of VIEWPORTS) {
     page.on('console', m => {
       if (m.type() !== 'error') return;
       const t = m.text();
-      // Filter NetFree noise: their TLS-injected scripts violate our CSP and
-      // fail to load — that's the FILTER, not our bug.
       if (t.includes('netfree.link/injection-script')) return;
-      // NetFree also blocks POST/GET to our Worker on this box, which
-      // surfaces as a CORS error. Not our bug, not shippable-blocking.
       if (t.includes('maale-amos-api.6742853.workers.dev') && t.includes('CORS')) return;
       if (t.includes('Failed to load resource: net::ERR_FAILED')) return;
+      // /admin/ and /klita/ bootstrap by calling /api/me — 401 without a
+      // session is the correct response, not a bug. Same for /api/klita/me.
+      if (/Failed to load resource:.*status of 401/i.test(t)) return;
+      // NetFree 418 block from browsers behind the filter.
+      if (/Failed to load resource:.*status of 418/i.test(t)) return;
       consoleErrs.push(t.slice(0, 240));
     });
     page.on('requestfailed', r => {
