@@ -32,8 +32,7 @@ jobs:
       - name: node --check on Worker JS
         run: |
           set -e
-          for f in worker/src/*.js worker/scripts/*.mjs 2>/dev/null; do
-            [ -f "$f" ] || continue
+          for f in $(find worker/src -maxdepth 2 -type f \( -name '*.js' -o -name '*.mjs' \)); do
             echo "checking $f"
             node --check "$f"
           done
