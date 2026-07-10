@@ -37,6 +37,16 @@ jobs:
             node --check "$f"
           done
 
+      - name: Unit tests (validators)
+        run: |
+          set -e
+          if [ -d worker/test ]; then
+            for f in $(find worker/test -type f -name '*.test.mjs'); do
+              echo "running $f"
+              node --test "$f"
+            done
+          fi
+
   playwright:
     name: Playwright smoke (22-URL sweep)
     runs-on: ubuntu-latest
