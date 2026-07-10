@@ -1,0 +1,60 @@
+name: CI — syntax + smoke tests
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'STATUS.md'
+      - '*.md'
+      - '.gitignore'
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax:
+    name: Syntax check (node --check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: node --check on frontend JS
+        run: |
+          set -e
+          for f in src/js/*.js; do
+            echo "checking $f"
+            node --check "$f"
+          done
+      - name: node --check on Worker JS
+        run: |
+          set -e
+          for f in worker/src/*.js worker/scripts/*.mjs 2>/dev/null; do
+            [ -f "$f" ] || continue
+            echo "checking $f"
+            node --check "$f"
+          done
+
+  playwright:
+    name: Playwright smoke (22-URL sweep)
+    runs-on: ubuntu-latest
+    needs: syntax
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run sweep against production
+        # Sweep hits the live site (maale-amos.github.io) — so this catches
+        # broken deploys within a minute of merge. The Cloudflare Worker
+        # requests are filtered inside the script (workers.dev is blocked
+        # from CI here too in some cases).
+        run: node scripts/full-sweep.mjs
