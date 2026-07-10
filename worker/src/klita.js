@@ -879,3 +879,55 @@ export async function handleKlitaExport(request, env) {
     'Content-Disposition': `attachment; filename="klita-export-uid${targetUid}-${Date.now()}.json"`
   }, request);
 }
+
+// ============================================================================
+// Stale-draft reminder — surfaces application_forms of type='questionnaire'
+// still in status='draft' that haven't been updated in over 14 days. Called
+// by a Cloudflare Cron Trigger (or manually by admin). The reminder does NOT
+// send mail (mail.js is hard-off) — it logs the intent to audit_log so
+// committee can see who needs a nudge, and returns the list to the caller.
+// ============================================================================
+
+const STALE_DRAFT_DAYS_DEFAULT = 14;
+
+export async function handleKlitaStaleDrafts(request, env) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  if (s.role !== 'committee' && s.role !== 'admin') return error(403, 'forbidden', env);
+
+  const url = new URL(request.url);
+  const daysN = Number(url.searchParams.get('days')) || STALE_DRAFT_DAYS_DEFAULT;
+  const threshold = Math.floor(Date.now() / 1000) - (daysN * 86400);
+
+  const rows = await env.DB.prepare(
+    `SELECT a.id AS applicant_id, a.family_name, a.email, a.phone,
+            f.id AS form_id, f.form_type, f.status,
+            f.created_at, f.updated_at
+     FROM application_forms f
+     JOIN applicants a ON a.id = f.applicant_id
+     WHERE f.status = 'draft'
+       AND f.form_type = 'questionnaire'
+       AND f.updated_at < ?
+     ORDER BY f.updated_at ASC LIMIT 500`
+  ).bind(threshold).all();
+
+  const stale = rows.results || [];
+  try {
+    await env.DB.prepare(
+      'INSERT INTO audit_log (actor_id, action, target, ip, meta) VALUES (?, ?, ?, ?, ?)'
+    ).bind(
+      s.uid, 'stale_drafts_checked', `days:${daysN}`, clientIp(request),
+      JSON.stringify({ count: stale.length })
+    ).run();
+  } catch (e) { console.error('audit stale_drafts', e); }
+
+  return json({
+    ok: true,
+    threshold_days: daysN,
+    threshold_timestamp: threshold,
+    count: stale.length,
+    stale_drafts: stale,
+    note: 'שליחת מיילים כבויה. הרשימה מיועדת לבדיקה ידנית ע\"י הרכז.'
+  }, env, 200, {}, request);
+}

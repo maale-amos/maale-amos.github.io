@@ -16,7 +16,7 @@ import {
   handleKlitaFormSave, handleKlitaFormGet,
   handleKlitaUploadPost, handleKlitaUploadsList, handleKlitaUploadGet,
   handleKlitaCommitteeQueue, handleKlitaCommitteeDecide, handleKlitaCommitteeApplicant,
-  handleKlitaStage, handleKlitaExport
+  handleKlitaStage, handleKlitaExport, handleKlitaStaleDrafts
 } from './klita.js';
 
 export default {
@@ -76,6 +76,8 @@ export default {
       if (path === '/api/klita/stage')             return await handleKlitaStage(request, env);
       // GDPR data export
       if (path === '/api/klita/export')             return await handleKlitaExport(request, env);
+      // Stale draft nudge — committee/admin only
+      if (path === '/api/klita/stale-drafts')       return await handleKlitaStaleDrafts(request, env);
       return error(404, 'not_found', env, undefined, request);
     } catch (e) {
       // Log full detail server-side, but do NOT echo the exception message to

@@ -698,40 +698,110 @@
 
   // ============ Committee view ============
   let CURRENT_COMMITTEE_APP = null;
+  const COMMITTEE_STATE = { status: 'active', q: '', limit: 25, offset: 0 };
+
+  // Debounce so typing in the search box doesn't spam D1.
+  let _committeeSearchTimer = null;
+  function scheduleCommitteeRefresh() {
+    clearTimeout(_committeeSearchTimer);
+    _committeeSearchTimer = setTimeout(() => { COMMITTEE_STATE.offset = 0; renderCommittee(); }, 250);
+  }
 
   async function renderCommittee() {
     const qEl = $('committeeQueue');
+    const pagerEl = $('committeePager');
+    const titleEl = $('committeeQueueTitle');
+    const searchInput = $('committeeSearch');
+    const statusSelect = $('committeeStatusFilter');
     qEl.replaceChildren();
+    if (pagerEl) pagerEl.replaceChildren();
+
+    // Sync from UI controls (safe on first render — inputs may not exist).
+    if (searchInput && !searchInput.dataset.wired) {
+      searchInput.dataset.wired = '1';
+      searchInput.addEventListener('input', () => {
+        COMMITTEE_STATE.q = searchInput.value.trim();
+        scheduleCommitteeRefresh();
+      });
+      searchInput.value = COMMITTEE_STATE.q;
+    }
+    if (statusSelect && !statusSelect.dataset.wired) {
+      statusSelect.dataset.wired = '1';
+      statusSelect.addEventListener('change', () => {
+        COMMITTEE_STATE.status = statusSelect.value;
+        COMMITTEE_STATE.offset = 0;
+        renderCommittee();
+      });
+      statusSelect.value = COMMITTEE_STATE.status;
+    }
+
+    const params = new URLSearchParams({
+      status: COMMITTEE_STATE.status,
+      q:      COMMITTEE_STATE.q,
+      limit:  String(COMMITTEE_STATE.limit),
+      offset: String(COMMITTEE_STATE.offset)
+    });
+
     try {
-      const r = await api('/api/klita/committee/queue', { method: 'GET' });
+      const r = await api('/api/klita/committee/queue?' + params.toString(), { method: 'GET' });
       const list = r.applicants || [];
+      const p = r.pagination || {};
+      if (titleEl) {
+        const parts = ['תוצאות'];
+        if (typeof p.total === 'number') parts.push(`(${p.total})`);
+        titleEl.textContent = parts.join(' ');
+      }
       if (!list.length) {
-        const p = document.createElement('p');
-        p.textContent = 'אין ממתינים להחלטה כרגע.';
-        qEl.append(p);
+        const p2 = document.createElement('p');
+        p2.textContent = COMMITTEE_STATE.q ? 'אין תוצאות לחיפוש.' : 'אין ממתינים להחלטה כרגע.';
+        qEl.append(p2);
       } else {
         const ul = document.createElement('ul');
         ul.style.cssText = 'list-style:none;padding:0';
         list.forEach(a => {
           const li = document.createElement('li');
           li.style.cssText = 'padding:10px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center';
+          li.tabIndex = 0;
           const label = document.createElement('div');
           const strong = document.createElement('strong');
           strong.textContent = a.family_name;
           const small = document.createElement('small');
-          small.textContent = ' · ' + (a.track || '') + ' · שלב ' + (a.current_stage || 1);
+          const husband = a.husband_name ? ' · ' + a.husband_name : '';
+          small.textContent = husband + ' · ' + (a.track || '') + ' · שלב ' + (a.current_stage || 1);
           label.append(strong, small);
           const badge = document.createElement('small');
           badge.className = 'verify-badge';
           badge.textContent = a.status;
           li.append(label, badge);
-          li.onclick = () => loadCommitteeApplicant(a.id);
+          const open = () => loadCommitteeApplicant(a.id);
+          li.onclick = open;
+          li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
           ul.append(li);
         });
         qEl.append(ul);
       }
+
+      // Pagination controls
+      if (pagerEl && p.total > COMMITTEE_STATE.limit) {
+        const info = document.createElement('span');
+        info.textContent = `${COMMITTEE_STATE.offset + 1}-${Math.min(COMMITTEE_STATE.offset + COMMITTEE_STATE.limit, p.total)} מתוך ${p.total}`;
+        const buttons = document.createElement('div');
+        const prev = document.createElement('button');
+        prev.className = 'btn';
+        prev.textContent = '◀ הקודמים';
+        prev.disabled = COMMITTEE_STATE.offset === 0;
+        prev.onclick = () => { COMMITTEE_STATE.offset = Math.max(0, COMMITTEE_STATE.offset - COMMITTEE_STATE.limit); renderCommittee(); };
+        const next = document.createElement('button');
+        next.className = 'btn';
+        next.textContent = 'הבאים ▶';
+        next.disabled = COMMITTEE_STATE.offset + COMMITTEE_STATE.limit >= p.total;
+        next.style.marginInlineStart = '8px';
+        next.onclick = () => { COMMITTEE_STATE.offset += COMMITTEE_STATE.limit; renderCommittee(); };
+        buttons.append(prev, next);
+        pagerEl.append(info, buttons);
+      }
     } catch (e) {
-      qEl.textContent = 'שגיאה בטעינת הרשימה: ' + (e.body?.error || e.status);
+      qEl.textContent = 'שגיאה בטעינת הרשימה: ' + humanError(e);
     }
   }
 
