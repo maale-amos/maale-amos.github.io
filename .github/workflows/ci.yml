@@ -37,14 +37,21 @@ jobs:
             node --check "$f"
           done
 
-      - name: Unit tests (validators)
+      - name: Unit tests + coverage
         run: |
           set -e
           if [ -d worker/test ]; then
             for f in $(find worker/test -type f -name '*.test.mjs'); do
               echo "running $f"
-              node --test "$f"
+              node --test --experimental-test-coverage --test-reporter=spec "$f" 2>&1 | tee test-out.log
             done
+            # Extract coverage % (rough) for summary badge — Node --test-coverage
+            # prints "coverage" lines we can grep. Best-effort — don't fail the
+            # build if the format changes.
+            if grep -qE 'all files' test-out.log; then
+              echo "## Test coverage" >> "$GITHUB_STEP_SUMMARY"
+              grep -A1 'all files' test-out.log | tail -1 >> "$GITHUB_STEP_SUMMARY" || true
+            fi
           fi
 
   playwright:
