@@ -17,7 +17,6 @@
   function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {} }
 
   async function api(path, opts = {}) {
-    // text/plain avoids CORS preflight; Worker's request.json() parses regardless.
     const headers = { 'Content-Type': 'text/plain;charset=utf-8', ...(opts.headers || {}) };
     const tok = getToken();
     if (tok) headers['Authorization'] = 'Bearer ' + tok;
@@ -30,6 +29,55 @@
     let bodyJson = null; try { bodyJson = await res.json(); } catch {}
     if (!res.ok) throw Object.assign(new Error('api_error'), { status: res.status, body: bodyJson });
     return bodyJson;
+  }
+
+  // Human-readable error mapper for the whole app. Keeps user-facing strings
+  // consistent + in Hebrew.
+  function humanError(e) {
+    if (!e) return 'שגיאה לא ידועה';
+    if (e.status === 0)   return 'בעיית רשת — בדוק את החיבור ונסה שוב';
+    if (e.status === 401) return e.body?.message || 'התחברות פגה — נא להיכנס שוב';
+    if (e.status === 403) return e.body?.message || 'אין הרשאה לפעולה זו';
+    if (e.status === 404) return e.body?.message || 'לא נמצא';
+    if (e.status === 409) return e.body?.message || 'כבר קיים';
+    if (e.status === 413) return e.body?.message || 'הבקשה גדולה מדי';
+    if (e.status === 429) return e.body?.message || 'ניסיונות רבים מדי — נא להמתין';
+    if (e.status === 400) return 'שדות לא תקינים: ' + (e.body?.message || 'בדוק שוב');
+    if (e.status === 500) return 'שגיאת שרת — נא לנסות שוב מאוחר יותר';
+    if (e.status === 502) return e.body?.message || 'השרת לא זמין כרגע';
+    if (e.status === 503) return e.body?.message || 'שירות לא זמין כרגע';
+    return e.body?.message || ('שגיאה (' + e.status + ')');
+  }
+
+  // Runs an async op with a busy state on the given button + status message.
+  // Disables the button, swaps its label to a spinner + text, restores on
+  // finish (success or throw). Returns whatever the fn returns / re-throws.
+  async function withBusy(button, busyText, fn) {
+    const btn = typeof button === 'string' ? $(button) : button;
+    let original = null;
+    if (btn) {
+      original = { html: btn.innerHTML, disabled: btn.disabled, aria: btn.getAttribute('aria-busy') };
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+      // DOM-builder: never innerHTML-with-user-data, but these strings are literal.
+      btn.innerHTML = '';
+      const sp = document.createElement('span');
+      sp.className = 'ma-spinner';
+      sp.setAttribute('aria-hidden', 'true');
+      const t = document.createElement('span');
+      t.textContent = ' ' + (busyText || 'טוען…');
+      btn.append(sp, t);
+    }
+    try {
+      return await fn();
+    } finally {
+      if (btn) {
+        btn.innerHTML = original.html;
+        btn.disabled = original.disabled;
+        if (original.aria === null) btn.removeAttribute('aria-busy');
+        else btn.setAttribute('aria-busy', original.aria);
+      }
+    }
   }
 
   // --------- Views ----------
@@ -93,19 +141,16 @@
     };
     if (!body.email || !body.password || !body.family_name) return msg('חובה: דוא״ל, סיסמה, שם משפחה', false);
     if (body.password.length < 10) return msg('סיסמה חייבת להיות באורך 10 תווים לפחות', false);
-    msg('פותח תיק…');
     try {
-      const r = await api('/api/klita/register', { method: 'POST', body: JSON.stringify(body) });
-      if (r.sessionToken) setToken(r.sessionToken);
+      await withBusy('regSubmit', 'פותח תיק…', async () => {
+        const r = await api('/api/klita/register', { method: 'POST', body: JSON.stringify(body) });
+        if (r.sessionToken) setToken(r.sessionToken);
+        await refreshMe();
+      });
       msg('בעז״ה נפתח תיק — ממשיכים לפורטל');
-      await refreshMe();
       go('portal');
     } catch (e) {
-      if (e.status === 409) msg('הכתובת כבר רשומה — נסו להתחבר', false);
-      else if (e.status === 400) msg('נתונים לא תקינים: ' + (e.body && e.body.message || 'בדוק שוב'), false);
-      else if (e.status === 429) msg('נסיונות רבים — נסו שוב עוד שעה', false);
-      else if (e.status === 0)  msg('בעיית רשת — נסו שוב', false);
-      else msg('שגיאה', false);
+      msg(humanError(e), false);
     }
   });
 
@@ -114,18 +159,17 @@
     const username = $('login_email').value.trim();
     const password = $('login_password').value;
     if (!username || !password) return msg('הזינו דוא״ל וסיסמה', false);
-    msg('בודק…');
     try {
-      const r = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username, password }) });
-      if (r.sessionToken) setToken(r.sessionToken);
-      await refreshMe();
+      const r = await withBusy('loginSubmit', 'בודק…', async () => {
+        const r2 = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+        if (r2.sessionToken) setToken(r2.sessionToken);
+        await refreshMe();
+        return r2;
+      });
       msg('שלום ' + (r.user && r.user.username));
       go('portal');
     } catch (e) {
-      if (e.status === 401)      msg('דוא״ל או סיסמה שגויים', false);
-      else if (e.status === 429) msg('נסיונות רבים — נסו עוד רגע', false);
-      else if (e.status === 0)   msg('בעיית רשת', false);
-      else msg('שגיאה', false);
+      msg(humanError(e), false);
     }
   });
 
@@ -294,14 +338,15 @@
     const payload = {};
     APPLICANT_FIELDS.forEach(f => { payload[f.key] = $('app_' + f.key).value.trim(); });
     if (!payload.family_name) return msg('שם המשפחה חובה', false);
-    msg('שומר…');
     try {
-      await api('/api/klita/applicant', { method: 'POST', body: JSON.stringify(payload) });
-      await refreshMe();
+      await withBusy('applicantSave', 'שומר…', async () => {
+        await api('/api/klita/applicant', { method: 'POST', body: JSON.stringify(payload) });
+        await refreshMe();
+      });
       msg('נשמר בעז״ה');
       go('portal');
     } catch (e) {
-      msg('שמירה נכשלה: ' + (e.body && e.body.message || e.status), false);
+      msg('שמירה נכשלה: ' + humanError(e), false);
     }
   });
 
@@ -439,23 +484,27 @@
   async function saveQ(status) {
     const form_data = collectQ();
     if (!form_data.family_name) { msg('שם המשפחה חובה', false); return null; }
-    msg(status === 'draft' ? 'שומר טיוטה…' : 'שולח…');
+    const btnId = status === 'draft' ? 'qDraft' : 'qSubmit';
+    const busyText = status === 'draft' ? 'שומר טיוטה…' : 'שולח…';
     try {
-      const r = await api('/api/klita/form', {
-        method: 'POST',
-        body: JSON.stringify({
-          form_type: 'questionnaire',
-          status,
-          form_data,
-          form_id: CURRENT_FORM_ID || undefined
-        })
+      const r = await withBusy(btnId, busyText, async () => {
+        const r2 = await api('/api/klita/form', {
+          method: 'POST',
+          body: JSON.stringify({
+            form_type: 'questionnaire',
+            status,
+            form_data,
+            form_id: CURRENT_FORM_ID || undefined
+          })
+        });
+        CURRENT_FORM_ID = r2.form_id;
+        await refreshMe();
+        return r2;
       });
-      CURRENT_FORM_ID = r.form_id;
-      await refreshMe();
       msg(status === 'draft' ? 'נשמר בעז״ה' : 'הוגש בעז״ה');
       return r;
     } catch (e) {
-      msg('שגיאה: ' + (e.body && e.body.message || e.status), false);
+      msg(humanError(e), false);
       return null;
     }
   }
@@ -580,34 +629,34 @@
     if (!formId) return msg('בחר טופס', false);
     if (!file) return msg('בחר קובץ', false);
     if (file.size > 8 * 1024 * 1024) return msg('קובץ גדול מ-8MB', false);
-    msg('מעלה…');
     try {
-      const b64 = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => {
-          const s = r.result;
-          const idx = s.indexOf('base64,');
-          resolve(idx >= 0 ? s.slice(idx + 7) : s);
-        };
-        r.onerror = () => reject(new Error('read'));
-        r.readAsDataURL(file);
-      });
-      await api('/api/klita/upload', {
-        method: 'POST',
-        body: JSON.stringify({
-          form_id: Number(formId),
-          filename: file.name,
-          content_type: file.type || 'application/octet-stream',
-          data_b64: b64
-        })
+      await withBusy('uploadSubmit', 'מעלה…', async () => {
+        const b64 = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => {
+            const s = r.result;
+            const idx = s.indexOf('base64,');
+            resolve(idx >= 0 ? s.slice(idx + 7) : s);
+          };
+          r.onerror = () => reject(new Error('read'));
+          r.readAsDataURL(file);
+        });
+        await api('/api/klita/upload', {
+          method: 'POST',
+          body: JSON.stringify({
+            form_id: Number(formId),
+            filename: file.name,
+            content_type: file.type || 'application/octet-stream',
+            data_b64: b64
+          })
+        });
+        $('uploadFile').value = '';
+        await refreshMe();
+        await refreshExistingUploads();
       });
       msg('הועלה בעז״ה');
-      $('uploadFile').value = '';
-      await refreshMe();
-      await refreshExistingUploads();
     } catch (e) {
-      const detail = e.body && (e.body.message || e.body.error);
-      msg('העלאה נכשלה' + (detail ? ': ' + detail : ''), false);
+      msg('העלאה נכשלה: ' + humanError(e), false);
     }
   });
 
@@ -708,22 +757,23 @@
       if (!CURRENT_COMMITTEE_APP) return msg('בחרו משפחה קודם', false);
       const decision = btn.dataset.decision;
       const comment = ($('committeeComment').value || '').trim();
-      msg('שולח החלטה…');
       try {
-        const r = await api('/api/klita/committee/decide', {
-          method: 'POST',
-          body: JSON.stringify({
-            applicant_id: CURRENT_COMMITTEE_APP.id,
-            decision,
-            comment
+        const r = await withBusy(btn, 'שולח…', () =>
+          api('/api/klita/committee/decide', {
+            method: 'POST',
+            body: JSON.stringify({
+              applicant_id: CURRENT_COMMITTEE_APP.id,
+              decision,
+              comment
+            })
           })
-        });
+        );
         msg('החלטה נשמרה — סטטוס כעת: ' + r.status);
         $('committeeComment').value = '';
         await renderCommittee();
         $('committeeDetail').hidden = true;
       } catch (e) {
-        msg('שגיאה: ' + (e.body?.message || e.status), false);
+        msg(humanError(e), false);
       }
     });
   });

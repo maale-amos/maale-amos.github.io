@@ -18,7 +18,8 @@ permalink: /klita/
         <br>הטפסים ניתנים למילוי מקוון — רק החתימה נעשית ידנית לאחר הדפסה.</small></p>
     </header>
 
-    <p id="klitaMsg" role="status" aria-live="polite" style="text-align:center;padding:8px"></p>
+    <p id="klitaMsg" role="status" aria-live="polite" aria-atomic="true"
+       style="text-align:center;padding:8px;min-height:1.5em"></p>
 
     {# =========== VIEW: WELCOME (unauthenticated) =========== #}
     <div data-view="welcome" hidden>
@@ -249,6 +250,32 @@ permalink: /klita/
   #klitaApp [data-view] { transition:opacity .15s }
   @media (max-width:640px) {
     #klitaApp .grid-2 { grid-template-columns:1fr }
+  }
+
+  /* Focus outlines — no more invisible keyboard focus. */
+  #klitaApp button:focus-visible,
+  #klitaApp input:focus-visible,
+  #klitaApp select:focus-visible,
+  #klitaApp textarea:focus-visible {
+    outline: 3px solid #1a5c3a;
+    outline-offset: 2px;
+  }
+  #klitaApp button[aria-busy="true"] { opacity: .7; cursor: wait; }
+  #klitaApp button[disabled] { opacity: .5; cursor: not-allowed; }
+
+  /* Spinner injected inside buttons during in-flight requests. */
+  .ma-spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    vertical-align: middle;
+    animation: maSpin 0.8s linear infinite;
+  }
+  @keyframes maSpin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ma-spinner { animation: none; border-top-color: transparent; }
   }
   /* Print styling — hide everything except the print-area */
   @media print {
