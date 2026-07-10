@@ -44,6 +44,26 @@ const HEB_TEXT_RE = /^[\p{L}\p{N}\s'\-.,()]{1,120}$/u;
 const ID_RE = /^\d{5,9}$/;
 const PHONE_RE = /^[\d+\-() ]{7,20}$/;
 
+// Israeli ת.ז. checksum (Luhn-style, weights 1,2,1,2,...).
+// Accepts leading-zero-padded strings up to 9 digits. Rejects all-zero,
+// obvious sequences (123456789), and any string that fails the modulo-10
+// check. This catches typos + intentional bad data (audit 2026-07-10 Z1).
+export function isValidIsraeliId(raw) {
+  if (typeof raw !== 'string') return false;
+  const s = raw.trim();
+  if (!/^\d{5,9}$/.test(s)) return false;
+  // Left-pad to 9 for the checksum math.
+  const padded = s.padStart(9, '0');
+  if (padded === '000000000') return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    let d = Number(padded[i]) * ((i % 2) + 1);
+    if (d > 9) d -= 9;
+    sum += d;
+  }
+  return sum % 10 === 0;
+}
+
 function pickApplicantFields(input) {
   // Coerce and strip anything not on the whitelist. Keeps writes deterministic
   // and blocks prototype-pollution vectors.
@@ -67,8 +87,9 @@ function validateApplicant(a, { requireContact = true } = {}) {
   if (!a.family_name || !HEB_TEXT_RE.test(a.family_name)) errs.push('family_name');
   if (a.husband_name && !HEB_TEXT_RE.test(a.husband_name)) errs.push('husband_name');
   if (a.wife_name && !HEB_TEXT_RE.test(a.wife_name)) errs.push('wife_name');
-  if (a.husband_id && !ID_RE.test(a.husband_id)) errs.push('husband_id');
-  if (a.wife_id && !ID_RE.test(a.wife_id)) errs.push('wife_id');
+  // Z1: real ת.ז. checksum — was ID_RE only (any 5-9 digits accepted).
+  if (a.husband_id && !isValidIsraeliId(a.husband_id)) errs.push('husband_id');
+  if (a.wife_id && !isValidIsraeliId(a.wife_id)) errs.push('wife_id');
   if (a.phone && !PHONE_RE.test(a.phone)) errs.push('phone');
   if (a.email && !EMAIL_RE.test(a.email)) errs.push('email');
   if (requireContact && !a.phone && !a.email) errs.push('phone_or_email');
