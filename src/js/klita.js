@@ -125,6 +125,42 @@
     }
   }
 
+  // Password strength meter (Z14). Cheap heuristic — length, char classes,
+  // and a small denylist of terrible-obvious passwords. Not zxcvbn (would be
+  // 250KB). Enough to nudge users away from '1234567890' and 'password11'.
+  const COMMON_WEAK = new Set([
+    'password', 'password1', 'password123', '123456789', '1234567890',
+    'qwerty123', 'abc12345', 'aaaaaaaaaa', 'welcome1', 'admin123',
+    'letmein12', 'iloveyou1', '1qaz2wsx', '000000000', '111111111'
+  ]);
+  function scorePassword(p) {
+    if (!p) return { s: 0, label: '' };
+    const low = p.toLowerCase();
+    if (COMMON_WEAK.has(low)) return { s: 0, label: 'סיסמה נפוצה מדי' };
+    let s = 0;
+    if (p.length >= 10) s++;
+    if (p.length >= 14) s++;
+    if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++;
+    if (/\d/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    // Reduce for repeats.
+    if (/^(.)\1+$/.test(p)) s = Math.max(0, s - 3);
+    s = Math.min(4, s);
+    const labels = ['חלשה מאוד', 'חלשה', 'סבירה', 'טובה', 'חזקה'];
+    return { s, label: labels[s] };
+  }
+  const pwInput = $('reg_password');
+  if (pwInput) {
+    pwInput.addEventListener('input', () => {
+      const meter = document.querySelector('#reg_password_meter .pw-meter-fill');
+      const label = $('reg_password_meter_label');
+      if (!meter || !label) return;
+      const { s, label: text } = scorePassword(pwInput.value);
+      meter.dataset.strength = String(s);
+      label.textContent = text;
+    });
+  }
+
   // --------- Register ----------
   $('regSubmit').addEventListener('click', async () => {
     const body = {

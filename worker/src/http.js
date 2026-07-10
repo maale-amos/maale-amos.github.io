@@ -62,16 +62,29 @@ export function error(status, code, env, msg, request = null) {
   return json({ error: code, message: msg || code }, env, status, {}, request);
 }
 
-export function setSessionCookie(name, value, opts = {}) {
-  const parts = [`${name}=${value}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Strict'];
+// Z16: __Host- prefix requires Secure + Path=/ + no Domain attribute. Browser
+// enforces this, giving the cookie a fully-scoped identity that can't be
+// overridden or read by a compromised subdomain. We keep the plain 'session'
+// alias in the read path so tokens issued before this change stay valid.
+const COOKIE_NAME_HOST = '__Host-session';
+const COOKIE_NAME_PLAIN = 'session';
+
+export function setSessionCookie(_ignoredName, value, opts = {}) {
+  // Always emit the hardened name. Callers pass a name for legacy signature
+  // compatibility but we ignore it — there's only one cookie now.
+  const parts = [`${COOKIE_NAME_HOST}=${value}`, 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Strict'];
   if (opts.maxAge !== undefined) parts.push(`Max-Age=${opts.maxAge}`);
   return parts.join('; ');
 }
 
 export function readSessionCookie(request) {
   const cookie = request.headers.get('Cookie') || '';
-  const m = cookie.match(/(?:^|; ?)session=([^;]+)/);
-  return m ? m[1] : null;
+  // Prefer the hardened name; fall back to the plain name for backward
+  // compatibility with tokens issued before Z16.
+  const m1 = cookie.match(new RegExp('(?:^|;\\s?)' + COOKIE_NAME_HOST.replace(/([_-])/g, '\\$1') + '=([^;]+)'));
+  if (m1) return m1[1];
+  const m2 = cookie.match(/(?:^|;\s?)session=([^;]+)/);
+  return m2 ? m2[1] : null;
 }
 
 export function clientIp(request) {

@@ -47,9 +47,18 @@ permalink: /klita/
           <label>כתובת דוא"ל (זו תשמש לכניסה)*
             <input type="email" id="reg_email" autocomplete="email" required>
           </label>
-          <label>סיסמה (10 תווים לפחות)*
-            <input type="password" id="reg_password" autocomplete="new-password" minlength="10" required>
+          <label for="reg_password">סיסמה (10 תווים לפחות)*
+            <input type="password" id="reg_password" autocomplete="new-password"
+                   minlength="10" required
+                   aria-describedby="reg_password_hint reg_password_meter_label">
           </label>
+          <div id="reg_password_meter" class="pw-meter" aria-hidden="true">
+            <div class="pw-meter-bar"><div class="pw-meter-fill" data-strength="0"></div></div>
+          </div>
+          <p id="reg_password_meter_label" class="pw-meter-label" aria-live="polite"></p>
+          <p id="reg_password_hint" style="font-size:0.85rem;color:#666;margin-top:4px">
+            טיפ: שלב אותיות + מספרים + סימנים לתוצאה חזקה יותר.
+          </p>
           <label>שם המשפחה*
             <input type="text" id="reg_family_name" name="family_name" autocomplete="family-name" required>
           </label>
@@ -262,6 +271,23 @@ permalink: /klita/
   }
   #klitaApp button[aria-busy="true"] { opacity: .7; cursor: wait; }
   #klitaApp button[disabled] { opacity: .5; cursor: not-allowed; }
+
+  /* Password strength meter (Z14). */
+  .pw-meter { margin: 4px 0 6px }
+  .pw-meter-bar {
+    height: 6px; width: 100%;
+    background: #eee; border-radius: 3px; overflow: hidden;
+  }
+  .pw-meter-fill {
+    height: 100%; width: 0%;
+    background: #c62828;
+    transition: width .15s ease, background .15s ease;
+  }
+  .pw-meter-fill[data-strength="1"] { width: 25%; background: #ef6c00 }
+  .pw-meter-fill[data-strength="2"] { width: 50%; background: #f9a825 }
+  .pw-meter-fill[data-strength="3"] { width: 75%; background: #689f38 }
+  .pw-meter-fill[data-strength="4"] { width: 100%; background: #1a5c3a }
+  .pw-meter-label { font-size: 0.85rem; margin: 2px 0 4px; min-height: 1em }
 
   /* Spinner injected inside buttons during in-flight requests. */
   .ma-spinner {

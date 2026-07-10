@@ -64,7 +64,7 @@ export function isValidIsraeliId(raw) {
   return sum % 10 === 0;
 }
 
-function pickApplicantFields(input) {
+export function pickApplicantFields(input) {
   // Coerce and strip anything not on the whitelist. Keeps writes deterministic
   // and blocks prototype-pollution vectors.
   const out = {};
@@ -82,7 +82,7 @@ function pickApplicantFields(input) {
   return out;
 }
 
-function validateApplicant(a, { requireContact = true } = {}) {
+export function validateApplicant(a, { requireContact = true } = {}) {
   const errs = [];
   if (!a.family_name || !HEB_TEXT_RE.test(a.family_name)) errs.push('family_name');
   if (a.husband_name && !HEB_TEXT_RE.test(a.husband_name)) errs.push('husband_name');
@@ -101,15 +101,16 @@ function validateApplicant(a, { requireContact = true } = {}) {
 // Email normalization: NFKC + strip zero-width chars + ASCII-only enforcement.
 // Blocks homograph/impersonation registrations like admin​@x.com
 // (audit 2026-07-09).
-function normalizeEmail(raw) {
-  const s = String(raw || '')
+export function normalizeEmail(raw) {
+  if (typeof raw !== 'string') return '';
+  const s = raw
     .normalize('NFKC')
     .replace(/[​-‏‪-‮⁠﻿]/g, '')  // zero-widths + bidi
     .trim()
     .toLowerCase();
   return s;
 }
-function isAsciiEmail(s) {
+export function isAsciiEmail(s) {
   return /^[\x21-\x7E]+@[\x21-\x7E]+$/.test(s) && EMAIL_RE.test(s);
 }
 
@@ -258,7 +259,7 @@ export async function handleKlitaApplicant(request, env) {
 const ALLOWED_FORM_TYPES = new Set(['questionnaire', 'medical', 'financial', 'stage']);
 
 // Recursive prototype-pollution guard for nested payloads (audit 2026-07-09).
-function hasBadKeys(v, depth = 0) {
+export function hasBadKeys(v, depth = 0) {
   if (v === null || typeof v !== 'object' || depth > 30) return false;
   if (Array.isArray(v)) return v.some(x => hasBadKeys(x, depth + 1));
   for (const k of Object.keys(v)) {
@@ -599,20 +600,71 @@ export async function handleKlitaUploadGet(request, env, uploadId) {
 // Committee — queue + decision endpoints. Role gate: committee or admin only.
 // ============================================================================
 
+const QUEUE_STATUS_FILTERS = {
+  active: ['pending', 'in_review'],
+  pending: ['pending'],
+  review: ['in_review'],
+  approved: ['approved'],
+  rejected: ['rejected'],
+  all: ['pending', 'in_review', 'approved', 'rejected', 'archived']
+};
+
 export async function handleKlitaCommitteeQueue(request, env) {
   if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
   const s = await getSession(request, env);
   if (!s) return error(401, 'unauthorized', env);
   if (s.role !== 'committee' && s.role !== 'admin') return error(403, 'forbidden', env);
 
-  const list = await env.DB.prepare(
-    `SELECT id, family_name, husband_name, wife_name, phone, email, track,
-            current_stage, status, created_at, updated_at
-     FROM applicants
-     WHERE status IN ('pending','in_review')
-     ORDER BY updated_at DESC LIMIT 100`
-  ).all();
-  return json({ ok: true, applicants: list.results || [] }, env, 200, {}, request);
+  const url = new URL(request.url);
+  const filterKey = String(url.searchParams.get('status') || 'active').toLowerCase();
+  const statuses = QUEUE_STATUS_FILTERS[filterKey] || QUEUE_STATUS_FILTERS.active;
+  // Sanitize search: allow Hebrew/Latin letters + digits + space + a few punctuation.
+  // Do NOT trust caller — this becomes a LIKE parameter but bound, so injection is
+  // impossible; still constrain length + shape to avoid pathological queries.
+  const search = String(url.searchParams.get('q') || '').trim().slice(0, 60)
+                        .replace(/[%_\\]/g, '');   // strip LIKE metacharacters
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit')) || 25));
+  const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
+
+  const statusPlaceholders = statuses.map(() => '?').join(',');
+  let sql = `SELECT id, family_name, husband_name, wife_name, phone, email, track,
+                    current_stage, status, husband_id_last4, wife_id_last4,
+                    created_at, updated_at
+             FROM applicants
+             WHERE status IN (${statusPlaceholders})`;
+  const params = [...statuses];
+  if (search) {
+    sql += ` AND (family_name LIKE ? OR husband_name LIKE ? OR wife_name LIKE ?
+                  OR phone LIKE ? OR email LIKE ?)`;
+    const pat = '%' + search + '%';
+    params.push(pat, pat, pat, pat, pat);
+  }
+  sql += ' ORDER BY updated_at DESC LIMIT ? OFFSET ?';
+  params.push(limit, offset);
+
+  const list = await env.DB.prepare(sql).bind(...params).all();
+
+  // Total count (respecting filters) for pagination UI.
+  let countSql = `SELECT COUNT(*) c FROM applicants WHERE status IN (${statusPlaceholders})`;
+  const countParams = [...statuses];
+  if (search) {
+    countSql += ` AND (family_name LIKE ? OR husband_name LIKE ? OR wife_name LIKE ?
+                       OR phone LIKE ? OR email LIKE ?)`;
+    const pat = '%' + search + '%';
+    countParams.push(pat, pat, pat, pat, pat);
+  }
+  const cnt = await env.DB.prepare(countSql).bind(...countParams).first();
+
+  return json({
+    ok: true,
+    applicants: list.results || [],
+    pagination: {
+      total: Number(cnt && cnt.c) || 0,
+      limit, offset,
+      filter: filterKey,
+      search
+    }
+  }, env, 200, {}, request);
 }
 
 const DECISIONS = new Set(['approve','reject','abstain','question']);
