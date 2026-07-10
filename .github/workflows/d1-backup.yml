@@ -1,0 +1,76 @@
+name: D1 backup — weekly + on-demand
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # every Sunday at 03:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: d1-backup
+  cancel-in-progress: false
+
+jobs:
+  export:
+    name: Export maale-amos D1 → encrypted artifact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Export D1 (SQL dump)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -e
+          # Wrangler expects the working dir to have wrangler.toml
+          cd worker
+          npx wrangler@4 d1 export maale-amos --remote --output=/tmp/maale-amos.sql
+          ls -la /tmp/maale-amos.sql
+          echo "raw size: $(wc -c < /tmp/maale-amos.sql) bytes"
+
+      - name: Encrypt with age
+        env:
+          AGE_RECIPIENT: ${{ secrets.D1_BACKUP_AGE_RECIPIENT }}
+        run: |
+          set -e
+          if [ -z "$AGE_RECIPIENT" ]; then
+            echo "::error::D1_BACKUP_AGE_RECIPIENT secret not set. Generate with"
+            echo "  age-keygen -o key.txt   (private key)"
+            echo "then paste the 'Public key: age1...' line as the secret value."
+            exit 1
+          fi
+          # Install age (Ubuntu package)
+          sudo apt-get install -y age
+          age -r "$AGE_RECIPIENT" -o /tmp/maale-amos.sql.age /tmp/maale-amos.sql
+          # SECURITY: shred the plaintext dump immediately.
+          shred -u /tmp/maale-amos.sql
+          ls -la /tmp/maale-amos.sql.age
+
+      - name: Upload as workflow artifact (30-day retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: maale-amos-d1-${{ github.run_id }}
+          path: /tmp/maale-amos.sql.age
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Summary
+        run: |
+          {
+            echo "## D1 backup — $(date -u +'%Y-%m-%d %H:%M UTC')"
+            echo ""
+            echo "- Encrypted with age (private key held by Yosef, offline)."
+            echo "- Artifact: \`maale-amos-d1-${{ github.run_id }}\`"
+            echo "- Retention: 30 days — download and store in \`Z:\`"
+            echo "  or another cold location for long-term keep."
+            echo "- To restore:"
+            echo "  1. \`age -d -i key.txt maale-amos.sql.age > dump.sql\`"
+            echo "  2. \`wrangler d1 execute maale-amos --remote --file=dump.sql\`"
+          } >> "$GITHUB_STEP_SUMMARY"
