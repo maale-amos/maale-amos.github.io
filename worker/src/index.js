@@ -16,7 +16,7 @@ import {
   handleKlitaFormSave, handleKlitaFormGet,
   handleKlitaUploadPost, handleKlitaUploadsList, handleKlitaUploadGet,
   handleKlitaCommitteeQueue, handleKlitaCommitteeDecide, handleKlitaCommitteeApplicant,
-  handleKlitaStage
+  handleKlitaStage, handleKlitaExport
 } from './klita.js';
 
 export default {
@@ -74,6 +74,8 @@ export default {
       if (mAp)                                      return await handleKlitaCommitteeApplicant(request, env, mAp[1]);
       // Stages
       if (path === '/api/klita/stage')             return await handleKlitaStage(request, env);
+      // GDPR data export
+      if (path === '/api/klita/export')             return await handleKlitaExport(request, env);
       return error(404, 'not_found', env, undefined, request);
     } catch (e) {
       // Log full detail server-side, but do NOT echo the exception message to

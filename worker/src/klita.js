@@ -743,3 +743,87 @@ export async function handleKlitaStage(request, env) {
 
   return json({ ok: true, current_stage: targetStage }, env, 200, {}, request);
 }
+
+// ============================================================================
+// Data export — GDPR-style. Family user downloads a JSON archive of every
+// piece of data we store about them: user record, applicant, forms + all
+// their data, uploads metadata, audit log entries where they were the actor
+// or the target. Files themselves NOT included (they live in Drive; the
+// user has direct access to the folder that was shared with their email).
+// ============================================================================
+
+export async function handleKlitaExport(request, env) {
+  if (request.method !== 'GET') return error(405, 'method_not_allowed', env);
+  const s = await getSession(request, env);
+  if (!s) return error(401, 'unauthorized', env);
+  // Family and viewer get their own data; committee/admin can pass ?uid= to
+  // export another family's data (audit-logged, still only that user's data).
+  let targetUid = s.uid;
+  if (s.role === 'committee' || s.role === 'admin') {
+    const url = new URL(request.url);
+    const qUid = url.searchParams.get('uid');
+    if (qUid) {
+      const n = Number(qUid);
+      if (!Number.isInteger(n) || n <= 0) return error(400, 'bad_uid', env);
+      targetUid = n;
+    }
+  }
+
+  const user = await env.DB.prepare(
+    'SELECT id, username, role, email, created_at, last_login_at, password_changed_at, active FROM admins WHERE id = ?'
+  ).bind(targetUid).first();
+  if (!user) return error(404, 'user_not_found', env);
+
+  const applicant = await env.DB.prepare(
+    `SELECT id, family_name, husband_name, wife_name, husband_id, wife_id,
+            husband_id_last4, wife_id_last4, phone, email, address, track,
+            current_stage, status, drive_folder_id, drive_folder_link,
+            created_at, updated_at
+     FROM applicants WHERE user_id = ?`
+  ).bind(targetUid).first();
+
+  let forms = [];
+  let uploads = [];
+  if (applicant) {
+    const fRows = await env.DB.prepare(
+      `SELECT id, form_type, form_data, status, created_at, updated_at
+       FROM application_forms WHERE applicant_id = ? ORDER BY created_at ASC`
+    ).bind(applicant.id).all();
+    forms = (fRows.results || []).map(f => {
+      let data = null;
+      try { data = JSON.parse(f.form_data); } catch (_) {}
+      return { ...f, form_data: data };
+    });
+    if (forms.length) {
+      const formIds = forms.map(f => f.id);
+      const placeholders = formIds.map(() => '?').join(',');
+      const uRows = await env.DB.prepare(
+        `SELECT id, form_id, filename, content_type, size_bytes,
+                drive_file_id, drive_web_view_link, uploaded_at
+         FROM form_uploads WHERE form_id IN (${placeholders})`
+      ).bind(...formIds).all();
+      uploads = uRows.results || [];
+    }
+  }
+
+  const auditRows = await env.DB.prepare(
+    `SELECT id, action, target, ip, at FROM audit_log
+     WHERE actor_id = ? ORDER BY at DESC LIMIT 500`
+  ).bind(targetUid).all();
+
+  try {
+    await env.DB.prepare('INSERT INTO audit_log (actor_id, action, target, ip) VALUES (?, ?, ?, ?)')
+      .bind(s.uid, 'data_export', `uid:${targetUid}`, clientIp(request)).run();
+  } catch (e) { console.error('audit export', e); }
+
+  return json({
+    ok: true,
+    generated_at: new Date().toISOString(),
+    exported_by: { id: s.uid, role: s.role },
+    subject: { user, applicant, forms, uploads,
+               audit_log: auditRows.results || [] },
+    note: 'קבצי ה-PDF/JPG החתומים לא נכללים כאן. תיקיית ה-Drive של המשפחה שותפה איתך ישירות במייל — יש לך גישה ישירה לקבצים.'
+  }, env, 200, {
+    'Content-Disposition': `attachment; filename="klita-export-uid${targetUid}-${Date.now()}.json"`
+  }, request);
+}
