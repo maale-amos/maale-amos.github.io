@@ -58,6 +58,7 @@ for (const vp of VIEWPORTS) {
       // timing artifact, not a real broken resource. Verify with plain curl if
       // suspicious. fonts.googleapis.com sometimes flaky on this connection.
       if (err === 'net::ERR_ABORTED') return;
+      if (err === 'net::ERR_BLOCKED_BY_ORB') return;   // Opaque-response-blocking is browser policy noise for cross-origin <img>.
       if (u.includes('maps.googleapis.com/maps/api/mapsjs/gen_204')) return;
       netFails.push(`${err}: ${u.slice(0, 120)}`);
     });
