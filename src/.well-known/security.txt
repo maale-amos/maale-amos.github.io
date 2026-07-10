@@ -1,0 +1,10 @@
+Contact: mailto:6742853@gmail.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: he, en
+Canonical: https://maale-amos.github.io/.well-known/security.txt
+Policy: https://maale-amos.github.io/SECURITY.md
+
+# Vulnerability reporting policy
+# Found a security issue? Please email the address above. Do NOT open a
+# public GitHub issue before we've confirmed the fix is live or the report
+# is not sensitive.

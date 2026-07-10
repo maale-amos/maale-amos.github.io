@@ -5,6 +5,8 @@ export default async function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"src/robots.txt": "robots.txt"});
   eleventyConfig.addPassthroughCopy({"src/manifest.json": "manifest.json"});
   eleventyConfig.addPassthroughCopy({"src/sw.js": "sw.js"});
+  eleventyConfig.addPassthroughCopy({"src/.well-known": ".well-known"});
+  eleventyConfig.addPassthroughCopy({"SECURITY.md": "SECURITY.md"});
   eleventyConfig.addPassthroughCopy({"data": "data"});
   eleventyConfig.addPassthroughCopy({"src/_data/sections": "data/sections"});
   // src/_data/sections.json conflicts with data/sections.json — admin loads from /data/sections.json (the runtime one, kept in sync manually)
