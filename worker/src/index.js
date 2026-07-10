@@ -7,7 +7,7 @@
 //   POST /api/content/:id    → admin only
 //   POST /api/admin/change-password  {oldPassword, newPassword}  → admin only
 
-import { corsHeaders, json, error, setSessionCookie, clientIp } from './http.js';
+import { corsHeaders, json, error, setSessionCookie, clientIp, csrfCheck } from './http.js';
 import { verifyPassword, hashPassword } from './password.js';
 import { issueSessionToken, getSession, revokeSession } from './session.js';
 import { checkRateLimit } from './ratelimit.js';
@@ -26,6 +26,25 @@ export default {
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(env, request) });
+    }
+
+    // Z2: Anti-CSRF via Origin allowlist. Rejects state-changing browser
+    // requests whose Origin isn't one of our sites. Bearer-only callers
+    // (curl, mobile apps) omit Origin and are still gated by session logic.
+    if (!csrfCheck(request)) {
+      return error(403, 'bad_origin', env, 'Origin לא מורשה', request);
+    }
+
+    // Z4: Public health check for uptime monitoring. Returns feature flags
+    // + non-sensitive build info so external monitors can watch cutover.
+    if (path === '/api/health' && request.method === 'GET') {
+      return json({
+        ok: true,
+        service: 'maale-amos-api',
+        drive_configured: !!(env && env.GDRIVE_CLIENT_ID && env.GDRIVE_CLIENT_SECRET && env.GDRIVE_REFRESH_TOKEN),
+        mail_enabled: env && env.MAIL_ENABLED === 'true',
+        time: new Date().toISOString()
+      }, env, 200, {}, request);
     }
 
     try {

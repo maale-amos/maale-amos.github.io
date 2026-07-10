@@ -9,10 +9,6 @@ const ALLOWED_ORIGINS = new Set([
 const DEFAULT_ORIGIN = 'https://maale-amos.github.io';
 
 export function corsHeaders(env, request) {
-  // Prefer the request's Origin when it's in the allowlist. Fall back to the
-  // default so preflights and non-browser callers still get a valid header.
-  // env.CORS_ORIGIN is honored only if it exactly matches an allowed value —
-  // guards against config drift (M-8).
   const reqOrigin = request && request.headers && request.headers.get('Origin');
   const envOrigin = env && env.CORS_ORIGIN;
   let origin = DEFAULT_ORIGIN;
@@ -24,10 +20,31 @@ export function corsHeaders(env, request) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-Via-Proxy',
     'Access-Control-Max-Age': '86400',
+    // Z3 hardening: HSTS + defense-in-depth security headers on every response.
+    // preload eligibility requires 1yr+ and includeSubDomains; safe since the
+    // Worker only ever serves HTTPS.
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
     'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',                    // Worker responses are JSON — never frameable.
     'Referrer-Policy': 'no-referrer',
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Cross-Origin-Resource-Policy': 'same-site',
+    'Permissions-Policy': 'geolocation=(), camera=(), microphone=(), payment=(), usb=()',
     'Vary': 'Origin'
   };
+}
+
+// Z2: Anti-CSRF via Origin header check on state-changing endpoints. The
+// Bearer scheme already defeats most CSRF (no credentials sent by browser
+// on cross-origin fetch), but this closes the gap if a future flow adds
+// cookie/basic auth. Idempotent GETs are exempt. Non-browser callers
+// (curl, servers) may omit Origin — allowed only for non-mutating methods.
+export function csrfCheck(request) {
+  const m = request.method;
+  if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return true;
+  const origin = request.headers.get('Origin');
+  if (!origin) return true;   // no Origin → non-browser caller (Bearer still required upstream)
+  return ALLOWED_ORIGINS.has(origin);
 }
 
 export function json(data, env, status = 200, extra = {}, request = null) {
