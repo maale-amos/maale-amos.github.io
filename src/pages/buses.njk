@@ -9,17 +9,18 @@ description: קווי אוטובוס למעלה עמוס
     <p>{{ sections.buses.subtitle }}</p>
 
     <div class="alert-box" role="status">
-      <h3><i class="bi bi-hourglass-split" aria-hidden="true"></i> טבלת זמנים — בבדיקה</h3>
+      <h3><i class="bi bi-info-circle" aria-hidden="true"></i> מסלולים קבועים · זמנים לבדיקה בזמן אמת</h3>
       <p>{{ sections.buses.routesStatus }}</p>
-      <p><strong>לזמנים מדויקים ועדכוני מסלולים:</strong> אפליקציית מוביט או מוקד המועצה (טל׳ <a href="tel:{{ sections.buses.councilLine }}">{{ sections.buses.councilLine }}</a>).</p>
+      {% if sections.buses.access %}<p>{{ sections.buses.access }}</p>{% endif %}
+      <p><strong>לזמנים מדויקים ועדכוני מסלולים:</strong> אפליקציית מוביט או מוקד המועצה האזורית (טל׳ <a href="tel:{{ sections.buses.councilLine }}">{{ sections.buses.councilLine }}</a>).</p>
     </div>
 
-    <h2>קווים ידועים</h2>
+    <h2>קווים קבועים</h2>
     <ul class="phone-list">
       {% for r in sections.buses.routes %}
-      <li><strong>קו {{ r.line }}:</strong> {{ r.route }}{% if not r.verified %} <small class="verify-badge">בבדיקה</small>{% endif %}</li>
+      <li><strong>קו {{ r.line }}:</strong> {{ r.route }}{% if r.operator %} · {{ r.operator }}{% endif %}</li>
       {% endfor %}
     </ul>
-    <p><small class="verify-badge">זמני יציאה — בבדיקה. אין להסתמך על המידע לפני אימות במוביט.</small></p>
+    <p><small class="verify-badge">זמני היציאה משתנים מעת לעת — לפני נסיעה מומלץ לאמת באפליקציית מוביט.</small></p>
   </div>
 </section>

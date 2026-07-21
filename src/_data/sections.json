@@ -22,7 +22,7 @@
     { "id": "newspaper", "title": "ועדת העיתון", "order": 20, "visible": true },
     { "id": "tzimer", "title": "פנאי ונופש", "order": 21, "visible": true },
     { "id": "stores", "title": "קניות", "order": 22, "visible": true },
-    { "id": "buses", "title": "אוטובוסים", "order": 23, "visible": true, "status": "בבדיקה" },
+    { "id": "buses", "title": "אוטובוסים", "order": 23, "visible": true },
     { "id": "housing", "title": "דיור", "order": 24, "visible": true },
     { "id": "gemachim", "title": "גמחים", "order": 25, "visible": true },
     { "id": "marketplace", "title": "לוח יד שנייה", "order": 26, "visible": true },

@@ -7,8 +7,8 @@
   "items": [
     { "name": "לוח שמחות", "description": "מזל טוב לבעלי השמחה", "url": "/simchot/", "icon": "bi-stars", "color": "gold" },
     { "name": "ועד מקומי", "description": "ניהול ענייני הישוב", "url": "/leadership/", "icon": "bi-people-fill", "color": "green" },
-    { "name": "ארגון החסד", "description": "קמחא דפסחא, חלוקת מזון", "url": "https://maaleamos.co.il", "external": true, "icon": "bi-heart", "color": "blue" },
-    { "name": "קהילתון", "description": "עיתון הקהילה", "url": "mailto:maaleiton@gmail.com", "external": true, "icon": "bi-envelope-paper", "color": "purple" },
+    { "name": "קופת הקהילה", "description": "עמותת חסד — חלוקות מזון, קמחא דפסחא, סיוע לחגים", "url": "https://maaleamos.co.il", "external": true, "icon": "bi-heart", "color": "blue" },
+    { "name": "עיתון מעלה", "description": "השבועון הקהילתי — מערכת העיתון", "url": "mailto:maaleiton@gmail.com", "external": true, "icon": "bi-newspaper", "color": "purple" },
     { "name": "גמ\"חים", "description": "תמיכה, חלוקות וסיוע", "url": "/gemachim/", "icon": "bi-chat-dots", "color": "orange" },
     { "name": "אטרקציות", "description": "אטרקציות ומקומות בעלי עניין לנופשים", "url": "/attractions/", "icon": "bi-tree", "color": "teal" },
     { "name": "בתי כנסת", "description": "זמני תפילות ומניינים", "url": "/shuls/", "icon": "bi-book", "color": "pink" },

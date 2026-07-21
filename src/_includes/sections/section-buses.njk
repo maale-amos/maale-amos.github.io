@@ -8,16 +8,17 @@
     </div>
 
     <div class="alert-box fade-up" role="status">
-      <h3><i class="bi bi-hourglass-split" aria-hidden="true"></i> לוח זמנים — בבדיקה</h3>
+      <h3><i class="bi bi-info-circle" aria-hidden="true"></i> מסלולים קבועים · זמנים לבדיקה בזמן אמת</h3>
       <p>{{ sections.buses.routesStatus }}</p>
+      {%- if sections.buses.access %}<p>{{ sections.buses.access }}</p>{% endif %}
       <p><strong>לזמנים מדויקים ועדכוני מסלולים:</strong>
         אפליקציית <a href="{{ sections.buses.moovitUrl | safeUrl }}" rel="noopener noreferrer" target="_blank">מוביט</a>
-        או מוקד המועצה
+        או מוקד המועצה האזורית
         (טל׳ <a href="tel:{{ sections.buses.councilLine }}">{{ sections.buses.councilLine }}</a>).
       </p>
     </div>
 
-    <h3 style="margin-top:24px">קווים ידועים</h3>
+    <h3 style="margin-top:24px">קווים קבועים</h3>
     <ul class="phone-list fade-up">
       {%- for r in sections.buses.routes %}
       <li>
