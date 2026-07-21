@@ -675,8 +675,14 @@ body.show-all-extras section[data-extra="1"] { display: block; }
 }
 
 /* ===== SCROLL ANIMATIONS ===== */
-.fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.fade-up.visible { opacity: 1; transform: translateY(0); }
+.fade-up { transition: opacity 0.6s ease, transform 0.6s ease; }
+/* אנימציית הכניסה מופעלת רק אם JS חי וסימן js-ready — אחרת התוכן גלוי כרגיל.
+   קודם היה opacity:0 כברירת מחדל, ולכן כשל JS או חסימת סקריפט הותירו עמוד ריק. */
+html.js-ready .fade-up { opacity: 0; transform: translateY(30px); }
+html.js-ready .fade-up.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  html.js-ready .fade-up { opacity: 1; transform: none; transition: none; }
+}
 
 /* ===== BACK TO TOP ===== */
 .back-to-top {

@@ -23,7 +23,7 @@
       {%- for r in sections.buses.routes %}
       <li>
         <strong>קו {{ r.line }}:</strong> {{ r.route }}
-        {%- if not r.verified %} <small class="verify-badge">בבדיקה</small>{% endif %}
+        {%- if not r.verified %} <small class="verify-badge">מומלץ לאמת במוביט</small>{% endif %}
       </li>
       {%- endfor %}
     </ul>

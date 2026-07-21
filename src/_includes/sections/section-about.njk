@@ -24,8 +24,16 @@
         <div class="about-visual-overlay"></div>
       </div>
     </div>
+    {#- מפה: היה iframe חי ל-google.com/maps — קריאה חיצונית שנחסמת בסינון תוכן.
+        הוחלף בכרטיס מקומי עם קישור יוצא, כדי שהעמוד ייטען במלואו ללא תלות חיצונית. #}
     <div class="map-container fade-up">
-      <iframe src="{{ sections.about.mapUrl | safeUrl }}" allowfullscreen loading="lazy" title="מפת מעלה עמוס" aria-label="מפת המיקום של מעלה עמוס" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>
+      <div class="map-static">
+        <h3><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> מיקום היישוב</h3>
+        <p>מעלה עמוס · דרום-מזרח גוש עציון, כ-20 ק"מ דרומית-מזרחית לירושלים. הגישה דרך צומת מצד.</p>
+        {%- if sections.about.mapUrl %}
+        <p><a class="btn btn-primary" href="{{ sections.about.mapUrl | safeUrl }}" target="_blank" rel="noopener noreferrer">פתיחת המפה בכרטיסייה חדשה</a></p>
+        {%- endif %}
+      </div>
     </div>
   </div>
 </section>

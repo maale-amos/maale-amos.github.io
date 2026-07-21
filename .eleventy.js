@@ -2,6 +2,7 @@ export default async function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/images");
   eleventyConfig.addPassthroughCopy("src/css");
   eleventyConfig.addPassthroughCopy("src/js");
+  eleventyConfig.addPassthroughCopy("src/vendor");
   eleventyConfig.addPassthroughCopy({"src/robots.txt": "robots.txt"});
   eleventyConfig.addPassthroughCopy({"src/manifest.json": "manifest.json"});
   eleventyConfig.addPassthroughCopy({"src/sw.js": "sw.js"});
@@ -9,7 +10,10 @@ export default async function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({"SECURITY.md": "SECURITY.md"});
   eleventyConfig.addPassthroughCopy({"data": "data"});
   eleventyConfig.addPassthroughCopy({"src/_data/sections": "data/sections"});
-  // src/_data/sections.json conflicts with data/sections.json — admin loads from /data/sections.json (the runtime one, kept in sync manually)
+  // מקור אמת אחד לאינדקס הסקציות: היה קובץ כפול (data/sections.json) שסונכרן ביד
+  // מול src/_data/sections.json ונטה להיפרד. הכפילות הוסרה — הבנייה מייצרת את
+  // /data/sections.json מהמקור היחיד, וזה מה שהפאנל טוען ב-runtime.
+  eleventyConfig.addPassthroughCopy({"src/_data/sections.json": "data/sections.json"});
 
   // safeUrl — reject javascript:/data:/vbscript: schemes when interpolating
   // admin-editable URLs into templates. Falls back to '#' for unknown schemes.

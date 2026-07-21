@@ -14,8 +14,8 @@ description: מוסדות חינוך במעלה עמוס — חדר לבנים, 
         <i class="bi {{ i.icon or 'bi-mortarboard' }}" aria-hidden="true" style="font-size:2rem;color:var(--primary);display:block;margin-bottom:8px"></i>
         <h3 style="color:var(--primary-dark);margin-bottom:8px;font-size:1.15rem">{{ i.name }}</h3>
         <p style="color:var(--text-light);font-size:0.9rem">{{ i.description }}</p>
-        {% if i.hours %}<p><strong>שעות:</strong> {{ i.hours }}{% if i.hoursStatus == "בבדיקה" %} <small class="verify-badge">בבדיקה</small>{% endif %}</p>{% endif %}
-        {% if i.note %}<p><strong>{{ i.note }}</strong>{% if i.noteStatus == "בבדיקה" %} <small class="verify-badge">בבדיקה</small>{% endif %}</p>{% endif %}
+        {% if i.hours %}<p><strong>שעות:</strong> {{ i.hours }}{% if i.hoursStatus == "בבדיקה" %} <small class="verify-badge">מומלץ לאמת מול המוסד</small>{% endif %}</p>{% endif %}
+        {% if i.note %}<p><strong>{{ i.note }}</strong>{% if i.noteStatus == "בבדיקה" %} <small class="verify-badge">מומלץ לאמת מול המוסד</small>{% endif %}</p>{% endif %}
       </div>
       {%- endfor %}
     </div>

@@ -17,7 +17,7 @@ description: בתי כנסת ומניינים במעלה עמוס
           <p><strong>שחרית:</strong> {{ s.times.shacharit }}</p>
           <p><strong>מנחה:</strong> {{ s.times.mincha }}</p>
           <p><strong>ערבית:</strong> {{ s.times.maariv }}</p>
-          {% if s.timesStatus == "בבדיקה" %}<small class="verify-badge">זמנים בבדיקה</small>{% endif %}
+          {% if s.timesStatus == "בבדיקה" %}<small class="verify-badge">הזמנים מתפרסמים בלוח המודעות</small>{% endif %}
         {% endif %}
         {% if s.email %}<p><small>{{ s.email }}</small></p>{% endif %}
         {% if s.location %}<p><small>{{ s.location }}</small></p>{% endif %}

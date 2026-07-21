@@ -48,6 +48,15 @@ description: פאנל ניהול תוכן ועיצוב
       <div class="tab-panels">
         <div role="tabpanel" data-panel="content">
           <h2>עריכת תוכן סקציה</h2>
+          <div style="background:#fff4e5;border:1px solid #f0c48a;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+            <strong>שימו לב — עריכה כאן אינה מופיעה באתר הציבורי.</strong>
+            <p style="margin:6px 0 0">האתר הציבורי נבנה סטטית מקבצי <code>src/_data/sections/</code> שבמאגר.
+            "שמור לשרת" כותב לשרת ה-API בלבד, והאתר אינו קורא ממנו — ולכן שינוי שנשמר כאן
+            לא יוצג לגולשים עד שיעודכן במאגר ותתבצע בנייה מחדש.
+            להטמעה בפועל: העתיקו את ה-JSON בכפתור למטה ומסרו ליוסף לעדכון במאגר.</p>
+            <p style="margin:6px 0 0"><button type="button" id="copySectionJson" class="btn">העתקת ה-JSON להטמעה</button>
+            <span id="copyMsg" role="status" aria-live="polite"></span></p>
+          </div>
           <label>בחרו סקציה:
             <select id="sectionPicker" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;margin-bottom:12px">
               {%- for s in sections.sections | sort(attribute='order') %}

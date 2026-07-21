@@ -169,6 +169,17 @@
     $('sectionJson').value = obj ? JSON.stringify(obj, null, 2) : '';
   }
   $('sectionPicker').addEventListener('change', e => loadSection(e.target.value));
+  // האתר הציבורי נבנה סטטית מהמאגר ואינו קורא מה-API — לכן הכפתור מאפשר להוציא
+  // את ה-JSON להטמעה במאגר, במקום להסתמך על שמירה שלא תופיע לגולשים.
+  const copyBtn = $('copySectionJson');
+  if (copyBtn) copyBtn.addEventListener('click', async () => {
+    const msg = $('copyMsg');
+    const text = $('sectionJson').value;
+    if (!text.trim()) { msg.textContent = ' אין תוכן להעתקה'; return; }
+    try { await navigator.clipboard.writeText(text); msg.textContent = ' הועתק ✓'; }
+    catch { $('sectionJson').select(); msg.textContent = ' סמן והעתק ידנית (Ctrl+C)'; }
+    setTimeout(() => { msg.textContent = ''; }, 4000);
+  });
   $('saveContentBtn').addEventListener('click', async () => {
     const id = $('sectionPicker').value;
     const msg = $('saveMsg');
