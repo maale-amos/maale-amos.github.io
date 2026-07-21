@@ -1,0 +1,48 @@
+{
+  "id": "shuls",
+  "title": "בתי כנסת",
+  "subtitle": "בתי כנסת ומניינים בישוב",
+  "verified": "2026-07-08",
+  "source": "FACTS.md#shuls",
+  "items": [
+    {
+      "name": "בית הכנסת המרכזי — ליטאי",
+      "nosach": "אשכנז",
+      "icon": "bi-book",
+      "iconColor": "#1565c0",
+      "borderColor": "#1565c0",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
+      "email": "beitknessetma@gmail.com",
+      "image": ""
+    },
+    {
+      "name": "בית המדרש דחסידי ביאלא",
+      "nosach": "ספרד (חסידי)",
+      "icon": "bi-house-heart",
+      "iconColor": "#6a1b9a",
+      "borderColor": "#6a1b9a",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
+      "location": "שכונת קרית נוף",
+      "image": ""
+    },
+    {
+      "name": "בית הכנסת ה-ספרדי",
+      "nosach": "עדות המזרח",
+      "icon": "bi-lamp",
+      "iconColor": "#e65100",
+      "borderColor": "#e65100",
+      "note": "זמני התפילות מתפרסמים בלוח המודעות",
+      "image": ""
+    },
+    {
+      "name": "שטיבלך — מניינים",
+      "nosach": "מגוון",
+      "icon": "bi-stars",
+      "iconColor": "#2e7d32",
+      "borderColor": "#2e7d32",
+      "note": "מניינים שונים לאורך היום · ברסלב, אמשינוב, בויאן",
+      "notice": "בדקו בלוח המודעות",
+      "image": ""
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "shabbat",
+  "title": "זמני שבת",
+  "subtitle": "כניסת ויציאת שבת במעלה עמוס",
+  "verified": "2026-07-06",
+  "source": "Hebcal API — מיקום מעלה עמוס",
+  "location": {
+    "lat": 31.5964,
+    "lon": 35.2296,
+    "geonameid": null
+  },
+  "provider": "Hebcal",
+  "note": "הזמנים מתעדכנים אוטומטית לפי מיקום הישוב"
+}

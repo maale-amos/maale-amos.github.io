@@ -1,0 +1,8 @@
+{
+  "id": "hot-bulletins",
+  "title": "מבזקים חמים מהישוב",
+  "verified": "2026-07-06",
+  "source": "CMS דינמי",
+  "dynamic": true,
+  "emptyMessage": "אין מבזקים כרגע"
+}

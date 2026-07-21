@@ -1,0 +1,9 @@
+{
+  "id": "housing",
+  "title": "דיור ופיתוח",
+  "subtitle": "פרויקטים ושכונות בישוב",
+  "verified": "2026-07-06",
+  "source": "CMS דינמי",
+  "dynamic": true,
+  "emptyMessage": "אין פרויקטים לפרסום"
+}

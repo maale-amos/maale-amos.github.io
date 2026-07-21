@@ -1,0 +1,15 @@
+{
+  "id": "topics",
+  "title": "נושאים נוספים",
+  "subtitle": "בחרו תחום וצפו בכל המידע — או חפשו ישירות בחיפוש הכללי למעלה",
+  "verified": "2026-07-06",
+  "source": "index.html topics-nav",
+  "topics": [
+    { "id": "community", "label": "חיי קהילה", "icon": "bi-people-fill" },
+    { "id": "education", "label": "חינוך", "icon": "bi-mortarboard-fill" },
+    { "id": "security", "label": "ביטחון", "icon": "bi-shield-fill-check" },
+    { "id": "housing", "label": "דיור", "icon": "bi-house-fill" },
+    { "id": "marketplace", "label": "לוח יד שנייה", "icon": "bi-cart-fill" },
+    { "id": "shabbat", "label": "זמני שבת", "icon": "bi-brightness-high-fill" }
+  ]
+}
